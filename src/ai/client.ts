@@ -68,6 +68,7 @@ export const waHref = (text: string) => `https://wa.me/${CONTACT.whatsappNumber}
 /**
  * Runs a tool call from the assistant with the site's own store actions. Returns a WhatsApp
  * link for `open_whatsapp`, which the chat shows as a button (nothing is sent automatically).
+ * `book_call` opens the booking dialog; the visitor picks the slot and sends it themselves.
  */
 export function runTool(name: string, input: Record<string, unknown>): { wa?: string } {
   const s = useStore.getState()
@@ -76,6 +77,8 @@ export function runTool(name: string, input: Record<string, unknown>): { wa?: st
   } else if (name === 'go_to_section' && STOPS.some((x) => x.id === input.stop)) {
     if (s.mode === '3d') s.goTo(input.stop as StopId)
     else document.getElementById(input.stop as string)?.scrollIntoView({ behavior: 'smooth' })
+  } else if (name === 'book_call' && (input.founder === 'ceo' || input.founder === 'cmo')) {
+    s.openBooking(input.founder)
   } else if (name === 'open_whatsapp' && typeof input.summary === 'string') {
     return { wa: waHref(input.summary) }
   }

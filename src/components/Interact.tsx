@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { STOPS, tr, UI } from '../content'
 import { PERSONAL, welcomeLine } from '../personal'
+import { CLIENT_TEXT, useClient } from '../clientRoom'
 import { useStore } from '../store'
 import { CloseIcon } from './icons'
 
@@ -164,6 +165,7 @@ export function SoundSwitch() {
 export function IntroOverlay() {
   const intro = useStore((s) => s.intro)
   const lang = useStore((s) => s.lang)
+  const client = useClient((c) => c.project)
   const [line, setLine] = useState(0)
   useEffect(() => {
     if (!intro) return
@@ -177,7 +179,9 @@ export function IntroOverlay() {
   }, [intro])
   if (!intro) return null
   const bn = lang === 'bn'
-  const lines = PERSONAL
+  const lines = client
+    ? [welcomeLine(client.name, lang), tr(CLIENT_TEXT.ready, lang)]
+    : PERSONAL
     ? [welcomeLine(PERSONAL.name, lang), bn ? 'এটা কোডার জোন বিডি, খুলনার সফটওয়্যার স্টুডিও · ভেতরে আসুন' : 'This is Coder Zone BD, a software studio in Khulna · Come on in']
     : bn
       ? ['কোডার জোন বিডি-তে স্বাগতম', 'খুলনার একটি সফটওয়্যার স্টুডিও · ভেতরে আসুন']

@@ -144,7 +144,7 @@ export function DemoLauncher() {
   const lang = useStore((s) => s.lang)
   const ready = useStore((s) => s.ready)
   const intro = useStore((s) => s.intro)
-  const covered = useStore((s) => !!s.focusId || s.quoteOpen || !!s.chat)
+  const covered = useStore((s) => !!s.focusId || s.projectOpen || s.quoteOpen || !!s.chat)
   const open = useDemo((d) => d.open)
   if (!ready || intro) return null
   return (

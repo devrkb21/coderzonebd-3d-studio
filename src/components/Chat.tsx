@@ -60,6 +60,8 @@ const T = {
   openQuote: { en: 'Open quote list', bn: 'কোট লিস্ট খুলুন' },
   added: { en: 'Added to your quote', bn: 'কোটে যোগ হয়েছে' },
   went: { en: 'Took you to', bn: 'নিয়ে গেলাম' },
+  book: { en: 'Book a 15-min call', bn: '১৫ মিনিটের কল বুক করুন' },
+  booked: { en: 'Opened the booking form', bn: 'বুকিং ফর্ম খোলা হয়েছে' },
   notConfigured: {
     en: 'Our AI desk is still being set up. Please message the team on WhatsApp, they usually reply quickly.',
     bn: 'আমাদের AI ডেস্ক এখনো চালু হচ্ছে। WhatsApp-এ টিমকে মেসেজ দিন, সাধারণত দ্রুত উত্তর দেয়।',
@@ -126,7 +128,7 @@ function Launcher() {
   const mode = useStore((s) => s.mode)
   const ready = useStore((s) => s.ready)
   const intro = useStore((s) => s.intro)
-  const covered = useStore((s) => !!s.focusId || s.quoteOpen || !!s.chat)
+  const covered = useStore((s) => !!s.focusId || s.projectOpen || s.quoteOpen || !!s.chat)
   const demoOpen = useDemo((d) => d.open)
   const hidden = covered || demoOpen
   if (mode === '3d' && (!ready || intro)) return null
@@ -213,6 +215,7 @@ function ChatPanel({ persona }: { persona: Persona }) {
         const notes = [...(reply.notes ?? [])]
         if (e.name === 'add_to_quote') notes.push(`${tr(T.added, lang)}: ${(e.input.serviceIds as string[]).map((id) => serviceName(id, lang)).join(', ')}`)
         if (e.name === 'go_to_section') notes.push(`${tr(T.went, lang)} ${tr(STOPS.find((s) => s.id === e.input.stop)!.label, lang)}`)
+        if (e.name === 'book_call') notes.push(tr(T.booked, lang))
         reply = { ...reply, notes, wa: wa ?? reply.wa }
         show()
       }
@@ -282,6 +285,15 @@ function ChatPanel({ persona }: { persona: Persona }) {
         <button className="icon-btn sm" onClick={closeChat} aria-label={tr({ en: 'Close', bn: 'বন্ধ করুন' }, lang)}><CloseIcon /></button>
       </header>
 
+      {persona !== 'receptionist' && (
+        <button className="chat-book" onClick={() => useStore.getState().openBooking(persona)}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <rect x="3" y="5" width="18" height="16" rx="2" /><path d="M16 3v4M8 3v4M3 10h18" />
+          </svg>
+          {tr(T.book, lang)}
+        </button>
+      )}
+
       <div className="chat-list" ref={list} aria-live="polite">
         <p className="chat-msg assistant">{tr(who.hello, lang)}</p>
         {msgs.map((m, i) => (
@@ -294,6 +306,9 @@ function ChatPanel({ persona }: { persona: Persona }) {
               </button>
             )}
             {m.wa && <a className="btn wa chat-wa" href={m.wa} target="_blank" rel="noopener noreferrer">{tr(T.wa, lang)}</a>}
+            {persona !== 'receptionist' && m.notes?.includes(tr(T.booked, lang)) && (
+              <button className="chat-link" onClick={() => useStore.getState().openBooking(persona)}>{tr(T.book, lang)}</button>
+            )}
           </div>
         ))}
         {waiting && <div className="chat-msg assistant typing" aria-label="…"><span /><span /><span /></div>}

@@ -12,6 +12,9 @@
     ]
   },
   "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Limiter", "Presence"] }],
+  // Client project rooms (`?client=<token>`): one JSON record per client, keyed by a hash of the
+  // token. Managed with `node scripts/client.mjs` (see the README). Also caches GitHub commits.
+  "kv_namespaces": [{ "binding": "CLIENTS", "id": "b5033d765016499596f45684c21b6113" }],
   // Limits that protect the Anthropic credit. Change them here and redeploy.
   "vars": {
     "ALLOWED_ORIGINS": "https://3d.coderzonebd.com",
@@ -20,6 +23,7 @@
     "CHAT_PER_HOUR": "30",
     "DEMO_PER_HOUR": "5",
     "CHAT_PER_DAY": "600",
-    "DEMO_PER_DAY": "60"
+    "DEMO_PER_DAY": "60",
+    "PROJECT_PER_HOUR": "60"
   }
 }

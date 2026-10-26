@@ -24,6 +24,7 @@ import { Weather } from './Weather'
 import { Coins } from './Coins'
 import { SnapshotBridge } from './Snapshot'
 import { WelcomeStand } from './Welcome'
+import { ProjectBoard } from './ProjectBoard'
 
 /**
  * Soft shadows under and around everything that stands on the floor (furniture, plinths, the
@@ -136,6 +137,7 @@ export default function Scene({ onProgress }: { onProgress: (p: number) => void 
       </Suspense>
       <Coins />
       <WelcomeStand />
+      <ProjectBoard />
       <SnapshotBridge />
       <CameraRig />
       {AI_ENABLED && <><DemoScreen /><Ghosts /></>}

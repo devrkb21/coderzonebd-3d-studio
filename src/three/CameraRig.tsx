@@ -5,7 +5,7 @@ import CameraControlsImpl from 'camera-controls'
 import * as THREE from 'three'
 import type { StopId } from '../content'
 import { useStore } from '../store'
-import { fitFrame, frameForItem, ROOM, STOP_FRAMES, type Insets } from './layout'
+import { fitFrame, frameForItem, PROJECT_FRAME, ROOM, STOP_FRAMES, type Insets } from './layout'
 
 const { ACTION } = CameraControlsImpl
 
@@ -37,6 +37,7 @@ export function CameraRig() {
   const focusId = useStore((s) => s.focusId)
   const overview = useStore((s) => s.overview)
   const intro = useStore((s) => s.intro)
+  const projectOpen = useStore((s) => s.projectOpen)
   const introPlayed = useRef(false)
   /** The current flight: a camera crane move along a curve from where we are to the next view. */
   const flight = useRef<{ p0: THREE.Vector3; t0: THREE.Vector3; ctrl: THREE.Vector3; p: THREE.Vector3; t: THREE.Vector3; start: number; dur: number } | null>(null)
@@ -106,7 +107,8 @@ export function CameraRig() {
     const vw = size.width
     const vh = size.height
     const mobile = vw < MOBILE_BREAKPOINT
-    const itemFrame = focusId ? frameForItem(focusId) : null
+    // the client's project board is framed like an item, beside its panel
+    const itemFrame = focusId ? frameForItem(focusId) : projectOpen ? PROJECT_FRAME : null
 
     let insets: Insets
     let margin: number
@@ -185,7 +187,7 @@ export function CameraRig() {
     }
     const dur = THREE.MathUtils.clamp(0.75 + dist * 0.055, itemFrame ? 0.7 : 0.95, 2.1)
     flight.current = { p0, t0, ctrl, p: p.clone(), t: t.clone(), start: performance.now() / 1000, dur }
-  }, [ready, intro, stop, focusId, overview, size.width, size.height, camera])
+  }, [ready, intro, stop, focusId, overview, projectOpen, size.width, size.height, camera])
 
   return <CameraControls ref={ref} makeDefault />
 }

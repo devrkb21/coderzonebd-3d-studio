@@ -23,8 +23,7 @@ A walk-through 3D office and showroom for [Coder Zone BD](https://coderzonebd.co
 | 6 | Courier Check | centre kiosk | The free courier-history tool, with the real courier logos. **Check now** opens coderzonebd.com/courier-check |
 | 7 | Process | right wall | Discover → Design & Build → Launch → Support |
 | 8 | Contact | front-right desk | Contact details, team and FAQ. The quote list opens from here |
-| 9 | Leadership | front-left glass cabins | The two founders, Rakib Uddin (CEO · CTO) and Barek Mian (CMO · CFO), each at a desk with an AI assistant on a screen. The panel introduces them and opens either assistant's chat |
-| 9 | Leadership | front-left glass cabins | The two founders, Rakib Uddin (CEO · CTO) and Barek Mian (CMO · CFO), each at a desk with an AI assistant on a screen. The panel introduces them and opens either assistant's chat |
+| 9 | Leadership | front-left glass cabins | The two founders, Rakib Uddin (CEO · CTO) and Barek Mian (CMO · CFO), each at a desk with an AI assistant on a screen and a **Book a call** tablet. The panel introduces them and opens either assistant's chat or the booking dialog |
 
 Brand: the real Coder Zone BD logo and wordmark, orange `#FF931E` on ink `#12141C`.
 
@@ -36,7 +35,7 @@ Brand: the real Coder Zone BD logo and wordmark, orange `#FF931E` on ink `#12141
 - **Street life.** Cars, a bus, green CNG auto-rickshaws and cycle rickshaws with painted hoods (the riders pedal, the wheels turn) pass outside. People walk along both pavements, and birds cross the sky by day.
 - **Real-looking people on Bangladesh office hours.** Rigged, motion-captured avatars (see [People](#people)): two developers work at their desks and look up now and then, a colleague walks from the coffee corner to chat at reception, looks in on the lounge and goes back for a coffee, the founders work in their cabins, and a receptionist stands at the counter just inside the door. Lunch is in the lounge; after hours the desks are empty and the monitors sleep; at night a guard sits by the door. See [The office's day](#the-offices-day).
 - **Reception.** Just inside the entrance on the right. The receptionist waves as the intro's glass doors open (or when you hover her). Clicking her, the counter or its screen opens the **AI receptionist** chat, at any hour.
-- **Founders' cabins.** Two glass cabins in the front-left corner with nameplates, executive desks, a shelf, plants and monitors. Each desk has the founder's **AI assistant** on a screen facing the room; clicking the screen, desk or founder opens that assistant's chat.
+- **Founders' cabins.** Two glass cabins in the front-left corner with nameplates, executive desks, a shelf, plants and monitors. Each desk has the founder's **AI assistant** on a screen facing the room; clicking the screen, desk or founder opens that assistant's chat. A small tablet on the other front corner of the desk opens **Book a 15-min call** (see [Book a call with a founder](#book-a-call-with-a-founder)).
 - **Open / closed sign.** A sign hangs on the glass door, readable from the street and from inside: "OPEN NOW", or "CLOSED" with when we're back.
 - **Everything moves a little.** Ceiling fans spin, the AC louver sweeps, steam rises from a coffee cup, the router's lights blink, code scrolls on the monitors, the plants sway and the service cards swing gently on their wires. Turn the lights off and the fans wind down too.
 - **Digital clock.** An LED clock centred above the Home wall shows Dhaka time with ticking seconds, a blinking colon and the date.
@@ -56,6 +55,52 @@ Brand: the real Coder Zone BD logo and wordmark, orange `#FF931E` on ink `#12141
   - **Link maker** for the team: open `/?make-link` (not linked anywhere, `noindex`). Type the business name, pick the type and language, then copy the link or a ready-to-send message.
 - **Coin hunt.** Five spinning gold CZ coins are hidden in the office: on the bookshelf, under the lounge table, on the coffee counter, behind the courier kiosk and by the plant near the tech stack. Click one to collect it (a pop, and a chime with sound on). The counter under the logo shows "Coins 2/5"; found coins are remembered in the browser. All five open a reward card with a WhatsApp button to claim it. The reward text lives in `COIN_REWARD` (and the WhatsApp message in `COIN_CLAIM`) in `src/content.ts`.
 - **Selfie postcard.** The camera button in the top bar (3D only) captures the current view and frames it in a branded 1080×1350 postcard with the visitor's name and the site address: **Download**, and **Share** where the browser can share files (most phones). The frame is rendered and copied in one go, so the canvas never needs `preserveDrawingBuffer`.
+
+## Client project rooms (`?client=`)
+
+Each client gets a private link, `https://3d.coderzonebd.com/?client=<token>`, that shows **their project's live progress** inside the studio:
+
+- The intro caption greets them by name ("Welcome, <client>" · "Your project room is ready"). After the intro the camera flies to the **Your project** board on the right wall's back corner, between the last Process board and the corner plant. It hangs flush on the wall, so it stands in front of no stop and doesn't block the Esc overview. The board shows the client and project, a progress ring with the %, the phase on the four-step process (Discover → Design & Build → Launch → Support), "Day 13 of 30", the milestones with ticks, the latest updates and, if the repo is connected, the latest commits.
+- The same details open in a side panel (a bottom sheet on phones, easy to read) and, on the 2D page, in a card. **Your project** (bottom right) flies back to the board; the panel has **Ask about my project** on WhatsApp.
+- A wrong, deleted or expired link shows a polite "This project link isn't active" note with a WhatsApp button, then the normal site.
+- **Privacy.** The token is read once and removed from the address bar at once (`history.replaceState`), so it never ends up in shared links, postcards or analytics; it's kept in `sessionStorage` so a reload in the same tab still works. The Worker stores each record under a SHA-256 hash of the token (never the token itself), so the lookup never compares tokens and the stored keys are useless without the link. It never lists keys, rate-limits lookups (60 per visitor per hour) and answers the same 404 for anything unknown, malformed or expired. Clients only see the fields below; `repo` and `expiresAt` stay on the server.
+- Code: `src/clientRoom.ts` (token, loading, dates), `src/three/ProjectBoard.tsx` (the board), `src/components/ProjectPanel.tsx` (panel, 2D card, note), `worker/src/project.ts` (the route).
+
+**Record** (one JSON per client in the `CLIENTS` KV namespace): `{ name, project: {en, bn}, startDate, dueDate, percent, phase: discover|build|launch|support, milestones: [{ title: {en, bn}, done, date? }], updates: [{ date, text: {en, bn} }], manager, repo?, demo?, expiresAt? }`. Dates are `YYYY-MM-DD` in Dhaka time.
+
+### How the team creates and updates a client room
+
+Use `worker/scripts/client.mjs`. It runs `wrangler kv` on the live namespace, so run `cd worker && npm ci` once and be logged in to the Cloudflare account (`npx wrangler login`). `<token>` can be the bare token or the whole link.
+
+```bash
+cd worker
+# a new client: prints the private link once (the token isn't stored, so send it straight to the client)
+node scripts/client.mjs new "Rahim Fashion House" "Online store" "অনলাইন স্টোর" --days 30 --manager "Rakib Uddin"
+#   options: --start YYYY-MM-DD (default today), --due YYYY-MM-DD or --days N (default 30), --repo owner/name, --demo
+node scripts/client.mjs set <token> percent 45          # 0-100
+node scripts/client.mjs set <token> phase build         # discover | build | launch | support
+node scripts/client.mjs set <token> dueDate 2026-12-01  # also: name, project, project.en, project.bn, startDate, manager, repo, expiresAt, demo
+node scripts/client.mjs milestone <token> add "Design approved" "ডিজাইন অনুমোদিত" 2026-11-02
+node scripts/client.mjs milestone <token> done 1        # also: undo <n>, remove <n>
+node scripts/client.mjs update <token> "Checkout is live on staging" "স্টেজিং-এ চেকআউট লাইভ"   # newest first, last 10 kept
+node scripts/client.mjs show <token>
+node scripts/client.mjs list                            # names and short ids (no tokens)
+node scripts/client.mjs relink <id>                     # lost the link? issues a new one; the old one stops working
+node scripts/client.mjs set <token> expiresAt 2027-03-31   # the link stops working after that day ("" clears it)
+node scripts/client.mjs delete <token|id>
+```
+
+Changes show on the client's next visit; no deploy needed. **Recent commits** appear only when the record has `repo` (e.g. `coderzonebd/rahim-store`) *and* the Worker has a `GITHUB_TOKEN` secret: create a fine-grained GitHub token with read-only **Contents** access to those repos, then `cd worker && npx wrangler secret put GITHUB_TOKEN`. Commits are cached for 10 minutes; without the secret they're silently skipped.
+
+A sample record named **Demo client** ("Demo e-commerce store", marked DEMO on the board and in the panel) shows how it looks. Remove it with `node scripts/client.mjs delete <id>` (the id from `list`).
+
+## Book a call with a founder
+
+**Book a 15-min call / ১৫ মিনিটের কল বুক করুন** opens a small dialog from the tablet on each founder's desk, the Leadership panel and 2D section, and a button at the top of each founder's AI chat. The visitor picks one of the next 7 working days (Saturday–Thursday, Friday off) and a 15-minute slot in office hours (10:00–19:00 Dhaka time, none over lunch 13:30–14:15, at least 90 minutes ahead), shown in Dhaka time plus their own local time when it differs, then adds name, phone and topic. **Send request on WhatsApp** opens `wa.me/8801885660190` with everything prefilled (founder, date, time, name, phone, topic) in the site's language, and the team confirms. Nothing is stored on any server.
+
+The founders' AI assistants can open it too: the Worker's `book_call` tool (`founder: "ceo" | "cmo"`, strict schema) runs in the browser and opens the dialog; it never books anything by itself.
+
+**Using a real calendar later:** every slot comes from one function, `bookingSlots(founder)` in `src/booking.ts`. To use Cal.com or a Google Calendar appointment schedule, make it fetch that calendar's free slots (or busy times) and return them in the same `{ date, weekday, slots }` shape; the dialog doesn't change. Or replace the WhatsApp step with a link to the booking page.
 
 ## How to explore
 
@@ -91,9 +136,10 @@ A small Cloudflare Worker (`worker/`, deployed as **https://cz3d-api.electrohere
 
 | Endpoint | What it does |
 | --- | --- |
-| `POST /chat` | `{ persona, lang, messages }` → server-sent events: `{t:'text'}`, `{t:'tool', name, input}`, `{t:'done'}` or `{t:'error'}`. Tool calls run in the browser; the Worker answers them and lets the model finish its reply. |
+| `POST /chat` | `{ persona, lang, messages }` → server-sent events: `{t:'text'}`, `{t:'tool', name, input}`, `{t:'done'}` or `{t:'error'}`. Tool calls (`add_to_quote`, `go_to_section`, `open_whatsapp`, `book_call`) run in the browser; the Worker answers them and lets the model finish its reply. |
 | `POST /demo` | `{ name, type, description, lang }` → server-sent events `{t:'html'}` with one self-contained HTML page (inline CSS, no scripts, no external URLs). |
 | `GET /presence` | WebSocket. Send `{ p: [x, y, z, heading] }`; receive `{ you }` once, then `{ n, v: [[id, x, y, z, heading], ...] }`. |
+| `GET /project/:token` | A client's project record for `?client=` (see [Client project rooms](#client-project-rooms-client)), plus `commits` when `repo` and `GITHUB_TOKEN` are set. The same `404 { error: 'not_found' }` for any unknown, malformed or expired token; `Cache-Control: no-store`. |
 | `GET /health` | `{ ok, ai }`: whether the API key is set. |
 
 Models: `claude-sonnet-5-5` for chat and the site builder (both at low effort, with server-side refusal fallback), set in `worker/wrangler.jsonc`. The big shared system prompt (rules + facts) is prompt-cached. Without the API key, `/chat` and `/demo` answer `503 { error: 'not_configured' }` and the site shows a polite note with a WhatsApp button instead.
@@ -112,6 +158,7 @@ All in `worker/wrangler.jsonc` (`vars`), counted in a Durable Object:
 | Demo inputs | name and type 60 chars, note 400 |
 | Output | chat 2,000 tokens, demo 16,000 tokens |
 | Live visitors per room | 60 sockets, 40 shown |
+| Client-room lookups per visitor per hour (`PROJECT_PER_HOUR`) | 60 |
 
 Over a limit, the visitor gets a friendly `429` message in their language. Only `https://3d.coderzonebd.com` and `http://localhost:*` may call the Worker (CORS and an Origin check), set in `ALLOWED_ORIGINS`.
 
@@ -121,9 +168,12 @@ Over a limit, the visitor gets a friendly `429` message in their language. Only 
 cd worker
 npm ci
 npx wrangler secret put ANTHROPIC_API_KEY   # paste the key when asked; it's stored only in Cloudflare
+npx wrangler secret put GITHUB_TOKEN        # optional: read-only token for client rooms' recent commits
 npx wrangler deploy                         # after changing worker/ or src/content.ts
 npx wrangler tail                           # live logs
 ```
+
+Bindings: `LIMITER` and `PRESENCE` (Durable Objects) and `CLIENTS`, the KV namespace `cz3d-clients` (its id is in `wrangler.jsonc`), which holds the client-room records (`client:<sha256 of token>`) and the 10-minute GitHub commit cache (`gh:<repo>`). To recreate it on another account: `npx wrangler kv namespace create cz3d-clients` and put the new id in `wrangler.jsonc`.
 
 ## 2D version, SEO and slow devices
 
@@ -132,7 +182,7 @@ npx wrangler tail                           # live logs
 - In 3D, the render resolution adapts to the frame rate instead of dropping to 2D. If the GPU loses the WebGL context, the canvas rebuilds itself.
 - In 3D mode the 2D page stays in the DOM (visually hidden) for screen readers. Keyboard users who tab into it get it as a full overlay.
 - With reduced motion turned on, the camera jumps between sections instead of flying.
-- `?2d` / `?3d` / `?lang=bn` / `?time=night` / `?weather=rain` / `?fest=eid` in the URL force a mode, language, time of day, weather or festival. `?for=<name>&type=<kind>` makes a personalised visit, `?nointro` skips the intro, and `?make-link` opens the team's link maker. `?hour=0-23` (and `?day=fri`) preview the office at any hour; see [The office's day](#the-offices-day).
+- `?2d` / `?3d` / `?lang=bn` / `?time=night` / `?weather=rain` / `?fest=eid` in the URL force a mode, language, time of day, weather or festival. `?for=<name>&type=<kind>` makes a personalised visit, `?client=<token>` opens a client's project room, `?nointro` skips the intro, and `?make-link` opens the team's link maker. `?hour=0-23` (and `?day=fri`) preview the office at any hour; see [The office's day](#the-offices-day).
 
 **Weight:** in 2D mode, three.js is never downloaded. 3D adds about 300 KB gzipped of JS plus the screenshots and logos, and the Home film for the current language (about 0.8 MB on desktop, 0.7 MB on phones, streamed after the room appears). Everything else in the room is drawn on `<canvas>` at runtime.
 
@@ -172,6 +222,9 @@ Vite, React 18, TypeScript, React Three Fiber + drei (`CameraControls` for the c
 | `src/components/Postcard.tsx` | Selfie postcard button and dialog (capture via `src/three/Snapshot.tsx`) |
 | `src/components/WelcomeCard.tsx` | The large store preview with Get this store / WhatsApp |
 | `src/components/LinkMaker.tsx` | Internal link maker at `?make-link` |
+| `src/clientRoom.ts`, `src/three/ProjectBoard.tsx`, `src/components/ProjectPanel.tsx` | Client project rooms: token and loading, the 3D board, the panel / 2D card / note |
+| `worker/src/project.ts`, `worker/scripts/client.mjs` | The `/project/:token` route, and the team's tool to create and update client records |
+| `src/booking.ts`, `src/components/BookCall.tsx` | Book a 15-min call: the slot source (`bookingSlots`), the WhatsApp message, the dialog |
 | `src/three/homeVideo.ts` | The Home wall film as a video texture, with the static fallback |
 | `video/home/` | The Home film's source (HyperFrames) and its render script |
 

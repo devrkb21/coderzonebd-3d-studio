@@ -62,7 +62,16 @@ interface State {
   /** The personalised store mock-up card (`?for=` visits). */
   welcomeOpen: boolean
   setWelcomeOpen: (open: boolean) => void
+  /** Client rooms (`?client=`): the camera is at the "Your project" board and its panel is open. */
+  projectOpen: boolean
+  setProjectOpen: (open: boolean) => void
+  /** The "Book a 15-min call" dialog, for one founder. */
+  booking: Founder | null
+  openBooking: (who: Founder) => void
+  closeBooking: () => void
 }
+
+export type Founder = 'ceo' | 'cmo'
 
 export type Persona = 'receptionist' | 'ceo' | 'cmo'
 
@@ -143,11 +152,11 @@ export const useStore = create<State>((set, get) => ({
     set({ mode, focusId: null, ready: false })
   },
   setReady: () => set({ ready: true }),
-  goTo: (stop) => set({ stop, focusId: null, quoteOpen: false, overview: false }),
+  goTo: (stop) => set({ stop, focusId: null, quoteOpen: false, overview: false, projectOpen: false }),
   focus: (id) => {
     if (!id) return set({ focusId: null })
     const item = itemById(id)
-    if (item) set({ focusId: id, stop: item.stop, quoteOpen: false, overview: false })
+    if (item) set({ focusId: id, stop: item.stop, quoteOpen: false, overview: false, projectOpen: false })
   },
   step: (dir) => {
     const item = get().focusId ? itemById(get().focusId!) : null
@@ -170,12 +179,12 @@ export const useStore = create<State>((set, get) => ({
   },
   setQuoteOpen: (quoteOpen) => set({ quoteOpen }),
   showToast: (toast) => set({ toast }),
-  setOverview: (overview) => set({ overview, focusId: overview ? null : get().focusId }),
+  setOverview: (overview) => set({ overview, focusId: overview ? null : get().focusId, projectOpen: overview ? false : get().projectOpen }),
   nextStop: (dir) => {
     const s = get()
     const i = STOPS.findIndex((x) => x.id === s.stop)
     const next = s.overview ? (dir > 0 ? 0 : STOPS.length - 1) : (i + dir + STOPS.length) % STOPS.length
-    set({ stop: STOPS[next].id, focusId: null, overview: false, quoteOpen: false })
+    set({ stop: STOPS[next].id, focusId: null, overview: false, quoteOpen: false, projectOpen: false })
   },
   setTouring: (touring) => set({ touring }),
   toggleLights: () => set({ lightsOn: !get().lightsOn }),
@@ -206,6 +215,11 @@ export const useStore = create<State>((set, get) => ({
   setPostcardOpen: (postcardOpen) => set({ postcardOpen, touring: false }),
   welcomeOpen: false,
   setWelcomeOpen: (welcomeOpen) => set({ welcomeOpen, touring: false }),
+  projectOpen: false,
+  setProjectOpen: (projectOpen) => set(projectOpen ? { projectOpen, focusId: null, overview: false, quoteOpen: false, touring: false } : { projectOpen }),
+  booking: null,
+  openBooking: (booking) => set({ booking, touring: false }),
+  closeBooking: () => set({ booking: null }),
 }))
 
 export const COIN_COUNT = 5

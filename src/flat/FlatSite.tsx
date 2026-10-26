@@ -5,6 +5,7 @@ import {
   COMPANY, COURIER, PROCESS, PRODUCTS, SERVICES, SHOW_TESTIMONIALS, STOPS, TESTIMONIALS, tr, UI, WORK, type Lang,
 } from '../content'
 import { ContactDetails, CourierDetails, HomeDetails, LeadershipDetails, ProductDetails, ServiceDetails, TechDetails, WorkDetails } from '../components/details'
+import { useStore } from '../store'
 
 export function FlatSite({ lang, visible, onQuote }: { lang: Lang; visible: boolean; onQuote?: () => void }) {
   const title = (id: string) => tr(STOPS.find((s) => s.id === id)!.label, lang)
@@ -95,7 +96,7 @@ export function FlatSite({ lang, visible, onQuote }: { lang: Lang; visible: bool
 
         <section id="leadership">
           <h2>{title('leadership')}</h2>
-          <div className="card wide"><LeadershipDetails lang={lang} /></div>
+          <div className="card wide"><LeadershipDetails lang={lang} onBook={(who) => useStore.getState().openBooking(who)} /></div>
         </section>
       </main>
       <footer className="flat-foot">© {COMPANY.name} · {lang === 'bn' ? 'খুলনা, বাংলাদেশ' : 'Khulna, Bangladesh'}</footer>
