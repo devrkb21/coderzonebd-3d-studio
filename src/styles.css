@@ -512,4 +512,25 @@ html:not(.mode-3d) .chat-fab { bottom: max(16px, env(safe-area-inset-bottom)); }
   .project-fab { right: 12px; bottom: calc(max(16px, env(safe-area-inset-bottom)) + 180px); }
   .project-fab.flat-fab { top: auto; bottom: calc(max(16px, env(safe-area-inset-bottom)) + 66px); }
   .pr-ring { width: 96px; height: 96px; }
+/* "View in AR" dialog */
+.ar-card { width: min(560px, 100%); }
+.ar-stage { position: relative; height: min(52dvh, 380px); margin-top: 12px; border-radius: 14px; overflow: hidden; background: radial-gradient(circle at 50% 40%, #fff 0%, var(--page) 70%); }
+.ar-loading { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; color: var(--ink-3); font-size: 14px; pointer-events: none; }
+.ar-place { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); white-space: nowrap; box-shadow: var(--float); }
+.ar-note { margin: 12px 0 0; color: var(--ink-2); font-size: 14px; }
+.ar-scan { display: flex; align-items: center; gap: 16px; margin-top: 14px; }
+.ar-scan p { margin: 0; color: var(--ink-2); font-size: 15px; }
+.ar-scan .ar-works { margin-top: 6px; color: var(--ink-3); font-size: 13px; }
+.ar-qr { flex: none; width: 132px; height: 132px; border-radius: 8px; border: 1px solid var(--line); }
+/* the AR button makes one more in the top bar: tighten it a little more on narrow phones */
+@media (max-width: 420px) {
+  .topbar:has(.ar-btn) { gap: 4px; }
+  .top-actions:has(.ar-btn) { gap: 3px; }
+  .mode-3d .top-actions:has(.ar-btn) .icon-btn:not(.sm) { width: 30px; }
+  .top-actions:has(.ar-btn) .seg button { padding: 6px 4px; }
+}
+@media (min-width: 421px) and (max-width: 480px) {
+  .top-actions:has(.ar-btn) { gap: 4px; }
+  .mode-3d .top-actions:has(.ar-btn) .icon-btn:not(.sm) { width: 34px; }
+  .top-actions:has(.ar-btn) .seg button { padding: 6px 7px; }
 }

@@ -113,10 +113,10 @@ function initialLang(): Lang {
   return read('cz3d-lang') === 'bn' ? 'bn' : 'en'
 }
 
-/** The intro plays once per browser session, never with reduced motion or a deep link. */
+/** The intro plays once per browser session, never with reduced motion, a deep link or `?ar`. */
 function initialIntro(): boolean {
   const q = new URLSearchParams(location.search)
-  if (q.has('nointro') || q.has('2d') || location.hash.length > 1) return false
+  if (q.has('nointro') || q.has('2d') || q.has('ar') || location.hash.length > 1) return false
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return false
   try { return sessionStorage.getItem('cz3d-intro') !== 'done' } catch { return true }
 }

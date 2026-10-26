@@ -102,6 +102,23 @@ The founders' AI assistants can open it too: the Worker's `book_call` tool (`fou
 
 **Using a real calendar later:** every slot comes from one function, `bookingSlots(founder)` in `src/booking.ts`. To use Cal.com or a Google Calendar appointment schedule, make it fetch that calendar's free slots (or busy times) and return them in the same `{ date, weekday, slots }` shape; the dialog doesn't change. Or replace the WhatsApp step with a link to the booking page.
 
+## See the studio in AR
+
+**View in AR / AR-এ দেখুন** (the cube button in the top bar, 2D and 3D) puts a miniature of the studio on a table through the phone camera. It's a 1:64 model, so the 32 m room is about 50 cm wide: the room shell with the front glass, door and storefront sign, the brand-coloured walls, every display with its real texture (Home wall, product boxes, work wall, service cards, tech board, courier kiosk, process boards, contact desk), the furniture, the reception counter and the founders' cabins. No people, traffic, ceiling or anything animated, so it reads as a dollhouse from above.
+
+- **Where the button shows.** Android Chrome (WebXR, or Google's Scene Viewer as the fallback) and iPhone / iPad Safari (AR Quick Look) get a dialog with a 3D preview and **Place it on your table**. Desktops (mouse or trackpad) get the same preview with a QR code for `https://3d.coderzonebd.com/?ar` (plus `&lang=bn` in Bangla), drawn locally by `qrcode-generator`. Other phones and tablets (Firefox on Android, in-app browsers on iOS, touch-only devices) get no button. `?ar` opens the dialog straight away (and skips the intro), so the QR lands right on it; a phone without AR still gets the preview with a note.
+- **How.** Google's `<model-viewer>` 4.0.0 (`ar ar-modes="webxr scene-viewer quick-look"`, `ar-scale="auto"`, camera controls, auto-rotate), installed from npm and bundled by Vite into its own lazy chunk that shares the site's three.js. Nothing loads until the dialog opens: then the model-viewer chunk (about 130 KB gzipped, plus three.js in 2D mode), the QR code (8 KB) and `public/models/studio-mini.glb` (2.4 MB). iOS fetches `studio-mini.usdz` (4.1 MB) only when Quick Look starts.
+- **Why a ready-made USDZ.** model-viewer can convert the GLB to USDZ on the phone when AR starts, but that runs three's exporter on the device at tap time (slow on older iPhones, and a long pause before Quick Look opens). The build script makes the USDZ once, with JPEG textures and rounded numbers, and it's committed next to the GLB.
+- **Bangla.** The model's displays are the English versions.
+
+**Rebuilding the model** after the room or the content changes (Chrome or Edge installed; set `CHROME=/path/to/chrome` if it isn't found):
+
+```bash
+node scripts/ar/build-model.mjs
+```
+
+It serves `scripts/ar/export.html` with Vite and opens it in headless Chrome. The page renders the real room components (`Room`, `Office`, `Items`, the Poly Haven models, `Reception`, `Cabins`) with the office open and the lights on, then drops the people, the ceiling, the fans and the painted-on shading and glows, redraws every texture at 256–1024 px (JPEG, PNG only for real cut-outs), simplifies the heavy models with meshoptimizer, merges everything by material, scales it to the tabletop with the origin at floor centre, adds a plinth and a strip of pavement, and exports `public/models/studio-mini.glb` (three's GLTFExporter, no extensions, so Scene Viewer reads it) and `studio-mini.usdz` (USDZExporter). It takes about a minute. Keep the GLB under ~2.5 MB: `MAX_TRIS`, `JPEG_QUALITY` and the texture sizes in `convert()` are the knobs.
+
 ## How to explore
 
 | Desktop | Phone | What it does |
@@ -182,7 +199,7 @@ Bindings: `LIMITER` and `PRESENCE` (Durable Objects) and `CLIENTS`, the KV names
 - In 3D, the render resolution adapts to the frame rate instead of dropping to 2D. If the GPU loses the WebGL context, the canvas rebuilds itself.
 - In 3D mode the 2D page stays in the DOM (visually hidden) for screen readers. Keyboard users who tab into it get it as a full overlay.
 - With reduced motion turned on, the camera jumps between sections instead of flying.
-- `?2d` / `?3d` / `?lang=bn` / `?time=night` / `?weather=rain` / `?fest=eid` in the URL force a mode, language, time of day, weather or festival. `?for=<name>&type=<kind>` makes a personalised visit, `?client=<token>` opens a client's project room, `?nointro` skips the intro, and `?make-link` opens the team's link maker. `?hour=0-23` (and `?day=fri`) preview the office at any hour; see [The office's day](#the-offices-day).
+- `?2d` / `?3d` / `?lang=bn` / `?time=night` / `?weather=rain` / `?fest=eid` in the URL force a mode, language, time of day, weather or festival. `?for=<name>&type=<kind>` makes a personalised visit, `?client=<token>` opens a client's project room, `?nointro` skips the intro, `?ar` opens the AR dialog, and `?make-link` opens the team's link maker. `?hour=0-23` (and `?day=fri`) preview the office at any hour; see [The office's day](#the-offices-day).
 
 **Weight:** in 2D mode, three.js is never downloaded. 3D adds about 300 KB gzipped of JS plus the screenshots and logos, and the Home film for the current language (about 0.8 MB on desktop, 0.7 MB on phones, streamed after the room appears). Everything else in the room is drawn on `<canvas>` at runtime.
 
@@ -225,6 +242,8 @@ Vite, React 18, TypeScript, React Three Fiber + drei (`CameraControls` for the c
 | `src/clientRoom.ts`, `src/three/ProjectBoard.tsx`, `src/components/ProjectPanel.tsx` | Client project rooms: token and loading, the 3D board, the panel / 2D card / note |
 | `worker/src/project.ts`, `worker/scripts/client.mjs` | The `/project/:token` route, and the team's tool to create and update client records |
 | `src/booking.ts`, `src/components/BookCall.tsx` | Book a 15-min call: the slot source (`bookingSlots`), the WhatsApp message, the dialog |
+| `src/components/ArView.tsx` | The View in AR button and dialog (model-viewer, QR code) |
+| `scripts/ar/` | Builds the AR miniature `public/models/studio-mini.glb` / `.usdz` |
 | `src/three/homeVideo.ts` | The Home wall film as a video texture, with the static fallback |
 | `video/home/` | The Home film's source (HyperFrames) and its render script |
 
