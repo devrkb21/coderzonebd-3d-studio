@@ -512,6 +512,7 @@ html:not(.mode-3d) .chat-fab { bottom: max(16px, env(safe-area-inset-bottom)); }
   .project-fab { right: 12px; bottom: calc(max(16px, env(safe-area-inset-bottom)) + 180px); }
   .project-fab.flat-fab { top: auto; bottom: calc(max(16px, env(safe-area-inset-bottom)) + 66px); }
   .pr-ring { width: 96px; height: 96px; }
+}
 /* "View in AR" dialog */
 .ar-card { width: min(560px, 100%); }
 .ar-stage { position: relative; height: min(52dvh, 380px); margin-top: 12px; border-radius: 14px; overflow: hidden; background: radial-gradient(circle at 50% 40%, #fff 0%, var(--page) 70%); }
