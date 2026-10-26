@@ -226,7 +226,7 @@ function ContactDesk({ m }: { m: Mats }) {
   )
 }
 
-const WIN = { x0: 4, x1: 12, y0: 1, y1: 4.2 }
+export const WIN = { x0: 4, x1: 12, y0: 1, y1: 4.2 }
 
 function Window({ m, cx }: { m: Mats; cx: number }) {
   const glass = useMemo(() => new THREE.MeshBasicMaterial({ color: '#CFE4F2', transparent: true, opacity: 0.1, depthWrite: false }), [])
@@ -263,7 +263,7 @@ function etchTexture() {
   return t
 }
 
-const DOOR = { w: 2.8, h: 3.1 }
+export const DOOR = { w: 2.8, h: 3.1 }
 
 /** Glass double doors in slim black frames with tall brand-orange pulls: the street shows through. */
 function GlassDoor({ m }: { m: Mats }) {

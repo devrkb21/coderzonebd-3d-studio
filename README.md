@@ -29,6 +29,8 @@ Brand: the real Coder Zone BD logo and wordmark, orange `#FF931E` on ink `#12141
 ### A living office
 
 - **Real Bangladesh time.** Through the windows and the glass entrance, the street follows the time in Dhaka (GMT+6): dawn, day, dusk and night, with the sun or moon, lit building windows and street lights after dark. `?time=day|dawn|dusk|night` forces a phase.
+- **Real Khulna weather.** The street shows the current weather in Khulna, from [Open-Meteo](https://open-meteo.com) (free, no key, checked every 15 minutes, clear sky if it can't be reached). Cloudy: grey clouds drift across the sky. Rain: rain falls over the street, drops run down the windows and the glass doors, the road turns dark and wet, rickshaws get clear plastic covers, their riders rain capes, and people walk under umbrellas. Storm: rain plus lightning that lights up the sky and the room for a moment, and thunder when sound is on. Fog: the far buildings fade into haze. `?weather=clear|cloudy|rain|storm|fog` forces a state.
+- **Bangladeshi festivals.** Chosen by today's date in Bangladesh. Pohela Boishakh (14 April): alpona floor art at the entrance, red-and-white bunting and a "শুভ নববর্ষ" banner. Eid ul-Fitr and Eid ul-Adha (from the Islamic calendar, give or take a day): twinkling fairy lights (morich bati) along the front wall, the windows and the door, and an "Eid Mubarak / ঈদ মোবারক" sign. 21 February: a small Shaheed Minar with flowers by the entrance and "অমর একুশে". 26 March and 16 December: a Bangladesh flag flying outside and green-and-red bunting. 1 January: a "Happy New Year" banner and gold bunting. The greeting hangs over the door inside and above the canopy outside. `?fest=boishakh|eid|ekushe|independence|victory|newyear` forces one.
 - **Street life.** Cars, a bus, green CNG auto-rickshaws and cycle rickshaws with painted hoods (the riders pedal, the wheels turn) pass outside. People walk along both pavements, and birds cross the sky by day.
 - **The team at work.** Two people type at their desks (and stretch now and then), while a third walks between the coffee corner and the lounge, sipping from a mug.
 - **Everything moves a little.** Ceiling fans spin, the AC louver sweeps, steam rises from a coffee cup, the router's lights blink, code scrolls on the monitors, the plants sway and the service cards swing gently on their wires. Turn the lights off and the fans wind down too.
@@ -69,7 +71,7 @@ Clicking an item zooms to it and opens a side panel; on phones the panel is a bo
 - In 3D, the render resolution adapts to the frame rate instead of dropping to 2D. If the GPU loses the WebGL context, the canvas rebuilds itself.
 - In 3D mode the 2D page stays in the DOM (visually hidden) for screen readers. Keyboard users who tab into it get it as a full overlay.
 - With reduced motion turned on, the camera jumps between sections instead of flying.
-- `?2d` / `?3d` / `?lang=bn` / `?time=night` in the URL force a mode, language or time of day.
+- `?2d` / `?3d` / `?lang=bn` / `?time=night` / `?weather=rain` / `?fest=eid` in the URL force a mode, language, time of day, weather or festival.
 
 **Weight:** in 2D mode, three.js is never downloaded. 3D adds about 300 KB gzipped of JS plus the screenshots and logos. Everything else in the room is drawn on `<canvas>` at runtime.
 
@@ -86,6 +88,8 @@ Vite, React 18, TypeScript, React Three Fiber + drei (`CameraControls` for the c
 | `src/three/Life.tsx` | The animated team, fans, AC, steam, router, digital clock |
 | `src/three/Street.tsx` | Rickshaws, CNGs, pedestrians, birds |
 | `src/three/Models.tsx` | Real 3D models and the CZ Bot receptionist |
+| `src/weather.ts`, `src/three/Weather.tsx` | Live Khulna weather (Open-Meteo) and the clouds, rain, fog and lightning outside |
+| `src/three/Festivals.tsx` | Festival dates and decorations |
 | `src/audio.ts` | The synthesised office and street sound |
 | `src/three/Outside.tsx` | Sky, buildings, street, traffic, day/night |
 | `src/three/CameraRig.tsx` | Camera moves, look-around, zoom, overview |

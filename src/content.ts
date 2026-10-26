@@ -401,3 +401,18 @@ export const UI = {
     { bn: '৳৫ লাখের বেশি', en: 'Over ৳5 lakh' },
   ],
 } satisfies Record<string, L | L[]>
+
+/** Festival greetings shown in the room on the day (src/three/Festivals.tsx). */
+export const FESTIVAL_TEXT = {
+  boishakh: { bn: 'শুভ নববর্ষ', en: 'Shubho Noboborsho' },
+  boishakhSub: { bn: 'বঙ্গাব্দ', en: 'Happy Bengali New Year' },
+  eid: { bn: 'ঈদ মোবারক', en: 'Eid Mubarak' },
+  eidSub: { bn: 'সবাইকে ঈদের শুভেচ্ছা', en: 'Warm Eid wishes to everyone' },
+  ekushe: { bn: 'অমর একুশে', en: 'Amar Ekushe' },
+  ekusheSub: { bn: '২১ ফেব্রুয়ারি · আন্তর্জাতিক মাতৃভাষা দিবস', en: '21 February · International Mother Language Day' },
+  victory: { bn: 'মহান বিজয় দিবস', en: 'Victory Day' },
+  victorySub: { bn: '১৬ ডিসেম্বর', en: '16 December' },
+  independence: { bn: 'মহান স্বাধীনতা দিবস', en: 'Independence Day' },
+  independenceSub: { bn: '২৬ মার্চ', en: '26 March' },
+  newyear: { bn: 'হ্যাপি নিউ ইয়ার', en: 'Happy New Year' },
+} satisfies Record<string, L>

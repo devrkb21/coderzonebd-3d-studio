@@ -1,8 +1,10 @@
 // Bangladesh street life outside the windows: cycle rickshaws, CNG auto-rickshaws,
-// people on the pavements and birds crossing the sky.
+// people on the pavements and birds crossing the sky. In the rain the rickshaws get plastic
+// covers and people walk under umbrellas.
 import { useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
+import { useWeather } from '../weather'
 import { ROOM } from './layout'
 import { Person, walkPose, type Look, type Rig } from './Life'
 
@@ -16,24 +18,26 @@ const LANE_B = ROAD.z1 - 1.9
 const SPAN = 150
 
 export function StreetLife({ night }: { night: boolean }) {
+  const weather = useWeather((w) => w.kind)
+  const wet = weather === 'rain' || weather === 'storm'
   return (
     <>
-      <Rickshaws night={night} />
-      <Pedestrians />
-      {!night && <Birds />}
+      <Rickshaws night={night} wet={wet} />
+      <Pedestrians wet={wet} />
+      {!night && !wet && weather !== 'fog' && <Birds />}
     </>
   )
 }
 
 const HOODS = ['#C0392B', '#1F6FB2', '#E2A21B', '#8E44AD']
 
-function Rickshaws({ night }: { night: boolean }) {
+function Rickshaws({ night, wet }: { night: boolean; wet: boolean }) {
   return (
     <>
-      <Rickshaw dir={1} speed={3.2} offset={10} color={HOODS[0]} night={night} />
-      <Rickshaw dir={-1} speed={2.8} offset={70} color={HOODS[1]} night={night} />
-      <Rickshaw dir={1} speed={3.6} offset={95} color={HOODS[2]} night={night} />
-      <Rickshaw dir={-1} speed={3.0} offset={130} color={HOODS[3]} night={night} />
+      <Rickshaw dir={1} speed={3.2} offset={10} color={HOODS[0]} night={night} wet={wet} />
+      <Rickshaw dir={-1} speed={2.8} offset={70} color={HOODS[1]} night={night} wet={wet} />
+      <Rickshaw dir={1} speed={3.6} offset={95} color={HOODS[2]} night={night} wet={wet} />
+      <Rickshaw dir={-1} speed={3.0} offset={130} color={HOODS[3]} night={night} wet={wet} />
       <Cng dir={1} speed={9} offset={40} night={night} />
       <Cng dir={-1} speed={8} offset={115} night={night} />
     </>
@@ -54,7 +58,7 @@ function useLoop(dir: number, speed: number, offset: number, z: number) {
 const RIDER: Look = { shirt: '#D9D4C7', pants: '#4A5A3A', skin: '#7A4E30', hair: '#141010' }
 
 /** A cycle rickshaw with a painted hood; the rider pedals and the wheels turn. */
-function Rickshaw({ dir, speed, offset, color, night }: { dir: number; speed: number; offset: number; color: string; night: boolean }) {
+function Rickshaw({ dir, speed, offset, color, night, wet }: { dir: number; speed: number; offset: number; color: string; night: boolean; wet: boolean }) {
   const ref = useLoop(dir, speed, offset, dir > 0 ? ROAD.z0 + 0.9 : ROAD.z1 - 0.9)
   const wheels = useRef<THREE.Group[]>([])
   const shade = night ? 0.4 : 1
@@ -64,6 +68,8 @@ function Rickshaw({ dir, speed, offset, color, night }: { dir: number; speed: nu
     frame: new THREE.MeshBasicMaterial({ color: new THREE.Color('#2A2E36').multiplyScalar(shade) }),
     seat: new THREE.MeshBasicMaterial({ color: new THREE.Color('#2E7D4F').multiplyScalar(shade) }),
     tyre: new THREE.MeshBasicMaterial({ color: '#111111' }),
+    plastic: new THREE.MeshBasicMaterial({ color: new THREE.Color('#BFD9EE').multiplyScalar(shade), transparent: true, opacity: 0.45, depthWrite: false, side: THREE.DoubleSide }),
+    cape: new THREE.MeshBasicMaterial({ color: new THREE.Color('#2F6FB0').multiplyScalar(shade), transparent: true, opacity: 0.85, side: THREE.DoubleSide }),
   }), [color, shade])
   const pedal = useMemo(() => (r: Rig, t: number) => {
     if (!r.hips) return
@@ -102,6 +108,21 @@ function Rickshaw({ dir, speed, offset, color, night }: { dir: number; speed: nu
       <mesh position={[0, 0.98, 0.85]} material={m.frame}><boxGeometry args={[0.24, 0.06, 0.2]} /></mesh>
       <mesh position={[0, 1.15, 1.15]} material={m.frame}><boxGeometry args={[0.5, 0.03, 0.03]} /></mesh>
       <Person look={RIDER} position={[0, 0.02, 0.82]} drive={pedal} />
+      {wet && (
+        <>
+          {/* clear plastic over the hood and drawn across the front of the passenger seat */}
+          <mesh position={[0, 1.15, -0.45]} rotation-z={Math.PI / 2} material={m.plastic}>
+            <cylinderGeometry args={[0.64, 0.64, 1.1, 14, 1, true, 0, Math.PI]} />
+          </mesh>
+          <mesh position={[0, 1.15, 0.17]} material={m.plastic}><circleGeometry args={[0.62, 14, 0, Math.PI]} /></mesh>
+          <mesh position={[0, 0.92, 0.17]} material={m.plastic}><planeGeometry args={[1.24, 0.46]} /></mesh>
+          {/* the rider's rain cape and hood, leaning forward with him */}
+          <group position={[0, 1.0, 0.82]} rotation-x={0.35}>
+            <mesh position-y={0.3} material={m.cape}><cylinderGeometry args={[0.13, 0.34, 0.62, 12, 1, true]} /></mesh>
+            <mesh position={[0, 0.72, -0.02]} material={m.cape}><sphereGeometry args={[0.15, 12, 8, 0, Math.PI * 2, 0, Math.PI * 0.6]} /></mesh>
+          </group>
+        </>
+      )}
     </group>
   )
 }
@@ -140,19 +161,45 @@ const WALKERS: { look: Look; dir: number; speed: number; offset: number; z: numb
 ]
 const WALK_SPAN = 90
 
-function Pedestrians() {
-  return <>{WALKERS.map((w, i) => <Walker key={i} {...w} />)}</>
+const UMBRELLAS = ['#1A1B20', '#7A1F2B', '#1F3A6B', '#2E5E3A']
+
+function Pedestrians({ wet }: { wet: boolean }) {
+  return <>{WALKERS.map((w, i) => <Walker key={i} {...w} umbrella={wet ? UMBRELLAS[i % UMBRELLAS.length] : null} />)}</>
 }
 
-function Walker({ look, dir, speed, offset, z }: { look: Look; dir: number; speed: number; offset: number; z: number }) {
+function Walker({ look, dir, speed, offset, z, umbrella }: { look: Look; dir: number; speed: number; offset: number; z: number; umbrella: string | null }) {
+  const brolly = useRef<THREE.Group>(null)
+  const m = useMemo(() => umbrella ? {
+    canopy: new THREE.MeshBasicMaterial({ color: umbrella, side: THREE.DoubleSide }),
+    stick: new THREE.MeshBasicMaterial({ color: '#2A2A2E' }),
+  } : null, [umbrella])
   const drive = useMemo(() => (r: Rig, t: number) => {
     if (!r.root) return
     const d = (t * speed + offset) % WALK_SPAN
     r.root.position.set(dir > 0 ? -WALK_SPAN / 2 + d : WALK_SPAN / 2 - d, 0, z)
     r.root.rotation.y = dir > 0 ? Math.PI / 2 : -Math.PI / 2
     walkPose(r, t * speed * 5.2, 1)
+    const b = brolly.current
+    if (!b) return
+    // the right hand holds the umbrella up in front of the chest
+    r.armR!.rotation.x = -0.55
+    r.armR!.rotation.z = -0.25
+    r.elbowR!.rotation.x = -1.5
+    b.position.copy(r.root.position)
+    b.position.y = Math.abs(Math.cos(t * speed * 5.2)) * -0.02
+    b.rotation.y = r.root.rotation.y
   }, [dir, speed, offset, z])
-  return <Person look={look} drive={drive} />
+  return (
+    <>
+      <Person look={look} drive={drive} />
+      {m && (
+        <group ref={brolly}>
+          <mesh position={[0.12, 1.72, 0.32]} material={m.stick}><cylinderGeometry args={[0.012, 0.012, 0.85, 6]} /></mesh>
+          <mesh position={[0.12, 2.24, 0.28]} material={m.canopy}><coneGeometry args={[0.6, 0.28, 8, 1, true]} /></mesh>
+        </group>
+      )}
+    </>
+  )
 }
 
 /** A small flock crossing the sky, flapping. */

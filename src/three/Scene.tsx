@@ -9,9 +9,11 @@ import { Items, DRAG_PX } from './Items'
 import { Office } from './Office'
 import { OfficeModels, Robot } from './Models'
 import { Outside, SKY } from './Outside'
+import { Festivals } from './Festivals'
 import { Room } from './Room'
 import { prepareTextures } from './textures'
 import { usePhase } from './time'
+import { Weather } from './Weather'
 
 /**
  * Soft shadows under and around everything that stands on the floor (furniture, plinths, the
@@ -109,6 +111,8 @@ export default function Scene({ onProgress }: { onProgress: (p: number) => void 
       <Office />
       <Items />
       <Outside />
+      <Weather />
+      <Festivals />
       {/* Real models stream in after the room is up; the floor shadows render once they're in. */}
       <Suspense fallback={null}>
         <OfficeModels />

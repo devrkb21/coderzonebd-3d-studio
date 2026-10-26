@@ -1,14 +1,17 @@
 // Office and street ambience, synthesised live with Web Audio: no sound files to download.
 // Room tone (fan + AC), distant traffic, keyboard typing in bursts, a rickshaw bell, the odd
-// horn, birds by day, and a soft tick on clicks. Starts only after the visitor turns it on.
+// horn, birds by day, and a soft tick on clicks. In Khulna's rain there's a rain loop, and
+// thunder follows each lightning flash in a storm. Starts only after the visitor turns it on.
 import { useStore } from './store'
 import { dhakaHours, phaseAt } from './three/time'
+import { onStrike, useWeather, type Weather } from './weather'
 
 let ctx: AudioContext | null = null
 let master: GainNode | null = null
 let roomGain: GainNode | null = null
 let timers: ReturnType<typeof setTimeout>[] = []
 let unsub: (() => void) | null = null
+let weatherUnsubs: (() => void)[] = []
 
 function noiseBuffer(c: AudioContext, seconds: number, brown = false) {
   const b = c.createBuffer(1, c.sampleRate * seconds, c.sampleRate)
@@ -105,6 +108,42 @@ function chirp() {
   }
 }
 
+/** A thunder roll: a low rumble that swells and fades over a few seconds, with a crack when close. */
+function thunder(brown: AudioBuffer, white: AudioBuffer) {
+  if (!ctx || !master) return
+  const t = ctx.currentTime + 0.5 + Math.random() * 2
+  const close = Math.random() < 0.35
+  const rumble = ctx.createBufferSource()
+  rumble.buffer = brown
+  rumble.playbackRate.value = 0.6
+  const lp = ctx.createBiquadFilter()
+  lp.type = 'lowpass'
+  lp.frequency.value = 180
+  const g = ctx.createGain()
+  g.gain.setValueAtTime(0, t)
+  g.gain.linearRampToValueAtTime(close ? 0.9 : 0.55, t + 0.25)
+  g.gain.setTargetAtTime(0.25, t + 0.6, 0.5)
+  g.gain.setTargetAtTime(0, t + 1.6, 0.9)
+  rumble.connect(lp).connect(g).connect(master)
+  rumble.start(t)
+  rumble.stop(t + 6)
+  if (close) {
+    const crack = ctx.createBufferSource()
+    crack.buffer = white
+    const hp = ctx.createBiquadFilter()
+    hp.type = 'highpass'
+    hp.frequency.value = 900
+    const cg = ctx.createGain()
+    cg.gain.setValueAtTime(0.12, t)
+    cg.gain.exponentialRampToValueAtTime(0.0001, t + 0.35)
+    crack.connect(hp).connect(cg).connect(master)
+    crack.start(t)
+    crack.stop(t + 0.4)
+  }
+}
+
+const RAIN_GAIN: Record<Weather, number> = { clear: 0, cloudy: 0, fog: 0, rain: 0.05, storm: 0.08 }
+
 export function startSound() {
   if (ctx) { ctx.resume(); master?.gain.setTargetAtTime(0.9, ctx.currentTime, 0.4); return }
   const AC = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
@@ -132,7 +171,21 @@ export function startSound() {
   })
   every(9, 22, bell)
   every(18, 40, horn)
-  every(4, 11, () => { const p = phaseAt(dhakaHours()); if (p === 'day' || p === 'dawn') chirp() })
+  every(4, 11, () => { const p = phaseAt(dhakaHours()); if ((p === 'day' || p === 'dawn') && useWeather.getState().kind === 'clear') chirp() })
+
+  // rain on the glass and the street, and thunder after lightning
+  const rain = loop(ctx, white, 'highpass', 1400, 0, master)
+  const patter = loop(ctx, brown, 'bandpass', 600, 0, master)
+  const setRain = (k: Weather) => {
+    if (!ctx) return
+    rain.gain.setTargetAtTime(RAIN_GAIN[k], ctx.currentTime, 1.2)
+    patter.gain.setTargetAtTime(RAIN_GAIN[k] * 2.5, ctx.currentTime, 1.2)
+  }
+  setRain(useWeather.getState().kind)
+  weatherUnsubs = [
+    useWeather.subscribe((w) => setRain(w.kind)),
+    onStrike(() => thunder(brown, white)),
+  ]
 
   // the fan and AC hum go quiet with the lights; a soft tick when moving around
   unsub = useStore.subscribe((s, prev) => {
@@ -151,6 +204,8 @@ export function stopSound() {
   timers = []
   unsub?.()
   unsub = null
+  weatherUnsubs.forEach((f) => f())
+  weatherUnsubs = []
   setTimeout(() => { c.close(); }, 600)
   ctx = null
   master = null

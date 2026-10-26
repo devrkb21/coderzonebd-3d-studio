@@ -3,14 +3,15 @@
 import { useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
+import { useWeather, type Weather } from '../weather'
 import { ROOM } from './layout'
 import { StreetLife } from './Street'
 import { usePhase, type Phase } from './time'
 
 const { halfD } = ROOM
-const SIDEWALK = { z0: halfD, z1: halfD + 3.2 }
-const ROAD = { z0: halfD + 3.2, z1: halfD + 10.4 }
-const FAR_WALK = { z0: ROAD.z1, z1: ROAD.z1 + 2.4 }
+export const SIDEWALK = { z0: halfD, z1: halfD + 3.2 }
+export const ROAD = { z0: halfD + 3.2, z1: halfD + 10.4 }
+export const FAR_WALK = { z0: ROAD.z1, z1: ROAD.z1 + 2.4 }
 const BUILD_Z = FAR_WALK.z1 + 2
 
 export const SKY: Record<Phase, { top: string; bottom: string; ground: string; bg: string }> = {
@@ -30,15 +31,24 @@ function canvasTex(w: number, h: number, draw: (ctx: CanvasRenderingContext2D) =
   return t
 }
 
-function skyTexture(phase: Phase) {
+/** How far the sky and the street fade towards grey under clouds, rain or fog. */
+export const OVERCAST: Record<Weather, number> = { clear: 0, cloudy: 0.5, rain: 0.78, storm: 0.9, fog: 0.82 }
+const GREY: Record<Phase, string> = { day: '#A3ABB5', dawn: '#9A949C', dusk: '#6E6872', night: '#12151D' }
+export const FOG_GREY: Record<Phase, string> = { day: '#D3D7DC', dawn: '#C9C2C0', dusk: '#8E8790', night: '#262B36' }
+
+function skyTone(color: string, phase: Phase, weather: Weather) {
+  return new THREE.Color(color).lerp(new THREE.Color(weather === 'fog' ? FOG_GREY[phase] : GREY[phase]), OVERCAST[weather]).getStyle()
+}
+
+function skyTexture(phase: Phase, weather: Weather) {
   const s = SKY[phase]
   return canvasTex(64, 512, (ctx) => {
     const g = ctx.createLinearGradient(0, 0, 0, 512)
-    g.addColorStop(0, s.top)
-    g.addColorStop(1, s.bottom)
+    g.addColorStop(0, skyTone(s.top, phase, weather))
+    g.addColorStop(1, skyTone(s.bottom, phase, weather))
     ctx.fillStyle = g
     ctx.fillRect(0, 0, 64, 512)
-    if (phase === 'night') {
+    if (phase === 'night' && weather === 'clear') {
       ctx.fillStyle = '#ffffff'
       for (let i = 0; i < 70; i++) {
         const x = (i * 37.3) % 64
@@ -68,16 +78,33 @@ function facadeTexture(seed: number, night: boolean, tone: string) {
 
 const rand = (i: number) => { const x = Math.sin(i * 127.1) * 43758.5453; return x - Math.floor(x) }
 
+/** Soft, streaky highlights for a wet road: the sky and the lights smeared on wet asphalt. */
+function sheenTexture() {
+  return canvasTex(512, 64, (ctx) => {
+    ctx.filter = 'blur(5px)'
+    ctx.fillStyle = '#ffffff'
+    for (let i = 0; i < 46; i++) {
+      ctx.globalAlpha = 0.25 + rand(i + 300) * 0.5
+      ctx.fillRect(rand(i + 200) * 512, rand(i + 400) * 64, 20 + rand(i + 500) * 70, 3 + rand(i + 600) * 7)
+    }
+  })
+}
+
 export function Outside() {
   const phase = usePhase()
+  const weather = useWeather((w) => w.kind)
   const night = phase === 'night'
+  const wet = weather === 'rain' || weather === 'storm'
   const s = SKY[phase]
+  // overcast light is flatter and darker on the street and the buildings
+  const dim = 1 - OVERCAST[weather] * (weather === 'fog' ? 0.08 : 0.3)
 
   const mats = useMemo(() => ({
-    sky: new THREE.MeshBasicMaterial({ map: skyTexture(phase), depthWrite: false, fog: false }),
-    ground: new THREE.MeshBasicMaterial({ color: s.ground }),
-    walk: new THREE.MeshBasicMaterial({ color: night ? '#4A4C52' : '#B9B6AE' }),
-    road: new THREE.MeshBasicMaterial({ color: night ? '#1B1C20' : '#3B3D42' }),
+    sky: new THREE.MeshBasicMaterial({ map: skyTexture(phase, weather), depthWrite: false, fog: false }),
+    ground: new THREE.MeshBasicMaterial({ color: new THREE.Color(s.ground).multiplyScalar(dim) }),
+    walk: new THREE.MeshBasicMaterial({ color: wet ? (night ? '#36383D' : '#8C8984') : night ? '#4A4C52' : '#B9B6AE' }),
+    road: new THREE.MeshBasicMaterial({ color: wet ? (night ? '#111216' : '#25272B') : night ? '#1B1C20' : '#3B3D42' }),
+    sheen: new THREE.MeshBasicMaterial({ map: sheenTexture(), color: night ? '#FFD98A' : '#C9D3DE', transparent: true, opacity: night ? 0.3 : 0.2, depthWrite: false, blending: THREE.AdditiveBlending }),
     paint: new THREE.MeshBasicMaterial({ color: night ? '#9A9A88' : '#F2F0E6' }),
     pole: new THREE.MeshBasicMaterial({ color: '#3A3D44' }),
     lamp: new THREE.MeshBasicMaterial({ color: night || phase === 'dusk' ? '#FFE3A1' : '#D9D9D2' }),
@@ -85,7 +112,7 @@ export function Outside() {
     tree: new THREE.MeshBasicMaterial({ color: night ? '#22361F' : '#4F7D43' }),
     trunk: new THREE.MeshBasicMaterial({ color: '#5B4430' }),
     disc: new THREE.MeshBasicMaterial({ color: night ? '#F4F1E6' : phase === 'day' ? '#FFF6C9' : '#FFB46B', fog: false }),
-  }), [phase, night, s.ground])
+  }), [phase, night, s.ground, weather, wet, dim])
 
   const facades = useMemo(() => ['#C9C4BA', '#A9B1BB', '#D8CDBE', '#9AA3A9'].map((tone, i) => facadeTexture(i + 1, night, night ? '#2A2E38' : tone)), [night])
 
@@ -103,9 +130,9 @@ export function Outside() {
       <mesh position={[0, 32, 95]} rotation-y={Math.PI} material={mats.sky}>
         <planeGeometry args={[320, 110]} />
       </mesh>
-      <mesh position={[phase === 'dawn' ? 30 : phase === 'dusk' ? -30 : -12, phase === 'day' ? 40 : phase === 'night' ? 34 : 9, 92]} rotation-y={Math.PI} material={mats.disc}>
+      {(weather === 'clear' || weather === 'cloudy') && <mesh position={[phase === 'dawn' ? 30 : phase === 'dusk' ? -30 : -12, phase === 'day' ? 40 : phase === 'night' ? 34 : 9, 92]} rotation-y={Math.PI} material={mats.disc}>
         <circleGeometry args={[phase === 'night' ? 2.6 : 3.4, 32]} />
-      </mesh>
+      </mesh>}
 
       {/* ground, sidewalks, road and lane markings */}
       <mesh rotation-x={-Math.PI / 2} position={[0, -0.02, halfD + 45]} material={mats.ground}>
@@ -120,6 +147,11 @@ export function Outside() {
       <mesh rotation-x={-Math.PI / 2} position={[0, 0.01, (FAR_WALK.z0 + FAR_WALK.z1) / 2]} material={mats.walk}>
         <planeGeometry args={[320, FAR_WALK.z1 - FAR_WALK.z0]} />
       </mesh>
+      {wet && (
+        <mesh rotation-x={-Math.PI / 2} position={[0, 0.006, (ROAD.z0 + ROAD.z1) / 2]} material={mats.sheen}>
+          <planeGeometry args={[320, ROAD.z1 - ROAD.z0]} />
+        </mesh>
+      )}
       {Array.from({ length: 40 }, (_, i) => (
         <mesh key={i} rotation-x={-Math.PI / 2} position={[-156 + i * 8, 0.015, (ROAD.z0 + ROAD.z1) / 2]} material={mats.paint}>
           <planeGeometry args={[3, 0.18]} />
@@ -127,7 +159,7 @@ export function Outside() {
       ))}
 
       {/* buildings across the street */}
-      {buildings.map((b, i) => <Building key={i} {...b} map={facades[b.tex]} />)}
+      {buildings.map((b, i) => <Building key={i} {...b} map={facades[b.tex]} dim={dim} />)}
 
       {/* street lights and trees along the near sidewalk */}
       {Array.from({ length: 9 }, (_, i) => {
@@ -138,6 +170,8 @@ export function Outside() {
             <mesh position={[0, 5.15, 0.6]} material={mats.pole}><boxGeometry args={[0.08, 0.08, 1.2]} /></mesh>
             <mesh position={[0, 5.05, 1.15]} material={mats.lamp}><boxGeometry args={[0.5, 0.12, 0.3]} /></mesh>
             <mesh rotation-x={-Math.PI / 2} position={[0, 0.03, 1.4]} material={mats.glow}><circleGeometry args={[2.4, 24]} /></mesh>
+            {/* on a wet night each lamp leaves a long reflection across the road */}
+            {wet && night && <mesh rotation-x={-Math.PI / 2} position={[0, 0.02, 5]} material={mats.glow}><planeGeometry args={[1.1, 7]} /></mesh>}
             {i % 2 === 1 && (
               <group position={[5, 0, -0.9]}>
                 <mesh position-y={1.2} material={mats.trunk}><cylinderGeometry args={[0.12, 0.16, 2.4, 8]} /></mesh>
@@ -154,14 +188,14 @@ export function Outside() {
   )
 }
 
-function Building({ x, w, h, d, z, map }: { x: number; w: number; h: number; d: number; z: number; map: THREE.Texture }) {
+function Building({ x, w, h, d, z, map, dim }: { x: number; w: number; h: number; d: number; z: number; map: THREE.Texture; dim: number }) {
   const mat = useMemo(() => {
     const t = map.clone()
     t.wrapS = t.wrapT = THREE.RepeatWrapping
     t.repeat.set(Math.max(1, Math.round(w / 6)), Math.max(1, Math.round(h / 9)))
     t.needsUpdate = true
-    return new THREE.MeshBasicMaterial({ map: t })
-  }, [map, w, h])
+    return new THREE.MeshBasicMaterial({ map: t, color: new THREE.Color(dim, dim, dim) })
+  }, [map, w, h, dim])
   return (
     <mesh position={[x, h / 2, z]} material={mat}>
       <boxGeometry args={[w, h, d]} />
