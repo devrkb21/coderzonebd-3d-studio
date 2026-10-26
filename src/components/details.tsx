@@ -1,6 +1,6 @@
 // Detail views shared by the 3D side panel and the 2D / SEO page.
 import {
-  COMPANY, CONTACT, COURIER, FAQ, PROCESS, priceText, TECH, TECH_LOGOS, tr, UI, waLink, workById,
+  COMPANY, CONTACT, COURIER, FAQ, LEADERSHIP, PROCESS, priceText, TECH, TECH_LOGOS, tr, UI, waLink, workById,
   type Lang, type ProductInfo, type Service, type WorkItem,
 } from '../content'
 import { useStore } from '../store'
@@ -201,6 +201,25 @@ export function ContactDetails({ lang, onQuote }: { lang: Lang; onQuote?: () => 
           </details>
         ))}
       </div>
+    </>
+  )
+}
+
+/** The two founders; in the 3D room each has an AI assistant to chat with. */
+export function LeadershipDetails({ lang, onAsk }: { lang: Lang; onAsk?: (who: 'ceo' | 'cmo') => void }) {
+  return (
+    <>
+      <p className="lead">{tr(LEADERSHIP.intro, lang)}</p>
+      <ul className="team">
+        {LEADERSHIP.founders.map((f) => (
+          <li key={f.who}>
+            <strong>{f.name}</strong>
+            <span>{f.role} · {tr(f.duty, lang)}</span>
+            {onAsk && <button type="button" className="btn" onClick={() => onAsk(f.who)}>{tr(LEADERSHIP.ask, lang)}</button>}
+          </li>
+        ))}
+      </ul>
+      {onAsk && <p>{tr(LEADERSHIP.assistant, lang)}</p>}
     </>
   )
 }

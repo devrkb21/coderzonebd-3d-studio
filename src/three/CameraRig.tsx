@@ -121,6 +121,8 @@ export function CameraRig() {
     // Overview: stand at the entrance, a little raised, and take in the whole studio.
     const p = overview && !itemFrame ? new THREE.Vector3(0, 5.6, ROOM.halfD - 1.2) : fit.position
     const t = overview && !itemFrame ? new THREE.Vector3(0, 2.2, -ROOM.halfD + 2) : fit.target
+    // A wide frame above a tall bottom sheet can push the camera under the floor: raise it and look down.
+    p.y = Math.max(p.y, 0.9)
 
     c.minAzimuthAngle = -Infinity
     c.maxAzimuthAngle = Infinity

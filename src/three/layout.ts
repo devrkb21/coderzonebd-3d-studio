@@ -4,18 +4,34 @@ import * as THREE from 'three'
 import { PROCESS, PRODUCTS, SERVICES, WORK, type StopId } from '../content'
 import { ITEMS, type Item } from '../items'
 
-export const ROOM = { halfW: 16, halfD: 10, height: 7 }
+// The front of the room (z > 8) is the reception and the founders' cabins, behind every display.
+export const ROOM = { halfW: 16, halfD: 13, height: 7 }
 const { halfW, halfD } = ROOM
 
 const UP = new THREE.Vector3(0, 1, 0)
 const BACK = new THREE.Vector3(0, 0, 1)
 const LEFT = new THREE.Vector3(1, 0, 0)
 const RIGHT = new THREE.Vector3(-1, 0, 0)
+const FRONT = new THREE.Vector3(0, 0, -1)
 export const KIOSK_NORMAL = new THREE.Vector3(0.35, 0, 1).normalize()
 export const KIOSK_POS = new THREE.Vector3(-3.4, 0, 3)
 /** Tech-stack board on the left wall, near the entrance. */
 export const TECH_Z = 6.6
 export const TECH_BOARD = { w: 5, h: 2.64, y: 2.7 }
+
+/** The founders' glass cabins, side by side in the front-left corner, open to the room at z0 (the CEO's reads first from inside). */
+export const CABIN = { w: 4.1, z0: halfD - 3.2, h: 2.75 }
+export const CABINS = [
+  { who: 'cmo' as const, x: -halfW + CABIN.w / 2 + 0.05 },
+  { who: 'ceo' as const, x: -halfW + CABIN.w * 1.5 + 0.1 },
+]
+/** Front-zone furniture: the lounge in the front-right corner, the coffee corner right of the door. */
+export const LOUNGE_X = 12.4
+export const COFFEE_X = 5.6
+/** The reception counter a few steps inside the entrance, on the right, facing whoever walks in (seen through the door in the intro). */
+export const RECEPTION = { x: 2.6, z: halfD - 4.2, yaw: -0.46 }
+/** The night guard's chair, left of the door, looking into the room. */
+export const GUARD_SEAT = { x: -2.4, z: halfD - 1.3, yaw: 2.6 }
 
 export interface Frame {
   center: THREE.Vector3
@@ -37,6 +53,8 @@ export const STOP_FRAMES: Record<StopId, Frame> = {
   courier: { center: v(KIOSK_POS.x, 1.45, KIOSK_POS.z), normal: KIOSK_NORMAL, width: 2.4, height: 2.6 },
   process: { center: v(halfW, 2.6, -4), normal: RIGHT, width: 9.8, height: 3.4 },
   contact: { center: v(halfW, 2.3, 5.5), normal: RIGHT, width: 4.6, height: 4.4 },
+  // framed on the front wall behind the cabins, so the cabins in front still catch clicks
+  leadership: { center: v((CABINS[0].x + CABINS[1].x) / 2, 1.9, halfD - 0.05), normal: FRONT, width: 13, height: 4.6 },
 }
 
 export const rightOf = (normal: THREE.Vector3) => new THREE.Vector3().crossVectors(UP, normal).normalize()
@@ -106,6 +124,8 @@ function placeItem(item: Item): Placement {
     }
     case 'contact':
       return { item, position: v(halfW - 0.06, 3.45, 5.5), normal: RIGHT, width: 3.6, height: 2.2 }
+    case 'leadership':
+      return { item, position: v(STOP_FRAMES.leadership.center.x, CABIN.h + 0.42, CABIN.z0 - 0.06), normal: FRONT, width: 2.4, height: 0.6 }
   }
 }
 
@@ -146,5 +166,8 @@ export function frameForItem(id: string): Frame | null {
   if (pl.depth) center.addScaledVector(pl.normal, pl.depth / 2)
   // The contact sign is framed together with the desk below it.
   if (pl.item.kind === 'contact') return { center: center.setY(2.5), normal: pl.normal, width: 4, height: 3.8 }
+  // The leadership sign is framed with both cabins below it, nudged into the room so the side
+  // panel never pushes the view past the left wall.
+  if (pl.item.kind === 'leadership') return { center: v(center.x + 1.5, 1.75, CABIN.z0), normal: pl.normal, width: CABIN.w * 2 + 0.6, height: 3.3 }
   return { center, normal: pl.normal, width: pl.width * 1.05, height: pl.height * 1.05 }
 }

@@ -7,7 +7,7 @@ import { useStore } from '../store'
 import { PLACEMENTS, STOP_FRAMES, yawOf, type Placement } from './layout'
 import { useHomeVideo } from './homeVideo'
 import {
-  contactTexture, homeWallTexture, kioskTexture, processTexture, productFrontTexture, serviceCardTexture, techBoardTexture, workPosterTexture,
+  contactTexture, homeWallTexture, kioskTexture, processTexture, productFrontTexture, serviceCardTexture, signTexture, techBoardTexture, workPosterTexture,
 } from './textures'
 
 /** Pointer movement (px) above which a press counts as a drag, not a click. */
@@ -25,6 +25,7 @@ function textureFor(pl: Placement, lang: Lang) {
     case 'courier': return kioskTexture(lang)
     case 'process': return processTexture(PROCESS.findIndex((p) => p.id === ref), lang)
     case 'contact': return contactTexture(lang)
+    case 'leadership': return signTexture('leadership', lang)
   }
 }
 
