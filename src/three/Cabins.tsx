@@ -3,7 +3,7 @@
 // and their AI assistant on a desk screen (always on: clicking it opens that founder's chat).
 import { useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
-import { LEADERSHIP, type L } from '../content'
+import { LEADERSHIP, type L, type Lang } from '../content'
 import { useSchedule } from '../schedule'
 import { useStore } from '../store'
 import { Hot } from './Hot'
@@ -12,7 +12,7 @@ import { noHit } from './Life'
 import { Model } from './Models'
 import { Avatar, type Actor } from './People'
 import { assistantTexture, nameplateTexture } from './PeopleScreens'
-import { BRAND } from './textures'
+import { BRAND, INK } from './textures'
 
 const { halfD } = ROOM
 const D = halfD - CABIN.z0
@@ -51,6 +51,7 @@ export function Cabins() {
             <Shell m={m} />
             <Nameplate name={f.name} role={f.role} />
             <Desk m={m} who={c.who} name={f.name} role={f.role} />
+            <BookScreen m={m} who={c.who} name={f.name} />
             {i === 0 ? <TallShelf m={m} /> : <Credenza m={m} />}
             <Model name="potted_plant_02" position={[(i === 0 ? -1 : 1) * (CABIN.w / 2 - 0.45), 0, D - 0.45]} scale={1.45} rotation-y={i * 2} />
             {open && <Founder who={c.who} seed={i * 3} />}
@@ -122,6 +123,60 @@ function Desk({ m, who, name, role }: { m: Mats; who: 'ceo' | 'cmo'; name: strin
         <ExecChair m={m} />
         {/* the founder catches clicks through an invisible box, not the skinned mesh */}
         <mesh position={[0, 0.95, 0.68]} material={m.hit}><boxGeometry args={[0.7, 1.0, 0.5]} /></mesh>
+      </group>
+    </Hot>
+  )
+}
+
+/** "Book a 15-min call": a small tablet on the desk's other front corner, next to the AI screen. */
+function bookTexture(name: string, lang: Lang) {
+  const c = document.createElement('canvas')
+  c.width = 512
+  c.height = 320
+  const ctx = c.getContext('2d')!
+  const g = ctx.createLinearGradient(0, 0, 0, c.height)
+  g.addColorStop(0, '#1B1F2B')
+  g.addColorStop(1, '#0E1016')
+  ctx.fillStyle = g
+  ctx.fillRect(0, 0, c.width, c.height)
+  const font = (w: number, s: number) => `${w} ${s}px "Anek Bangla Variable", system-ui, sans-serif`
+  // a little calendar
+  ctx.strokeStyle = BRAND
+  ctx.lineWidth = 7
+  ctx.beginPath(); ctx.roundRect(36, 44, 92, 84, 12); ctx.stroke()
+  ctx.beginPath(); ctx.moveTo(36, 72); ctx.lineTo(128, 72); ctx.stroke()
+  ctx.fillStyle = BRAND
+  for (let i = 0; i < 6; i++) ctx.fillRect(50 + (i % 3) * 24, 84 + Math.floor(i / 3) * 20, 14, 12)
+  ctx.textBaseline = 'middle'
+  ctx.fillStyle = '#ffffff'
+  ctx.font = font(700, lang === 'bn' ? 38 : 40)
+  ctx.fillText(lang === 'bn' ? '১৫ মিনিটের কল' : '15-min call', 152, 70)
+  ctx.fillStyle = '#9AA0AE'
+  ctx.font = font(500, 28)
+  ctx.fillText(lang === 'bn' ? `${name}-এর সাথে` : `with ${name.split(' ')[0]}`, 152, 114)
+  ctx.fillStyle = BRAND
+  ctx.beginPath(); ctx.roundRect(36, 190, c.width - 72, 84, 42); ctx.fill()
+  ctx.fillStyle = INK
+  ctx.font = font(700, 36)
+  ctx.textAlign = 'center'
+  ctx.fillText(lang === 'bn' ? 'কল বুক করুন →' : 'Book a call →', c.width / 2, 234)
+  const t = new THREE.CanvasTexture(c)
+  t.colorSpace = THREE.SRGBColorSpace
+  t.anisotropy = 4
+  return t
+}
+
+function BookScreen({ m, who, name }: { m: Mats; who: 'ceo' | 'cmo'; name: string }) {
+  const lang = useStore((s) => s.lang)
+  const mat = useMemo(() => new THREE.MeshBasicMaterial({ map: bookTexture(name, lang), toneMapped: false }), [name, lang])
+  useEffect(() => () => { mat.map?.dispose(); mat.dispose() }, [mat])
+  const tip: L = { en: `Book a 15-min call with ${name.split(' ')[0]}`, bn: `${name}-এর সাথে ১৫ মিনিটের কল বুক করুন` }
+  return (
+    <Hot tip={tip} onPick={() => useStore.getState().openBooking(who)}>
+      <group position={[0.4, 0.77, DESK_Z - 0.3]} rotation-y={Math.PI - 0.25}>
+        <mesh position={[0, 0.08, 0.03]} rotation-x={-0.35} material={m.metal}><boxGeometry args={[0.03, 0.18, 0.03]} /></mesh>
+        <mesh position={[0, 0.17, -0.006]} rotation-x={-0.18} material={m.bezel}><boxGeometry args={[0.46, 0.3, 0.015]} /></mesh>
+        <mesh position={[0, 0.17, 0.003]} rotation-x={-0.18} material={mat}><planeGeometry args={[0.43, 0.27]} /></mesh>
       </group>
     </Hot>
   )

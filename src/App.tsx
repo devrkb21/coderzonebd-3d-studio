@@ -8,6 +8,8 @@ import { AiLayer } from './ai/AiLayer'
 import { CoinHud, CoinReward } from './components/Coins'
 import { PostcardDialog } from './components/Postcard'
 import { WelcomeCard } from './components/WelcomeCard'
+import { BookCall } from './components/BookCall'
+import { ClientRoom } from './components/ProjectPanel'
 import { HelpOverlay, IntroOverlay, Shortcuts, SoundSwitch, Tooltip, TourRunner } from './components/Interact'
 
 const Scene = lazy(() => import('./three/Scene'))
@@ -16,7 +18,7 @@ export default function App() {
   const lang = useStore((s) => s.lang)
   const mode = useStore((s) => s.mode)
   const ready = useStore((s) => s.ready)
-  const focused = useStore((s) => !!s.focusId)
+  const focused = useStore((s) => !!s.focusId || s.projectOpen)
   const intro = useStore((s) => s.intro)
   const setQuoteOpen = useStore((s) => s.setQuoteOpen)
   const [progress, setProgress] = useState(0.05)
@@ -57,6 +59,8 @@ export default function App() {
       {is3d && <SoundSwitch />}
       <QuoteDrawer />
       <AiLayer room={is3d && ready && !intro} />
+      <ClientRoom room={is3d && ready && !intro} flat={!is3d} />
+      <BookCall />
       <Toast />
       {is3d && <Loader progress={ready ? 1 : progress} done={ready} />}
     </>

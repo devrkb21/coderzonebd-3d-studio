@@ -3,12 +3,16 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { chatSystem, DEMO_SYSTEM, TOOLS, type Persona } from './prompts'
 import { SERVICE_IDS, STOP_IDS } from './knowledge'
+import { expired, latestCommits, publicRecord, repoOf, TOKEN, tokenKey } from './project'
 
 export { Limiter } from './limiter'
 export { Presence } from './presence'
 
 export interface Env {
   ANTHROPIC_API_KEY?: string
+  /** Optional, read-only: lets client rooms show their repo's latest commits. */
+  GITHUB_TOKEN?: string
+  CLIENTS: KVNamespace
   LIMITER: DurableObjectNamespace<import('./limiter').Limiter>
   PRESENCE: DurableObjectNamespace<import('./presence').Presence>
   ALLOWED_ORIGINS: string
@@ -18,6 +22,7 @@ export interface Env {
   DEMO_PER_HOUR: string
   CHAT_PER_DAY: string
   DEMO_PER_DAY: string
+  PROJECT_PER_HOUR: string
 }
 
 const PERSONAS: Persona[] = ['receptionist', 'ceo', 'cmo']
@@ -60,9 +65,9 @@ async function visitorKey(req: Request) {
 }
 
 /** Per-visitor hourly limit first, then the global daily cap. Returns a 429 response or null. */
-async function limit(req: Request, env: Env, kind: 'chat' | 'demo', origin: string) {
-  const perHour = Number(kind === 'chat' ? env.CHAT_PER_HOUR : env.DEMO_PER_HOUR)
-  const perDay = Number(kind === 'chat' ? env.CHAT_PER_DAY : env.DEMO_PER_DAY)
+async function limit(req: Request, env: Env, kind: 'chat' | 'demo' | 'project', origin: string) {
+  const perHour = Number(kind === 'chat' ? env.CHAT_PER_HOUR : kind === 'demo' ? env.DEMO_PER_HOUR : env.PROJECT_PER_HOUR)
+  const perDay = Number(kind === 'chat' ? env.CHAT_PER_DAY : kind === 'demo' ? env.DEMO_PER_DAY : Infinity)
   const mine = await env.LIMITER.get(env.LIMITER.idFromName(await visitorKey(req))).hit(kind, perHour, HOUR)
   if (!mine.ok) {
     return json({
@@ -70,9 +75,12 @@ async function limit(req: Request, env: Env, kind: 'chat' | 'demo', origin: stri
       retryAfter: mine.retryAfter,
       message: kind === 'chat'
         ? { en: "You've sent a lot of messages this hour. Please try again a little later, or message us on WhatsApp.", bn: 'এই ঘণ্টায় অনেক মেসেজ পাঠিয়েছেন। একটু পরে আবার চেষ্টা করুন, অথবা WhatsApp-এ মেসেজ দিন।' }
+        : kind === 'project'
+        ? { en: 'Too many requests this hour. Please try again a little later.', bn: 'এই ঘণ্টায় অনেকবার চেষ্টা হয়েছে। একটু পরে আবার চেষ্টা করুন।' }
         : { en: "You've built a few demos this hour. Please try again later, or message us on WhatsApp.", bn: 'এই ঘণ্টায় কয়েকটা ডেমো বানিয়েছেন। পরে আবার চেষ্টা করুন, অথবা WhatsApp-এ মেসেজ দিন।' },
     }, 429, origin)
   }
+  if (!Number.isFinite(perDay)) return null
   const all = await env.LIMITER.get(env.LIMITER.idFromName('global')).hit(kind, perDay, DAY)
   if (!all.ok) {
     return json({
@@ -134,6 +142,7 @@ function validTool(name: string, input: unknown): Record<string, unknown> | null
     return ids.length ? { serviceIds: [...new Set(ids)] } : null
   }
   if (name === 'go_to_section') return typeof i.stop === 'string' && STOP_IDS.includes(i.stop as never) ? { stop: i.stop } : null
+  if (name === 'book_call') return i.founder === 'ceo' || i.founder === 'cmo' ? { founder: i.founder } : null
   if (name === 'open_whatsapp') {
     const summary = clean(i.summary, 400)
     return summary ? { summary } : null
@@ -202,6 +211,24 @@ async function chat(req: Request, env: Env, ctx: ExecutionContext, origin: strin
   return out.response
 }
 
+/** One client's project record (`?client=<token>`); 404 for a malformed, unknown or expired token. */
+async function project(req: Request, env: Env, origin: string, token: string) {
+  const limited = await limit(req, env, 'project', origin)
+  if (limited) return limited
+  const headers = { 'Content-Type': 'application/json', 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex', ...cors(origin) }
+  const notFound = () => new Response(JSON.stringify({ error: 'not_found' }), { status: 404, headers })
+  // Malformed tokens are hashed and looked up like any other, so every miss costs the same.
+  const raw = await env.CLIENTS.get(await tokenKey(TOKEN.test(token) ? token : `x${token.slice(0, 64)}`), 'json').catch(() => null)
+  const record = TOKEN.test(token) && raw && !expired(raw) ? publicRecord(raw) : null
+  if (!record) return notFound()
+  const repo = repoOf(raw)
+  if (repo) {
+    const commits = await latestCommits(env.CLIENTS, repo, env.GITHUB_TOKEN).catch(() => null)
+    if (commits) record.commits = commits
+  }
+  return new Response(JSON.stringify(record), { status: 200, headers })
+}
+
 async function demo(req: Request, env: Env, ctx: ExecutionContext, origin: string) {
   const body = await readBody(req)
   const name = clean(body?.name, 60)
@@ -260,6 +287,8 @@ export default {
     if (url.pathname === '/health' && req.method === 'GET') return json({ ok: true, ai: !!env.ANTHROPIC_API_KEY }, 200, origin)
     if (url.pathname === '/chat' && req.method === 'POST') return chat(req, env, ctx, origin)
     if (url.pathname === '/demo' && req.method === 'POST') return demo(req, env, ctx, origin)
+    const p = url.pathname.match(/^\/project\/([^/]{1,100})$/)
+    if (p && req.method === 'GET') return project(req, env, origin, p[1])
     return json({ error: 'not_found' }, 404, origin)
   },
 } satisfies ExportedHandler<Env>

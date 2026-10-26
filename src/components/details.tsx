@@ -206,7 +206,7 @@ export function ContactDetails({ lang, onQuote }: { lang: Lang; onQuote?: () => 
 }
 
 /** The two founders; in the 3D room each has an AI assistant to chat with. */
-export function LeadershipDetails({ lang, onAsk }: { lang: Lang; onAsk?: (who: 'ceo' | 'cmo') => void }) {
+export function LeadershipDetails({ lang, onAsk, onBook }: { lang: Lang; onAsk?: (who: 'ceo' | 'cmo') => void; onBook?: (who: 'ceo' | 'cmo') => void }) {
   return (
     <>
       <p className="lead">{tr(LEADERSHIP.intro, lang)}</p>
@@ -216,6 +216,7 @@ export function LeadershipDetails({ lang, onAsk }: { lang: Lang; onAsk?: (who: '
             <strong>{f.name}</strong>
             <span>{f.role} · {tr(f.duty, lang)}</span>
             {onAsk && <button type="button" className="btn" onClick={() => onAsk(f.who)}>{tr(LEADERSHIP.ask, lang)}</button>}
+            {onBook && <button type="button" className="btn" onClick={() => onBook(f.who)}>{lang === 'bn' ? '১৫ মিনিটের কল বুক করুন' : 'Book a 15-min call'}</button>}
           </li>
         ))}
       </ul>

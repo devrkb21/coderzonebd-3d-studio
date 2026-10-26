@@ -5,7 +5,7 @@ import CameraControlsImpl from 'camera-controls'
 import * as THREE from 'three'
 import type { StopId } from '../content'
 import { useStore } from '../store'
-import { fitFrame, frameForItem, ROOM, STOP_FRAMES, type Insets } from './layout'
+import { fitFrame, frameForItem, PROJECT_FRAME, ROOM, STOP_FRAMES, type Insets } from './layout'
 
 const { ACTION } = CameraControlsImpl
 
@@ -37,6 +37,7 @@ export function CameraRig() {
   const focusId = useStore((s) => s.focusId)
   const overview = useStore((s) => s.overview)
   const intro = useStore((s) => s.intro)
+  const projectOpen = useStore((s) => s.projectOpen)
   const introPlayed = useRef(false)
   const moveId = useRef(0)
   const transit = useRef(false)
@@ -99,7 +100,8 @@ export function CameraRig() {
     const vw = size.width
     const vh = size.height
     const mobile = vw < MOBILE_BREAKPOINT
-    const itemFrame = focusId ? frameForItem(focusId) : null
+    // the client's project board is framed like an item, beside its panel
+    const itemFrame = focusId ? frameForItem(focusId) : projectOpen ? PROJECT_FRAME : null
 
     let insets: Insets
     let margin: number
@@ -166,7 +168,7 @@ export function CameraRig() {
       if (id !== moveId.current || !transit.current) return
       land(c, p, t)
     })
-  }, [ready, intro, stop, focusId, overview, size.width, size.height, camera])
+  }, [ready, intro, stop, focusId, overview, projectOpen, size.width, size.height, camera])
 
   return <CameraControls ref={ref} makeDefault />
 }

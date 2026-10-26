@@ -83,7 +83,7 @@ export function Panel() {
       break
     case 'leadership':
       title = tr(STOPS.find((s) => s.id === 'leadership')!.label, lang)
-      body = <LeadershipDetails lang={lang} onAsk={(who) => useStore.getState().openChat(who)} />
+      body = <LeadershipDetails lang={lang} onAsk={(who) => useStore.getState().openChat(who)} onBook={(who) => useStore.getState().openBooking(who)} />
       break
   }
 

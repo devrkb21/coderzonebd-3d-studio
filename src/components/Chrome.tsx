@@ -74,7 +74,7 @@ export function TopBar() {
 export function NavPills() {
   const lang = useStore((s) => s.lang)
   const stop = useStore((s) => s.stop)
-  const focused = useStore((s) => !!s.focusId)
+  const focused = useStore((s) => !!s.focusId || s.projectOpen)
   const overview = useStore((s) => s.overview)
   const touring = useStore((s) => s.touring)
   const goTo = useStore((s) => s.goTo)
@@ -124,7 +124,7 @@ export function Loader({ progress, done }: { progress: number; done: boolean }) 
 
 export function Hint() {
   const lang = useStore((s) => s.lang)
-  const focused = useStore((s) => !!s.focusId)
+  const focused = useStore((s) => !!s.focusId || s.projectOpen)
   const [show, setShow] = useState(true)
   useEffect(() => {
     const t = setTimeout(() => setShow(false), 7000)

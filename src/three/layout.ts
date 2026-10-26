@@ -57,6 +57,14 @@ export const STOP_FRAMES: Record<StopId, Frame> = {
   leadership: { center: v((CABINS[0].x + CABINS[1].x) / 2, 1.9, halfD - 0.05), normal: FRONT, width: 13, height: 4.6 },
 }
 
+/**
+ * Client rooms (`?client=`): the "Your project" board on the right wall's back corner, between
+ * the last Process board (ends at z ≈ -8.5) and the corner plant (z ≈ -12.2). Flush on the wall,
+ * so it never stands in front of another stop, and only shown on a client's visit.
+ */
+export const PROJECT_BOARD = { z: -10.05, y: 2.7, w: 2.6, h: 2.1 }
+export const PROJECT_FRAME: Frame = { center: v(halfW, PROJECT_BOARD.y, PROJECT_BOARD.z), normal: RIGHT, width: PROJECT_BOARD.w * 1.05, height: PROJECT_BOARD.h * 1.05 }
+
 export const rightOf = (normal: THREE.Vector3) => new THREE.Vector3().crossVectors(UP, normal).normalize()
 export const yawOf = (normal: THREE.Vector3) => Math.atan2(normal.x, normal.z)
 
