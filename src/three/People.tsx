@@ -7,6 +7,7 @@ import { useAnimations, useGLTF } from '@react-three/drei'
 import * as THREE from 'three'
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils.js'
 import { noHit } from './Life'
+import { isBiped, retargetFromBiped } from './retarget'
 
 export const AVATARS = {
   receptionist: 'f', dev1: 'm', dev2: 'm', walker: 'f', ceo: 'm', cmo: 'm', guard: 'm',
@@ -15,6 +16,8 @@ export type AvatarId = keyof typeof AVATARS
 export type Clip = 'type' | 'sit' | 'look' | 'idle' | 'talk' | 'wave' | 'walk' | 'drink'
 
 const url = (name: string) => `${import.meta.env.BASE_URL}models/people/${name}.glb`
+/** Clips re-baked for avatars on another skeleton, once per model. */
+const retargeted = new WeakMap<THREE.Object3D, THREE.AnimationClip[]>()
 const FADE = 0.45
 /** Long clips trimmed in the pack loop back and forth so the seam never shows. */
 const PINGPONG: Clip[] = ['type', 'talk', 'sit', 'drink']
@@ -41,9 +44,16 @@ export function Avatar(props: AvatarProps) {
 
 function AvatarModel({ who, clip, seed = 0, actor, ...props }: AvatarProps) {
   const { scene, animations: own } = useGLTF(url(who))
-  const { animations: shared } = useGLTF(url(`anims-${AVATARS[who]}`))
-  // A swapped-in avatar on another rig (e.g. a founder's photo avatar) brings its own clips.
-  const animations = own.length ? own : shared
+  const { scene: rig, animations: shared } = useGLTF(url(`anims-${AVATARS[who]}`))
+  // A swapped-in avatar on another rig (e.g. a founder's photo avatar) either brings its own
+  // clips or gets the Rocketbox clips re-baked for its skeleton.
+  const animations = useMemo(() => {
+    if (own.length) return own
+    if (isBiped(scene)) return shared
+    let baked = retargeted.get(scene)
+    if (!baked) retargeted.set(scene, baked = retargetFromBiped(scene, rig, shared))
+    return baked
+  }, [scene, rig, own, shared])
   const model = useMemo(() => {
     const c = clone(scene)
     c.traverse((o) => {
@@ -112,6 +122,8 @@ function AvatarModel({ who, clip, seed = 0, actor, ...props }: AvatarProps) {
   useEffect(() => () => { clearTimeout(timer.current); mixer.stopAllAction() }, [mixer])
   useEffect(() => { if (actor) actor.current = api }, [actor, api])
 
+  // never show a photo avatar frozen in its T-pose if its clips couldn't be built
+  if (!animations.length) return null
   return <group {...props}><primitive object={model} /></group>
 }
 
