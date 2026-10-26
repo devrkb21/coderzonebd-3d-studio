@@ -110,6 +110,10 @@ node render.mjs                  # renders en + bn, writes public/video/*
 
 `render.mjs` renders a master per language with `--variables '{"lang":"bn"}'`, then encodes the 1600×900 and 720p MP4s and the posters with FFmpeg. (A VP9 WebM came out larger than the H.264 at the same quality, so there isn't one.)
 
+### Promo trailer (not shipped)
+
+`marketing/trailer/` holds a 30-second silent promo of the studio for ads and reels, in 16:9 (`wide/`) and 9:16 (`tall/`, built from `wide/` by `scripts/make-tall.py`). The footage is the live site, recorded frame by frame under a virtual clock so it is a smooth 30 fps on any machine: `node scripts/record.cjs all` and `node scripts/record.cjs intro,tour,street,night,team,robot vertical` (set `PUPPETEER` to a `puppeteer-core` install). Link `wide/assets/footage` to `footage/` and `tall/assets/footage` to `footage-9x16/` (a symlink or junction), then run `npx hyperframes render --quality delivery` in `wide/` and `tall/`. Footage and renders are git-ignored.
+
 ## 3D models and credits
 
 All models are CC0 (public domain), in `public/models/`, meshopt-compressed with textures cut to 512 px (about 2.9 MB in total, loaded after the room appears):

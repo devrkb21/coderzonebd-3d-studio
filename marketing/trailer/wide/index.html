@@ -1,0 +1,231 @@
+<!doctype html>
+<!--
+  Coder Zone BD · 3D studio trailer, 16:9 (1920×1080, 30 fps, 30 s, silent).
+  All footage is the live site (3d.coderzonebd.com) recorded frame by frame: see ../scripts/record.cjs.
+
+   0.0–6.6   the intro: across the street, to the storefront, the doors open, walk in   "Walk into our studio"
+   6.6–16.6  the auto tour, cut on its camera moves: services, products, work, tech, courier (the team), process
+  16.6–19.4  through the front window: the street, cars, rickshaws and CNGs            "Street life outside"
+  19.4–21.8  the team at their desks (punch-in on the overview pan)                     "The team at work"
+  21.8–25.4  CZ Bot waves at the quote desk                                             "Say hi to CZ Bot"
+  25.2–30.0  end card: wordmark, "Explore the studio in 3D", 3d.coderzonebd.com
+-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      @font-face {
+        font-family: "Anek Bangla";
+        font-weight: 400 700;
+        font-stretch: 88% 115%;
+        src: url("assets/fonts/anek-bangla-latin.woff2") format("woff2-variations");
+      }
+      :root {
+        --brand: #ff931e;
+        --ink: #12141c;
+        --font: "Anek Bangla", sans-serif;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: #000;
+      }
+      #root {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        font-family: var(--font);
+        background: #000;
+      }
+      .shot {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 1920px;
+        height: 1080px;
+        object-fit: cover;
+      }
+      .layer {
+        position: absolute;
+        inset: 0;
+      }
+      .chip {
+        position: absolute;
+        left: 120px;
+        top: 150px;
+      }
+      #c-walk {
+        top: 560px;
+      }
+      .chip {
+        padding: 26px 40px 20px;
+        border-radius: 22px;
+        background: rgba(18, 20, 28, 0.9);
+        color: #fff;
+        white-space: nowrap;
+      }
+      .chip .kick {
+        font-size: 30px;
+        font-weight: 600;
+        color: var(--brand);
+        letter-spacing: 0.02em;
+      }
+      .chip .big {
+        font-size: 72px;
+        line-height: 1.08;
+        font-weight: 700;
+      }
+      .chip .o {
+        color: var(--brand);
+      }
+      .w {
+        display: inline-block;
+        white-space: pre;
+      }
+      #end-ground {
+        background: #fff;
+        clip-path: circle(0% at 50% 62%);
+      }
+      #end-logo {
+        position: absolute;
+        left: 520px;
+        top: 300px;
+        width: 880px;
+        height: 224px;
+      }
+      #end-line {
+        position: absolute;
+        left: 0;
+        width: 1920px;
+        top: 590px;
+        text-align: center;
+        font-size: 76px;
+        font-weight: 700;
+        color: var(--ink);
+      }
+      #end-url {
+        position: absolute;
+        left: 0;
+        width: 1920px;
+        top: 735px;
+        display: flex;
+        justify-content: center;
+      }
+      #end-url span {
+        background: var(--brand);
+        color: var(--ink);
+        font-size: 56px;
+        font-weight: 700;
+        padding: 18px 54px 12px;
+        border-radius: 999px;
+      }
+      #end-bar {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 18px;
+        background: var(--brand);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="30" data-width="1920" data-height="1080">
+      <!-- footage -->
+      <video id="v-intro" class="clip shot" src="assets/footage/intro.mp4" data-start="0" data-duration="6.6" data-media-start="0" data-track-index="0" muted playsinline style="z-index: 1"></video>
+      <video id="v-svc" class="clip shot" src="assets/footage/tour.mp4" data-start="6.6" data-duration="1.7" data-media-start="1.0" data-track-index="0" muted playsinline style="z-index: 1"></video>
+      <video id="v-prod" class="clip shot" src="assets/footage/tour.mp4" data-start="8.3" data-duration="1.8" data-media-start="5.4" data-track-index="0" muted playsinline style="z-index: 1"></video>
+      <video id="v-work" class="clip shot" src="assets/footage/tour.mp4" data-start="10.1" data-duration="1.6" data-media-start="11.6" data-track-index="0" muted playsinline style="z-index: 1"></video>
+      <video id="v-tech" class="clip shot" src="assets/footage/tour.mp4" data-start="11.7" data-duration="1.5" data-media-start="17.8" data-track-index="0" muted playsinline style="z-index: 1"></video>
+      <video id="v-courier" class="clip shot" src="assets/footage/tour.mp4" data-start="13.2" data-duration="1.8" data-media-start="23.0" data-track-index="0" muted playsinline style="z-index: 1"></video>
+      <video id="v-proc" class="clip shot" src="assets/footage/tour.mp4" data-start="15.0" data-duration="1.6" data-media-start="27.6" data-track-index="0" muted playsinline style="z-index: 1"></video>
+      <video id="v-street" class="clip shot" src="assets/footage/street.mp4" data-start="16.6" data-duration="2.8" data-media-start="7.9" data-track-index="0" muted playsinline style="z-index: 1"></video>
+      <!-- the team at their desks: a fixed punch-in on the overview pan -->
+      <div class="layer" style="z-index: 1; overflow: hidden" data-layout-allow-overflow>
+        <div class="layer" style="transform: scale(1.7); transform-origin: 76% 94%">
+          <video id="v-team" class="clip shot" src="assets/footage/night.mp4" data-start="19.4" data-duration="2.4" data-media-start="4.0" data-track-index="0" muted playsinline></video>
+        </div>
+      </div>
+      <video id="v-robot" class="clip shot" src="assets/footage/robot.mp4" data-start="21.8" data-duration="4.2" data-media-start="0.9" data-track-index="0" muted playsinline style="z-index: 1"></video>
+
+      <!-- titles -->
+      <div id="t-walk" class="clip layer" data-start="0.3" data-duration="2.9" data-track-index="1" data-track-kind="graphics" style="z-index: 5">
+        <div class="chip" id="c-walk"><div class="kick">Coder Zone BD · Khulna</div><div class="big"><span class="w">Walk</span> <span class="w">into</span> <span class="w">our</span> <span class="w o">studio</span></div></div>
+      </div>
+      <div id="t-all" class="clip layer" data-start="7.0" data-duration="5.4" data-track-index="1" data-track-kind="graphics" style="z-index: 5">
+        <div class="chip" id="c-all"><div class="big" id="c-all-1"><span class="w">Every</span> <span class="w">service,</span> <span class="w">product</span> <span class="w">and</span> <span class="w">project</span></div><div class="big" id="c-all-2"><span class="w">in</span> <span class="w">one</span> <span class="w o">3D</span> <span class="w o">room</span></div></div>
+      </div>
+      <div id="t-street" class="clip layer" data-start="16.8" data-duration="2.5" data-track-index="1" data-track-kind="graphics" style="z-index: 5">
+        <div class="chip" id="c-street"><div class="big"><span class="w">Street</span> <span class="w">life</span> <span class="w o">outside</span></div></div>
+      </div>
+      <div id="t-team" class="clip layer" data-start="19.5" data-duration="2.2" data-track-index="1" data-track-kind="graphics" style="z-index: 5">
+        <div class="chip" id="c-team"><div class="big"><span class="w">The</span> <span class="w">team</span> <span class="w o">at</span> <span class="w o">work</span></div></div>
+      </div>
+      <div id="t-bot" class="clip layer" data-start="22.2" data-duration="3.0" data-track-index="1" data-track-kind="graphics" style="z-index: 5">
+        <div class="chip" id="c-bot"><div class="big"><span class="w">Say</span> <span class="w">hi</span> <span class="w">to</span> <span class="w o">CZ</span> <span class="w o">Bot</span></div></div>
+      </div>
+
+      <!-- end card -->
+      <div id="end" class="clip layer" data-start="25.2" data-duration="4.8" data-track-index="2" data-track-kind="graphics" style="z-index: 8">
+        <div id="end-ground" class="layer" data-layout-ignore></div>
+        <img id="end-logo" src="assets/logos/coderzone-wordmark.png" alt="Coder Zone BD" />
+        <div id="end-line"><span class="w">Explore</span> <span class="w">the</span> <span class="w">studio</span> <span class="w">in</span> <span class="w">3D</span></div>
+        <div id="end-url"><span>3d.coderzonebd.com</span></div>
+        <div id="end-bar" data-layout-ignore></div>
+      </div>
+    </div>
+
+    <script>
+      const tl = gsap.timeline({ paused: true });
+      const wordsIn = (sel, at, gap = 0.08) =>
+        tl.fromTo(sel, { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.16, ease: "power4.out", stagger: gap }, at);
+      const chipIn = (sel, at) =>
+        tl.fromTo(sel, { opacity: 0, x: -40, filter: "blur(10px)" }, { opacity: 1, x: 0, filter: "blur(0px)", duration: 0.45, ease: "expo.out" }, at);
+      const chipOut = (sel, at) =>
+        tl.fromTo(sel, { opacity: 1, filter: "blur(0px)" }, { opacity: 0, filter: "blur(8px)", duration: 0.22, ease: "power2.in", immediateRender: false }, at);
+
+      // A · the hook over the street
+      chipIn("#c-walk", 0.3);
+      wordsIn("#c-walk .big .w", 0.45);
+      chipOut("#c-walk", 2.95);
+
+      // B · the tour
+      chipIn("#c-all", 7.0);
+      wordsIn("#c-all-1 .w", 7.12);
+      wordsIn("#c-all-2 .w", 8.4);
+      chipOut("#c-all", 12.15);
+
+      // C · the street through the window, then the team
+      chipIn("#c-street", 16.8);
+      wordsIn("#c-street .w", 16.92);
+      chipOut("#c-street", 19.05);
+      chipIn("#c-team", 19.5);
+      wordsIn("#c-team .w", 19.62);
+      chipOut("#c-team", 21.45);
+
+      // D · CZ Bot
+      chipIn("#c-bot", 22.2);
+      wordsIn("#c-bot .w", 22.32);
+      chipOut("#c-bot", 24.95);
+
+      // E · end card: a white iris opens from the robot, the wordmark wipes in, then the line and the URL
+      tl.fromTo("#end-ground", { clipPath: "circle(0% at 50% 62%)" }, { clipPath: "circle(120% at 50% 62%)", duration: 0.6, ease: "power3.in" }, 25.2);
+      tl.fromTo("#end-logo", { opacity: 0, scale: 1.12 }, { opacity: 1, scale: 1, duration: 0.5, ease: "expo.out" }, 25.75);
+      tl.fromTo("#end-logo", { clipPath: "inset(0% 78% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.7, ease: "power3.inOut" }, 26.1);
+      wordsIn("#end-line .w", 26.7, 0.07);
+      tl.fromTo("#end-url span", { opacity: 0, y: 30, scale: 0.92 }, { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: "expo.out" }, 27.15);
+      tl.fromTo("#end-bar", { scaleX: 0, transformOrigin: "left center" }, { scaleX: 1, duration: 0.8, ease: "expo.out" }, 25.8);
+
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>

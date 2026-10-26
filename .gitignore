@@ -5,5 +5,9 @@ dist-ssr
 .DS_Store
 *.tsbuildinfo
 
-# HyperFrames trailer renders (large, not shipped)
-marketing/
+# Trailer: sources are kept, footage and renders are large and not shipped
+marketing/*.mp4
+marketing/trailer/footage*/
+marketing/trailer/*/assets/footage
+marketing/trailer/*/.hyperframes/
+marketing/trailer/.frames/
