@@ -5,6 +5,9 @@ import { Hint, Loader, NavPills, Toast, TopBar } from './components/Chrome'
 import { Panel } from './components/Panel'
 import { QuoteDrawer } from './components/QuoteDrawer'
 import { AiLayer } from './ai/AiLayer'
+import { CoinHud, CoinReward } from './components/Coins'
+import { PostcardDialog } from './components/Postcard'
+import { WelcomeCard } from './components/WelcomeCard'
 import { HelpOverlay, IntroOverlay, Shortcuts, SoundSwitch, Tooltip, TourRunner } from './components/Interact'
 
 const Scene = lazy(() => import('./three/Scene'))
@@ -45,6 +48,10 @@ export default function App() {
           <TourRunner />
           <Tooltip />
           <HelpOverlay />
+          <CoinHud />
+          <CoinReward />
+          <PostcardDialog />
+          <WelcomeCard />
         </>
       )}
       {is3d && <SoundSwitch />}

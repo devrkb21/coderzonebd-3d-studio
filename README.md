@@ -43,6 +43,15 @@ Brand: the real Coder Zone BD logo and wordmark, orange `#FF931E` on ink `#12141
 - **Baked-looking light.** Soft contact shadows under everything on the floor (live on desktop, rendered once on phones), shading where walls meet the ceiling and each other, and sunlight patches through the windows that follow the time of day.
 - **Sound** (off until you turn it on, top bar). Synthesised live with Web Audio, so there are no sound files: fan and AC hum, distant traffic, keyboard typing, rickshaw bells, the odd horn, birds by day, a door chime, and soft ticks when you move around.
 
+### Personal links, coin hunt and selfie postcard
+
+- **Personalised visit** (for outreach): `?for=<business name>` greets a prospect by name. The storefront gets a second banner under the sign ("Welcome, Rahim Fashion House" / "স্বাগতম, …"), the intro caption is personal, and inside, opposite the courier kiosk, a freestanding screen shows a mock-up of *their* online store home page: their name as the logo, and a palette and illustrated product tiles for their trade. Clicking it opens the preview large with **Get this store** (adds E-commerce Store to the quote list and opens it) and a prefilled WhatsApp button. Without `?for` none of this appears.
+  - `&type=fashion|food|electronics|cosmetics|grocery|other` picks the mock-up (without it, the name is used to guess, e.g. "… Fashion House" → fashion). `&lang=bn` opens it in Bangla.
+  - The name is trimmed, cut to 32 characters and stripped of control and bidi-override characters; it is only drawn on canvas or set as text, never injected as HTML.
+  - **Link maker** for the team: open `/?make-link` (not linked anywhere, `noindex`). Type the business name, pick the type and language, then copy the link or a ready-to-send message.
+- **Coin hunt.** Five spinning gold CZ coins are hidden in the office: on the bookshelf, under the lounge table, on the coffee counter, behind the courier kiosk and by the plant near the tech stack. Click one to collect it (a pop, and a chime with sound on). The counter under the logo shows "Coins 2/5"; found coins are remembered in the browser. All five open a reward card with a WhatsApp button to claim it. The reward text lives in `COIN_REWARD` (and the WhatsApp message in `COIN_CLAIM`) in `src/content.ts`.
+- **Selfie postcard.** The camera button in the top bar (3D only) captures the current view and frames it in a branded 1080×1350 postcard with the visitor's name and the site address: **Download**, and **Share** where the browser can share files (most phones). The frame is rendered and copied in one go, so the canvas never needs `preserveDrawingBuffer`.
+
 ## How to explore
 
 | Desktop | Phone | What it does |
@@ -118,7 +127,7 @@ npx wrangler tail                           # live logs
 - In 3D, the render resolution adapts to the frame rate instead of dropping to 2D. If the GPU loses the WebGL context, the canvas rebuilds itself.
 - In 3D mode the 2D page stays in the DOM (visually hidden) for screen readers. Keyboard users who tab into it get it as a full overlay.
 - With reduced motion turned on, the camera jumps between sections instead of flying.
-- `?2d` / `?3d` / `?lang=bn` / `?time=night` / `?weather=rain` / `?fest=eid` in the URL force a mode, language, time of day, weather or festival.
+- `?2d` / `?3d` / `?lang=bn` / `?time=night` / `?weather=rain` / `?fest=eid` in the URL force a mode, language, time of day, weather or festival. `?for=<name>&type=<kind>` makes a personalised visit, `?nointro` skips the intro, and `?make-link` opens the team's link maker.
 
 **Weight:** in 2D mode, three.js is never downloaded. 3D adds about 300 KB gzipped of JS plus the screenshots and logos. Everything else in the room is drawn on `<canvas>` at runtime.
 
@@ -145,6 +154,14 @@ Vite, React 18, TypeScript, React Three Fiber + drei (`CameraControls` for the c
 | `src/ai/` | Worker client and tool calls, the site builder's state and panel, live presence |
 | `src/three/DemoScreen.tsx`, `src/three/Ghosts.tsx` | The "Build my site live" screen, other live visitors |
 | `worker/` | The Cloudflare Worker: chat, site builder, presence, rate limits |
+| `src/personal.ts` | Personalised visits: reads and cleans `?for` / `?type`, builds share links |
+| `src/mockup.ts` | The prospect's store mock-up, drawn on canvas |
+| `src/three/Welcome.tsx` | The storefront welcome banner and the store-preview stand |
+| `src/three/Coins.tsx` | The five hidden coins |
+| `src/components/Coins.tsx` | Coin counter and reward card |
+| `src/components/Postcard.tsx` | Selfie postcard button and dialog (capture via `src/three/Snapshot.tsx`) |
+| `src/components/WelcomeCard.tsx` | The large store preview with Get this store / WhatsApp |
+| `src/components/LinkMaker.tsx` | Internal link maker at `?make-link` |
 
 ## 3D models and credits
 

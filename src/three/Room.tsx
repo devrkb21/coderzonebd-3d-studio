@@ -10,6 +10,8 @@ import {
 import { Hot } from './Hot'
 import { BRAND, deskTexture, floorTexture, frontWallTexture, signboardTexture, signTexture } from './textures'
 import { usePhase } from './time'
+import { useWeather } from '../weather'
+import { WelcomeBanner } from './Welcome'
 
 const { halfW, halfD, height } = ROOM
 
@@ -358,6 +360,7 @@ function Exterior({ hw }: { hw: number }) {
       <mesh position={[0, 5.45, -0.2]} rotation-y={Math.PI} material={m.sign}><planeGeometry args={[8, 1.6]} /></mesh>
       <mesh position={[0, 5.45, -0.17]} material={m.ink}><boxGeometry args={[8.2, 1.8, 0.04]} /></mesh>
       <mesh position={[0, DOOR.h + 0.32, -0.62]} rotation-x={-0.18} material={m.canopy}><boxGeometry args={[DOOR.w + 1.4, 0.06, 1.0]} /></mesh>
+      <WelcomeBanner position={[0, 4.0, -0.2]} />
     </group>
   )
 }
@@ -389,6 +392,8 @@ function CornerShade({ m }: { m: Mats }) {
 /** Sunlight through the front windows, falling on the floor; follows the sun in Dhaka. */
 function SunPatches() {
   const phase = usePhase()
+  // no sun on the floor when it's overcast, raining or foggy outside
+  const sunny = useWeather((w) => w.kind === 'clear')
   const mat = useMemo(() => {
     const c = document.createElement('canvas')
     c.width = 512
@@ -402,7 +407,7 @@ function SunPatches() {
     return new THREE.MeshBasicMaterial({ map: t, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending })
   }, [])
   const light = phase === 'day' ? { c: '#FFF1D2', o: 0.16, skew: -1.2 } : phase === 'dawn' ? { c: '#FFC48A', o: 0.12, skew: 2.2 } : phase === 'dusk' ? { c: '#FFA65C', o: 0.12, skew: -2.6 } : null
-  if (!light) return null
+  if (!light || !sunny) return null
   mat.color.set(light.c)
   mat.opacity = light.o
   return (
