@@ -57,6 +57,23 @@ Brand: the real Coder Zone BD logo and wordmark, orange `#FF931E` on ink `#12141
 - **Coin hunt.** Five spinning gold CZ coins are hidden in the office: on the bookshelf, under the lounge table, on the coffee counter, behind the courier kiosk and by the plant near the tech stack. Click one to collect it (a pop, and a chime with sound on). The counter under the logo shows "Coins 2/5"; found coins are remembered in the browser. All five open a reward card with a WhatsApp button to claim it. The reward text lives in `COIN_REWARD` (and the WhatsApp message in `COIN_CLAIM`) in `src/content.ts`.
 - **Selfie postcard.** The camera button in the top bar (3D only) captures the current view and frames it in a branded 1080×1350 postcard with the visitor's name and the site address: **Download**, and **Share** where the browser can share files (most phones). The frame is rendered and copied in one go, so the canvas never needs `preserveDrawingBuffer`.
 
+## See the studio in AR
+
+**View in AR / AR-এ দেখুন** (the cube button in the top bar, 2D and 3D) puts a miniature of the studio on a table through the phone camera. It's a 1:64 model, so the 32 m room is about 50 cm wide: the room shell with the front glass, door and storefront sign, the brand-coloured walls, every display with its real texture (Home wall, product boxes, work wall, service cards, tech board, courier kiosk, process boards, contact desk), the furniture, the reception counter and the founders' cabins. No people, traffic, ceiling or anything animated, so it reads as a dollhouse from above.
+
+- **Where the button shows.** Android Chrome (WebXR, or Google's Scene Viewer as the fallback) and iPhone / iPad Safari (AR Quick Look) get a dialog with a 3D preview and **Place it on your table**. Desktops (mouse or trackpad) get the same preview with a QR code for `https://3d.coderzonebd.com/?ar` (plus `&lang=bn` in Bangla), drawn locally by `qrcode-generator`. Other phones and tablets (Firefox on Android, in-app browsers on iOS, touch-only devices) get no button. `?ar` opens the dialog straight away (and skips the intro), so the QR lands right on it; a phone without AR still gets the preview with a note.
+- **How.** Google's `<model-viewer>` 4.0.0 (`ar ar-modes="webxr scene-viewer quick-look"`, `ar-scale="auto"`, camera controls, auto-rotate), installed from npm and bundled by Vite into its own lazy chunk that shares the site's three.js. Nothing loads until the dialog opens: then the model-viewer chunk (about 130 KB gzipped, plus three.js in 2D mode), the QR code (8 KB) and `public/models/studio-mini.glb` (2.4 MB). iOS fetches `studio-mini.usdz` (4.1 MB) only when Quick Look starts.
+- **Why a ready-made USDZ.** model-viewer can convert the GLB to USDZ on the phone when AR starts, but that runs three's exporter on the device at tap time (slow on older iPhones, and a long pause before Quick Look opens). The build script makes the USDZ once, with JPEG textures and rounded numbers, and it's committed next to the GLB.
+- **Bangla.** The model's displays are the English versions.
+
+**Rebuilding the model** after the room or the content changes (Chrome or Edge installed; set `CHROME=/path/to/chrome` if it isn't found):
+
+```bash
+node scripts/ar/build-model.mjs
+```
+
+It serves `scripts/ar/export.html` with Vite and opens it in headless Chrome. The page renders the real room components (`Room`, `Office`, `Items`, the Poly Haven models, `Reception`, `Cabins`) with the office open and the lights on, then drops the people, the ceiling, the fans and the painted-on shading and glows, redraws every texture at 256–1024 px (JPEG, PNG only for real cut-outs), simplifies the heavy models with meshoptimizer, merges everything by material, scales it to the tabletop with the origin at floor centre, adds a plinth and a strip of pavement, and exports `public/models/studio-mini.glb` (three's GLTFExporter, no extensions, so Scene Viewer reads it) and `studio-mini.usdz` (USDZExporter). It takes about a minute. Keep the GLB under ~2.5 MB: `MAX_TRIS`, `JPEG_QUALITY` and the texture sizes in `convert()` are the knobs.
+
 ## How to explore
 
 | Desktop | Phone | What it does |
@@ -132,7 +149,7 @@ npx wrangler tail                           # live logs
 - In 3D, the render resolution adapts to the frame rate instead of dropping to 2D. If the GPU loses the WebGL context, the canvas rebuilds itself.
 - In 3D mode the 2D page stays in the DOM (visually hidden) for screen readers. Keyboard users who tab into it get it as a full overlay.
 - With reduced motion turned on, the camera jumps between sections instead of flying.
-- `?2d` / `?3d` / `?lang=bn` / `?time=night` / `?weather=rain` / `?fest=eid` in the URL force a mode, language, time of day, weather or festival. `?for=<name>&type=<kind>` makes a personalised visit, `?nointro` skips the intro, and `?make-link` opens the team's link maker. `?hour=0-23` (and `?day=fri`) preview the office at any hour; see [The office's day](#the-offices-day).
+- `?2d` / `?3d` / `?lang=bn` / `?time=night` / `?weather=rain` / `?fest=eid` in the URL force a mode, language, time of day, weather or festival. `?for=<name>&type=<kind>` makes a personalised visit, `?nointro` skips the intro, `?ar` opens the AR dialog, and `?make-link` opens the team's link maker. `?hour=0-23` (and `?day=fri`) preview the office at any hour; see [The office's day](#the-offices-day).
 
 **Weight:** in 2D mode, three.js is never downloaded. 3D adds about 300 KB gzipped of JS plus the screenshots and logos, and the Home film for the current language (about 0.8 MB on desktop, 0.7 MB on phones, streamed after the room appears). Everything else in the room is drawn on `<canvas>` at runtime.
 
@@ -172,6 +189,8 @@ Vite, React 18, TypeScript, React Three Fiber + drei (`CameraControls` for the c
 | `src/components/Postcard.tsx` | Selfie postcard button and dialog (capture via `src/three/Snapshot.tsx`) |
 | `src/components/WelcomeCard.tsx` | The large store preview with Get this store / WhatsApp |
 | `src/components/LinkMaker.tsx` | Internal link maker at `?make-link` |
+| `src/components/ArView.tsx` | The View in AR button and dialog (model-viewer, QR code) |
+| `scripts/ar/` | Builds the AR miniature `public/models/studio-mini.glb` / `.usdz` |
 | `src/three/homeVideo.ts` | The Home wall film as a video texture, with the static fallback |
 | `video/home/` | The Home film's source (HyperFrames) and its render script |
 

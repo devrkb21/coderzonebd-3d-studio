@@ -420,6 +420,19 @@ export const UI = {
   ],
 } satisfies Record<string, L | L[]>
 
+/** "See the studio in AR" (src/components/ArView.tsx). */
+export const AR_TEXT = {
+  button: { bn: 'AR-এ দেখুন', en: 'View in AR' },
+  title: { bn: 'টেবিলের ওপর আমাদের স্টুডিও', en: 'Our studio on your table' },
+  alt: { bn: 'Coder Zone BD স্টুডিওর ছোট একটি 3D মডেল', en: 'A miniature 3D model of the Coder Zone BD studio' },
+  place: { bn: 'টেবিলে বসিয়ে দেখুন', en: 'Place it on your table' },
+  howTo: { bn: 'ক্যামেরা একটা টেবিল বা মেঝের দিকে ধরুন, তারপর বসান। দুই আঙুলে ছোট-বড় করুন, ঘোরান।', en: 'Point your camera at a table or the floor, then place it. Pinch to resize, twist to turn.' },
+  scan: { bn: 'ফোনের ক্যামেরা দিয়ে স্ক্যান করুন, স্টুডিওটা আপনার টেবিলে বসিয়ে দেখুন।', en: 'Scan with your phone camera to put the studio on your table.' },
+  works: { bn: 'Android (Chrome) আর iPhone / iPad (Safari)-তে চলে।', en: 'Works on Android (Chrome) and iPhone / iPad (Safari).' },
+  noAr: { bn: 'এই ডিভাইসে AR চলছে না, তবে মডেলটা ঘুরিয়ে দেখতে পারেন।', en: "AR isn't available on this device, but you can turn the model around." },
+  loading: { bn: 'মডেল লোড হচ্ছে…', en: 'Loading the model…' },
+} satisfies Record<string, L>
+
 /** Festival greetings shown in the room on the day (src/three/Festivals.tsx). */
 export const FESTIVAL_TEXT = {
   boishakh: { bn: 'শুভ নববর্ষ', en: 'Shubho Noboborsho' },

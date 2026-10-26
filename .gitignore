@@ -12,3 +12,6 @@ marketing/trailer/footage*/
 marketing/trailer/*/assets/footage
 marketing/trailer/*/.hyperframes/
 marketing/trailer/.frames/
+
+# AR model build scratch
+.tmp/
