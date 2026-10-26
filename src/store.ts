@@ -26,6 +26,8 @@ interface State {
   intro: boolean
   doorOpen: boolean
   soundOn: boolean
+  /** Who the visitor is chatting with: the AI receptionist or a founder's AI assistant. */
+  chat: Persona | null
   setLang: (lang: Lang) => void
   setMode: (mode: Mode) => void
   /** A visitor's explicit choice; remembered, and it disables the automatic 2D switch. */
@@ -48,7 +50,11 @@ interface State {
   endIntro: () => void
   setDoorOpen: (open: boolean) => void
   setSoundOn: (on: boolean) => void
+  openChat: (who: Persona) => void
+  closeChat: () => void
 }
+
+export type Persona = 'receptionist' | 'ceo' | 'cmo'
 
 const read = (k: string) => { try { return localStorage.getItem(k) } catch { return null } }
 const write = (k: string, v: string) => { try { localStorage.setItem(k, v) } catch { /* storage unavailable */ } }
@@ -114,6 +120,7 @@ export const useStore = create<State>((set, get) => ({
   intro: typeof window === 'undefined' ? false : initialIntro(),
   doorOpen: false,
   soundOn: false,
+  chat: null,
 
   setLang: (lang) => {
     write('cz3d-lang', lang)
@@ -169,6 +176,8 @@ export const useStore = create<State>((set, get) => ({
     set({ intro: false, doorOpen: false })
   },
   setDoorOpen: (doorOpen) => set({ doorOpen }),
+  openChat: (chat) => set({ chat, touring: false }),
+  closeChat: () => set({ chat: null }),
   setSoundOn: (soundOn) => {
     write('cz3d-sound', soundOn ? 'on' : 'off')
     set({ soundOn })
