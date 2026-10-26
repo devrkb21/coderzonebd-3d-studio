@@ -19,7 +19,7 @@ export function QuoteDrawer() {
 
   useEffect(() => {
     if (!open) return
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false) }
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape' && useStore.getState().quoteOpen) { e.preventDefault(); setOpen(false) } }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [open, setOpen])

@@ -1,50 +1,92 @@
 # Coder Zone BD · 3D Studio
 
-A walk-through 3D showroom for [Coder Zone BD](https://coderzonebd.com), a software studio in Khulna. Visitors move between seven stops, open any service, product or project, build a quote list, and send it on WhatsApp. The site is Bangla by default, with an English toggle.
+A walk-through 3D office and showroom for [Coder Zone BD](https://coderzonebd.com), a software studio in Khulna. Visitors look around the studio, fly between eight sections, open any service, product or project, build a quote list, and send it on WhatsApp. The site is in English by default, with a Bangla toggle.
 
 **Live:** https://3d.coderzonebd.com/
 
 ![Home wall](docs/home.jpg)
+![Glass entrance with the street outside](docs/entrance.jpg)
+![Night, office lights off, reflective floor](docs/night.jpg)
 ![Service card with its panel and Add to quote](docs/service.jpg)
-![Work wall with real screenshots and neutral cards](docs/work.jpg)
-![Phone: bottom sheets, quote list and English mode](docs/mobile.jpg)
+![Work wall with real screenshots](docs/work.jpg)
+![Phone: bottom sheets, quote list](docs/mobile.jpg)
 
 ## What's in the room
 
-| Stop | Where | What it shows |
+| # | Section | Where | What it shows |
+| --- | --- | --- | --- |
+| 1 | Home | back wall, centre | Logo wall with the headline and stats. Its panel covers the company and why to choose us |
+| 2 | Services | left wall, hanging rail | 8 cards. Each panel has what you get, an approximate price, duration, proof projects, **Add to quote** and WhatsApp buttons |
+| 3 | Products | back-left plinth | CZ Commerce, CheckoutGuard, Laravel Ecom and CZ Social (coming soon), with real logos, pricing and links |
+| 4 | Work | back-right wall | 13 projects. The live sites use real screenshots; projects without a public site get a neutral name + stack card |
+| 5 | Tech Stack | left wall, front | A board of the real logos of the tools we use (Laravel, React, Flutter, WordPress, …) |
+| 6 | Courier Check | centre kiosk | The free courier-history tool, with the real courier logos. **Check now** opens coderzonebd.com/courier-check |
+| 7 | Process | right wall | Discover → Design & Build → Launch → Support |
+| 8 | Contact | front-right desk | Contact details, team and FAQ. The quote list opens from here |
+
+Brand: the real Coder Zone BD logo and wordmark, orange `#FF931E` on ink `#12141C`.
+
+### A living office
+
+- **Real Bangladesh time.** Through the windows and the glass entrance, the street follows the time in Dhaka (GMT+6): dawn, day, dusk and night, with the sun or moon, lit building windows and street lights after dark. `?time=day|dawn|dusk|night` forces a phase.
+- **Traffic.** Cars and a bus drive past on the street outside.
+- **Glass entrance.** Double glass doors in slim black frames, with tall orange pulls and an etched "CODER ZONE BD" band, set in walnut and oak-slat panels. The street shows through.
+- **Office furniture.** Two workstations with code on the monitors, a lounge with a sofa and floor lamp, a bookshelf, a coffee corner, plants, and a wall clock showing Dhaka time.
+- **Premium finish.** Recessed ceiling light strips with a soft glow, a satin floor that reflects the displays (desktop only), and frosted-glass controls.
+
+## How to explore
+
+| Desktop | Phone | What it does |
 | --- | --- | --- |
-| Home | back wall, centre | Logo wall with the headline and stats. Its panel covers the company and why to choose us |
-| Services | left wall, hanging rail | 8 cards. Each panel has what you get, an approximate price, duration, proof projects, **Add to quote** and WhatsApp buttons |
-| Products | back-left plinth | CZ Commerce, CheckoutGuard, Laravel Ecom and CZ Social (coming soon), with pricing and links |
-| Work | back-right wall | 13 projects. The 6 live sites use real screenshots; projects without a public site get a neutral name + stack card |
-| Courier Check | centre kiosk | Explains the free tool. **Check now** opens coderzonebd.com/courier-check, because that page sends no CORS headers and can't be called from here |
-| Process | right wall | Discover → Design & Build → Launch → Support |
-| Contact | front-right desk | Contact details, team and FAQ. The quote list opens from here |
+| Drag | Drag with one finger | Look around, all 360° |
+| Scroll | Pinch | Zoom in and out (lens zoom, so the camera never goes through a wall) |
+| Click | Tap | Open an item, or click a section's empty space to fly there |
+| Esc | | Step back one level: close the help, the quote list or the panel, then show the whole studio |
+| ← → | | Previous / next section (inside a panel: previous / next item) |
+| 1 – 8 | | Jump straight to a section |
+| T | ▶ Tour button | Auto tour through every section; any click, drag, scroll or key stops it |
+| L | Light switch by the door | Office lights on / off (daylight through the windows stays) |
+| ? or H | ? button | The "How to explore" help |
+| O | ⌂ button | Overview of the whole studio |
 
-A tech-stack pegboard on the front-left wall is decoration only.
+On desktop, a label next to the pointer says what you're about to open ("Go to Work →", the service name, and so on).
 
-Clicking anything zooms to it and opens a side panel; on phones the panel is a bottom sheet. Prev/next arrows (or ← →) step through items at the same stop, and Esc closes the panel. The quote list (top-right) collects services, then takes a name, phone, budget and note. **Send on WhatsApp** opens `wa.me/8801885660190` with the whole list prefilled, and **Send by email** is the fallback.
+Things to click in the office: the **wall clock** tells you the time in Dhaka, the **coffee machine** takes you to Contact, the **monitors** take you to Work, the **door** shows the whole studio, and the **switch** by the door turns the lights off.
 
-## 2D version, SEO and low-end phones
+Clicking an item zooms to it and opens a side panel; on phones the panel is a bottom sheet. The quote list (top right) collects services, then takes a name, phone, budget and note. **Send on WhatsApp** opens `wa.me/8801885660190` with the whole list prefilled, and **Send by email** is the fallback.
+
+## 2D version, SEO and slow devices
 
 - All of the content is also plain semantic HTML (`src/flat/FlatSite.tsx`). It is **prerendered into `index.html` at build time**, so search engines and slow connections get the full text before any JavaScript runs.
-- **Skip 3D** in the top bar switches to that 2D page. The site also starts in 2D automatically when WebGL is missing or software-only, when the device has less than 3 GB of memory, or when Save-Data is on. If the frame rate stays low in 3D, it switches to 2D and shows a "View in 3D" button. A visitor's own choice is remembered.
+- **Skip 3D** in the top bar switches to that 2D page. The site starts in 2D automatically when WebGL is missing or software-only, when the device has less than 3 GB of memory, or when Save-Data is on. A visitor's own choice is remembered.
+- In 3D, the render resolution adapts to the frame rate instead of dropping to 2D. If the GPU loses the WebGL context, the canvas rebuilds itself.
 - In 3D mode the 2D page stays in the DOM (visually hidden) for screen readers. Keyboard users who tab into it get it as a full overlay.
-- With reduced motion turned on, the camera jumps between stops instead of flying.
-- `?2d` / `?3d` / `?lang=en` in the URL force a mode or language.
+- With reduced motion turned on, the camera jumps between sections instead of flying.
+- `?2d` / `?3d` / `?lang=bn` / `?time=night` in the URL force a mode, language or time of day.
 
-**Weight:** in 2D mode, three.js is never downloaded (~62 KB gzipped of JS + fonts). 3D adds ~240 KB gzipped of JS and ~150 KB of screenshot thumbnails. Everything else in the room is drawn on `<canvas>` at runtime.
+**Weight:** in 2D mode, three.js is never downloaded. 3D adds about 300 KB gzipped of JS plus the screenshots and logos. Everything else in the room is drawn on `<canvas>` at runtime.
 
 ## Stack
 
-Vite, React 18, TypeScript, React Three Fiber + drei (`CameraControls` for the camera moves), zustand, and the self-hosted Anek Bangla font (OFL, `src/fonts/OFL.txt`).
+Vite, React 18, TypeScript, React Three Fiber + drei (`CameraControls` for the camera, `MeshReflectorMaterial` for the floor, `PerformanceMonitor` for adaptive resolution), zustand, and the self-hosted Anek Bangla font (OFL, `src/fonts/OFL.txt`).
+
+| File | What's in it |
+| --- | --- |
+| `src/content.ts` | All text (English + Bangla), prices, products, projects, process, FAQ, contacts, UI strings |
+| `src/store.ts` | App state: section, focus, overview, tour, lights, help, quote list |
+| `src/three/Room.tsx` | Walls, floor, ceiling lights, displays, glass entrance, light switch |
+| `src/three/Office.tsx` | Furniture, wall clock, clickable office objects |
+| `src/three/Outside.tsx` | Sky, buildings, street, traffic, day/night |
+| `src/three/CameraRig.tsx` | Camera moves, look-around, zoom, overview |
+| `src/components/Interact.tsx` | Keyboard shortcuts, auto tour, pointer label, help overlay |
 
 ## Edit the content
 
-All text (Bangla and English), prices, products, projects, process steps, FAQ and contact details are in **`src/content.ts`**. The 3D room, the panels and the 2D page all read from it.
+Everything is in **`src/content.ts`**. The 3D room, the panels and the 2D page all read from it.
 
 - Add a service or project and it gets a place on the rail or the wall automatically (`src/three/layout.ts`).
 - To give a project a real screenshot, save `public/work/<id>.jpg` (960×600) and `public/work/<id>-thumb.jpg` (512×320), then set `shot: true`.
+- Logos live in `public/logos/`.
 - Testimonials are off on purpose. Once there are real ones, fill `TESTIMONIALS` and set `SHOW_TESTIMONIALS = true`.
 
 ## Run locally
@@ -60,12 +102,4 @@ Then open http://localhost:5173/
 
 ## Deploy
 
-Every push to `main` triggers `.github/workflows/deploy.yml`, which builds the site and publishes it to GitHub Pages.
-
-For a custom domain (e.g. `3d.coderzonebd.com`), build at the root path:
-
-```bash
-BASE_PATH=/ npm run build
-```
-
-In the workflow, add `env: BASE_PATH: /` to the build step, and add a `public/CNAME` file containing the domain.
+Every push to `main` triggers `.github/workflows/deploy.yml`, which builds the site and publishes it to GitHub Pages at **3d.coderzonebd.com** (`public/CNAME`). The site builds at the root path by default; set `BASE_PATH=/repo-name/` to host it under a project path instead.

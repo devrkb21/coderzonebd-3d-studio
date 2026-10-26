@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { Canvas } from '@react-three/fiber'
+import * as THREE from 'three'
+import { Canvas, useFrame } from '@react-three/fiber'
 import { PerformanceMonitor } from '@react-three/drei'
 import { UI, tr } from '../content'
 import { useStore } from '../store'
@@ -10,6 +11,32 @@ import { Outside, SKY } from './Outside'
 import { Room } from './Room'
 import { prepareTextures } from './textures'
 import { usePhase } from './time'
+
+/** Office lights, dimmed by the switch by the door; daylight through the windows stays. */
+function Lights() {
+  const phase = usePhase()
+  const amb = useRef<THREE.AmbientLight>(null)
+  const hemi = useRef<THREE.HemisphereLight>(null)
+  const sun = useRef<THREE.DirectionalLight>(null)
+  useFrame((_, dt) => {
+    const on = useStore.getState().lightsOn
+    const day = phase === 'day' ? 1 : phase === 'night' ? 0 : 0.5
+    const d = Math.min(dt, 0.05)
+    const go = (l: THREE.Light | null, onI: number, offI: number) => {
+      if (l) l.intensity = THREE.MathUtils.damp(l.intensity, on ? onI : offI, 4, d)
+    }
+    go(amb.current, 1.6, 0.22 + 0.9 * day)
+    go(hemi.current, 0.8, 0.12 + 0.4 * day)
+    go(sun.current, 1, 0.08 + 0.5 * day)
+  })
+  return (
+    <>
+      <ambientLight ref={amb} intensity={1.6} />
+      <hemisphereLight ref={hemi} args={['#ffffff', '#c8b190', 0.8]} />
+      <directionalLight ref={sun} position={[4, 9, 6]} intensity={1} />
+    </>
+  )
+}
 
 const coarse = typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches
 const MAX_DPR = coarse ? 1.5 : 1.75
@@ -66,9 +93,7 @@ export default function Scene({ onProgress }: { onProgress: (p: number) => void 
         onIncline={() => setDpr((d) => Math.min(MAX_DPR, Math.round((d + 0.25) * 100) / 100))}
       />
       <color attach="background" args={[SKY[phase].bg]} />
-      <ambientLight intensity={1.6} />
-      <hemisphereLight args={['#ffffff', '#c8b190', 0.8]} />
-      <directionalLight position={[4, 9, 6]} intensity={1} />
+      <Lights />
       <Room />
       <Office />
       <Outside />

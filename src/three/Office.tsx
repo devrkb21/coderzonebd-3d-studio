@@ -3,6 +3,8 @@
 import { useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
+import { useStore } from '../store'
+import { Hot } from './Hot'
 import { ROOM } from './layout'
 import { BRAND, INK } from './textures'
 import { dhakaHours } from './time'
@@ -86,17 +88,41 @@ export function Office() {
   const m = useOfficeMaterials()
   return (
     <group>
-      <WallClock position={[8, 5.65, halfD - 0.06]} />
-      <Workstation m={m} position={[5.4, 0, 7.4]} />
-      <Workstation m={m} position={[8.6, 0, 7.4]} />
+      <Hot tip={{ bn: 'ঢাকার এখনকার সময়', en: 'Time in Dhaka' }} onPick={tellTime}>
+        <WallClock position={[8, 5.65, halfD - 0.06]} />
+      </Hot>
+      <Hot tip={{ bn: 'আমাদের কাজ দেখুন →', en: 'See our work →' }} onPick={() => useStore.getState().goTo('work')}>
+        <Workstation m={m} position={[5.4, 0, 7.4]} />
+        <Workstation m={m} position={[8.6, 0, 7.4]} />
+      </Hot>
       <Lounge m={m} />
       <Bookshelf m={m} position={[-14.2, 0, halfD - 0.35]} />
-      <CoffeeCorner m={m} position={[14.2, 0, halfD - 0.55]} />
+      <Hot tip={{ bn: 'এক কাপ চা/কফিতে কথা হোক ☕', en: "Let's talk over coffee ☕" }} onPick={coffee}>
+        <CoffeeCorner m={m} position={[14.2, 0, halfD - 0.55]} />
+      </Hot>
       <Pot m={m} position={[-2.2, 0, halfD - 0.6]} />
       <Pot m={m} position={[2.2, 0, halfD - 0.6]} />
       <Pot m={m} position={[halfW - 0.8, 0, -halfD + 0.8]} />
     </group>
   )
+}
+
+function tellTime() {
+  const s = useStore.getState()
+  const h = dhakaHours()
+  const hh = Math.floor(h)
+  const mm = String(Math.floor((h % 1) * 60)).padStart(2, '0')
+  const h12 = ((hh + 11) % 12) + 1
+  const ampm = hh < 12 ? 'AM' : 'PM'
+  s.showToast(s.lang === 'bn'
+    ? `ঢাকায় এখন ${h12}:${mm} ${ampm}। আমরা সাধারণত ১৫ মিনিটের মধ্যে রিপ্লাই দিই।`
+    : `It's ${h12}:${mm} ${ampm} in Dhaka. We usually reply within 15 minutes.`)
+}
+
+function coffee() {
+  const s = useStore.getState()
+  s.goTo('contact')
+  s.showToast(s.lang === 'bn' ? 'চা রেডি ☕ নিচে আমাদের সাথে যোগাযোগের সব উপায়।' : 'Coffee is ready ☕ Here is how to reach us.')
 }
 
 /** Analog clock on the front wall, set to Bangladesh time. */

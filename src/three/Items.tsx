@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from 'react'
 import { useFrame, type ThreeEvent } from '@react-three/fiber'
 import { useCursor } from '@react-three/drei'
 import * as THREE from 'three'
-import { PROCESS, PRODUCTS, SERVICES, STOPS, WORK, type Lang, type StopId } from '../content'
+import { PROCESS, PRODUCTS, SERVICES, STOPS, tr, UI, WORK, type Lang, type StopId } from '../content'
 import { useStore } from '../store'
 import { PLACEMENTS, STOP_FRAMES, yawOf, type Placement } from './layout'
 import {
@@ -23,6 +23,17 @@ function textureFor(pl: Placement, lang: Lang) {
     case 'courier': return kioskTexture(lang)
     case 'process': return processTexture(PROCESS.findIndex((p) => p.id === ref), lang)
     case 'contact': return contactTexture(lang)
+  }
+}
+
+function labelFor(pl: Placement, lang: Lang) {
+  const { kind, ref, stop } = pl.item
+  switch (kind) {
+    case 'service': return tr(SERVICES.find((s) => s.id === ref)!.title, lang)
+    case 'product': return PRODUCTS.find((p) => p.id === ref)!.name
+    case 'work': return WORK.find((w) => w.id === ref)!.name
+    case 'process': return tr(PROCESS.find((p) => p.id === ref)!.title, lang)
+    default: return tr(STOPS.find((s) => s.id === stop)!.label, lang)
   }
 }
 
@@ -49,8 +60,13 @@ function StopZone({ stop }: { stop: StopId }) {
       position={pos}
       rotation-y={yawOf(F.normal)}
       material={mat}
-      onPointerOver={(e) => { e.stopPropagation(); document.body.style.cursor = 'pointer' }}
-      onPointerOut={() => { document.body.style.cursor = '' }}
+      onPointerOver={(e) => {
+        e.stopPropagation()
+        document.body.style.cursor = 'pointer'
+        const s = useStore.getState()
+        s.setTip(s.stop === stop && !s.focusId && !s.overview ? null : `${tr(UI.go, s.lang)} ${tr(STOPS.find((x) => x.id === stop)!.label, s.lang)} →`)
+      }}
+      onPointerOut={() => { document.body.style.cursor = ''; useStore.getState().setTip(null) }}
       onClick={(e) => {
         e.stopPropagation()
         if (e.delta > DRAG_PX) return
@@ -103,8 +119,15 @@ function ItemMesh({ pl }: { pl: Placement }) {
   })
 
   const handlers = {
-    onPointerOver: (e: ThreeEvent<PointerEvent>) => { e.stopPropagation(); hover(id) },
-    onPointerOut: () => { if (useStore.getState().hoveredId === id) hover(null) },
+    onPointerOver: (e: ThreeEvent<PointerEvent>) => {
+      e.stopPropagation()
+      hover(id)
+      if (!isWall) useStore.getState().setTip(labelFor(pl, useStore.getState().lang))
+    },
+    onPointerOut: () => {
+      if (useStore.getState().hoveredId === id) hover(null)
+      useStore.getState().setTip(null)
+    },
     onClick: (e: ThreeEvent<MouseEvent>) => {
       e.stopPropagation()
       if (e.delta > DRAG_PX) return

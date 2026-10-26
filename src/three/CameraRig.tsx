@@ -35,6 +35,7 @@ export function CameraRig() {
   const ready = useStore((s) => s.ready)
   const stop = useStore((s) => s.stop)
   const focusId = useStore((s) => s.focusId)
+  const overview = useStore((s) => s.overview)
   const introPlayed = useRef(false)
   const moveId = useRef(0)
 
@@ -44,9 +45,13 @@ export function CameraRig() {
     c.mouseButtons.left = ACTION.ROTATE
     c.mouseButtons.right = ACTION.NONE
     c.mouseButtons.middle = ACTION.NONE
-    c.mouseButtons.wheel = ACTION.NONE
+    // Scroll / pinch zooms the lens (never moves the camera, so it can't go through a wall).
+    c.mouseButtons.wheel = ACTION.ZOOM
     c.touches.one = ACTION.TOUCH_ROTATE
-    c.touches.two = ACTION.NONE
+    c.touches.two = ACTION.TOUCH_ZOOM
+    c.minZoom = 1
+    c.maxZoom = 3.5
+    c.dollySpeed = 0.6
     c.touches.three = ACTION.NONE
     // Negative speeds = "grab the room and drag it", like Street View.
     c.azimuthRotateSpeed = -0.35
@@ -72,12 +77,16 @@ export function CameraRig() {
       margin = 1.12
     }
     const frame = itemFrame ?? STOP_FRAMES[stop]
+    c.zoomTo(1, !reducedMotion())
     // On phones a wide display wall would push the camera far back; crop it instead and let
     // prev/next walk the items. Single-piece stops (home wall, kiosk, desk) are always shown whole.
     const cropped = mobile && !itemFrame && CROPPABLE.has(stop)
     // Never back the camera through the opposite wall: it has to stay inside the room to look around.
     const maxDist = Math.min(cropped ? 13 : 24, roomDepthAlong(frame) - 0.8)
-    const { position: p, target: t } = fitFrame(frame, camera.fov, vw, vh, insets, margin, maxDist)
+    const fit = fitFrame(frame, camera.fov, vw, vh, insets, margin, maxDist)
+    // Overview: stand at the entrance, a little raised, and take in the whole studio.
+    const p = overview && !itemFrame ? new THREE.Vector3(0, 5.6, ROOM.halfD - 1.2) : fit.position
+    const t = overview && !itemFrame ? new THREE.Vector3(0, 2.2, -ROOM.halfD + 2) : fit.target
 
     c.minAzimuthAngle = -Infinity
     c.maxAzimuthAngle = Infinity
@@ -108,7 +117,7 @@ export function CameraRig() {
       c.minPolarAngle = Math.PI / 2 - 0.55
       c.maxPolarAngle = Math.PI / 2 + 0.45
     })
-  }, [ready, stop, focusId, size.width, size.height, camera])
+  }, [ready, stop, focusId, overview, size.width, size.height, camera])
 
   return <CameraControls ref={ref} makeDefault />
 }

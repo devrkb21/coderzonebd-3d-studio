@@ -238,3 +238,47 @@ html:not(.mode-3d) .topbar { position: sticky; padding-bottom: 12px; background:
 .tech-grid li { display: grid; justify-items: center; gap: 8px; padding: 14px 10px; border-radius: var(--r1); background: var(--paper); border: 1px solid var(--line); font-weight: 600; font-size: 14px; }
 .tech-grid img { height: 36px; width: auto; }
 .product-logo { display: block; height: 48px; width: auto; margin: 4px 0 10px; }
+
+/* ── premium 3D chrome: frosted glass over the room ── */
+.mode-3d .brand, .mode-3d .seg, .mode-3d .pill-btn, .mode-3d .icon-btn:not(.sm), .mode-3d .pills {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(18px) saturate(1.6); -webkit-backdrop-filter: blur(18px) saturate(1.6);
+  border-color: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.7) inset, 0 12px 32px -14px rgba(18, 20, 28, 0.45);
+}
+.mode-3d .pills { width: max-content; padding: 5px; gap: 3px; border-radius: 16px; align-items: center; }
+.pill { position: relative; }
+.pill.active { background: linear-gradient(180deg, #ffa53d, var(--brand)); box-shadow: 0 6px 16px -8px rgba(255, 147, 30, 0.9), 0 1px 0 rgba(255, 255, 255, 0.5) inset; }
+.pill-icon { display: grid; place-items: center; padding: 8px 10px; }
+.pill-sep { flex: none; width: 1px; height: 22px; background: var(--line); margin: 0 3px; }
+.tour-btn { display: inline-flex; align-items: center; gap: 7px; color: var(--ink); }
+.tour-btn span[aria-hidden] { font-size: 11px; color: var(--brand-text); }
+.tour-btn.on { background: var(--ink); color: #fff; }
+.tour-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--brand); animation: pulse 1.2s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: 0.35; transform: scale(0.8); } }
+.help-btn { font-size: 18px; font-weight: 700; color: var(--ink); }
+.mode-3d .hint { background: rgba(18, 20, 28, 0.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); letter-spacing: 0.01em; }
+
+/* label that follows the pointer */
+.tooltip { position: fixed; z-index: 30; top: 0; left: 0; padding: 6px 11px; border-radius: 9px; background: rgba(18, 20, 28, 0.86); color: #fff; font-size: 13px; font-weight: 600; white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity 0.15s; box-shadow: 0 8px 20px -10px rgba(0, 0, 0, 0.6); }
+.tooltip.on { opacity: 1; }
+@media (pointer: coarse) { .tooltip { display: none; } }
+
+/* how-to-explore overlay */
+.help { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; padding: 16px; background: rgba(12, 14, 20, 0.45); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); animation: fade 0.25s var(--ease); }
+.help-card { width: min(520px, 100%); max-height: calc(100dvh - 32px); overflow: auto; padding: 20px 22px 22px; border-radius: 18px; background: var(--paper); box-shadow: 0 30px 80px -30px rgba(0, 0, 0, 0.6); animation: rise 0.35s var(--ease); }
+.help-head { display: flex; align-items: center; justify-content: space-between; }
+.help h2 { margin: 0; font-size: 22px; }
+.help h3 { margin: 18px 0 8px; font-size: 15px; color: var(--ink-2); }
+.keys { margin: 14px 0 0; display: grid; gap: 8px; }
+.keys > div { display: grid; grid-template-columns: 120px 1fr; align-items: center; gap: 12px; }
+.keys dt, .keys dd { margin: 0; }
+.keys dd { color: var(--ink-2); font-size: 15px; }
+kbd { display: inline-block; min-width: 30px; padding: 3px 9px; border-radius: 7px; background: var(--page); border: 1px solid var(--line); border-bottom-width: 2px; font: 600 13px var(--font); text-align: center; }
+.help .actions { display: flex; gap: 10px; margin-top: 18px; }
+@keyframes fade { from { opacity: 0; } }
+@keyframes rise { from { opacity: 0; transform: translateY(14px) scale(0.98); } }
+@media (max-width: 759px) {
+  .keys > div { grid-template-columns: 1fr; gap: 2px; }
+  .pill-sep { display: none; }
+}

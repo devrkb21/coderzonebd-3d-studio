@@ -4,6 +4,7 @@ import { FlatSite } from './flat/FlatSite'
 import { Hint, Loader, NavPills, Toast, TopBar } from './components/Chrome'
 import { Panel } from './components/Panel'
 import { QuoteDrawer } from './components/QuoteDrawer'
+import { HelpOverlay, Shortcuts, Tooltip, TourRunner } from './components/Interact'
 
 const Scene = lazy(() => import('./three/Scene'))
 
@@ -37,6 +38,10 @@ export default function App() {
           <NavPills />
           <Panel />
           <Hint />
+          <Shortcuts />
+          <TourRunner />
+          <Tooltip />
+          <HelpOverlay />
         </>
       )}
       <QuoteDrawer />

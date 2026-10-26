@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { SERVICES, type Lang, type StopId } from './content'
+import { SERVICES, STOPS, type Lang, type StopId } from './content'
 import { itemById, itemsAt } from './items'
 
 export type Mode = '3d' | '2d'
@@ -15,6 +15,13 @@ interface State {
   quote: string[]
   quoteOpen: boolean
   toast: string | null
+  /** Whole-room view from the entrance (Esc from a section). */
+  overview: boolean
+  touring: boolean
+  lightsOn: boolean
+  helpOpen: boolean
+  /** Label shown next to the pointer while hovering something in the room. */
+  tip: string | null
   setLang: (lang: Lang) => void
   setMode: (mode: Mode) => void
   /** A visitor's explicit choice; remembered, and it disables the automatic 2D switch. */
@@ -28,6 +35,12 @@ interface State {
   removeQuote: (serviceId: string) => void
   setQuoteOpen: (open: boolean) => void
   showToast: (msg: string | null) => void
+  setOverview: (on: boolean) => void
+  nextStop: (dir: 1 | -1) => void
+  setTouring: (on: boolean) => void
+  toggleLights: () => void
+  setHelpOpen: (open: boolean) => void
+  setTip: (tip: string | null) => void
 }
 
 const read = (k: string) => { try { return localStorage.getItem(k) } catch { return null } }
@@ -78,6 +91,11 @@ export const useStore = create<State>((set, get) => ({
   quote: typeof window === 'undefined' ? [] : initialQuote(),
   quoteOpen: false,
   toast: null,
+  overview: false,
+  touring: false,
+  lightsOn: true,
+  helpOpen: false,
+  tip: null,
 
   setLang: (lang) => {
     write('cz3d-lang', lang)
@@ -90,11 +108,11 @@ export const useStore = create<State>((set, get) => ({
     set({ mode, focusId: null, ready: false })
   },
   setReady: () => set({ ready: true }),
-  goTo: (stop) => set({ stop, focusId: null, quoteOpen: false }),
+  goTo: (stop) => set({ stop, focusId: null, quoteOpen: false, overview: false }),
   focus: (id) => {
     if (!id) return set({ focusId: null })
     const item = itemById(id)
-    if (item) set({ focusId: id, stop: item.stop, quoteOpen: false })
+    if (item) set({ focusId: id, stop: item.stop, quoteOpen: false, overview: false })
   },
   step: (dir) => {
     const item = get().focusId ? itemById(get().focusId!) : null
@@ -117,4 +135,15 @@ export const useStore = create<State>((set, get) => ({
   },
   setQuoteOpen: (quoteOpen) => set({ quoteOpen }),
   showToast: (toast) => set({ toast }),
+  setOverview: (overview) => set({ overview, focusId: overview ? null : get().focusId }),
+  nextStop: (dir) => {
+    const s = get()
+    const i = STOPS.findIndex((x) => x.id === s.stop)
+    const next = s.overview ? (dir > 0 ? 0 : STOPS.length - 1) : (i + dir + STOPS.length) % STOPS.length
+    set({ stop: STOPS[next].id, focusId: null, overview: false, quoteOpen: false })
+  },
+  setTouring: (touring) => set({ touring }),
+  toggleLights: () => set({ lightsOn: !get().lightsOn }),
+  setHelpOpen: (helpOpen) => set({ helpOpen }),
+  setTip: (tip) => set({ tip }),
 }))

@@ -21,6 +21,7 @@ export function TopBar() {
   const chooseMode = useStore((s) => s.chooseMode)
   const goTo = useStore((s) => s.goTo)
   const setQuoteOpen = useStore((s) => s.setQuoteOpen)
+  const setHelpOpen = useStore((s) => s.setHelpOpen)
   return (
     <header className="topbar">
       <a
@@ -40,6 +41,9 @@ export function TopBar() {
         <button className="pill-btn" onClick={() => chooseMode(mode === '3d' ? '2d' : '3d')}>
           {mode === '3d' ? tr(UI.skip3d, lang) : tr(UI.view3d, lang)}
         </button>
+        {mode === '3d' && (
+          <button className="icon-btn help-btn" onClick={() => setHelpOpen(true)} aria-label={tr(UI.help, lang)} title={tr(UI.help, lang)}>?</button>
+        )}
         <button className="icon-btn quote-btn" onClick={() => setQuoteOpen(true)} aria-label={`${tr(UI.quote, lang)} (${count})`}>
           <ListIcon />
           {count > 0 && <span className="badge">{count}</span>}
@@ -53,14 +57,27 @@ export function NavPills() {
   const lang = useStore((s) => s.lang)
   const stop = useStore((s) => s.stop)
   const focused = useStore((s) => !!s.focusId)
+  const overview = useStore((s) => s.overview)
+  const touring = useStore((s) => s.touring)
   const goTo = useStore((s) => s.goTo)
+  const setOverview = useStore((s) => s.setOverview)
+  const setTouring = useStore((s) => s.setTouring)
   return (
     <nav className={`pills ${focused ? 'behind' : ''}`} aria-label={lang === 'bn' ? 'স্টুডিওর অংশ' : 'Studio sections'}>
-      {STOPS.map((s) => (
-        <button key={s.id} className={`pill ${stop === s.id && !focused ? 'active' : ''}`} aria-current={stop === s.id ? 'true' : undefined} onClick={() => goTo(s.id)}>
+      <button className={`pill pill-icon ${overview && !focused ? 'active' : ''}`} onClick={() => setOverview(true)} aria-label={tr(UI.overview, lang)} title={`${tr(UI.overview, lang)} (Esc)`}>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M3 10.5 12 3l9 7.5M5 9.5V21h14V9.5" /></svg>
+      </button>
+      <span className="pill-sep" aria-hidden />
+      {STOPS.map((s, i) => (
+        <button key={s.id} className={`pill ${stop === s.id && !focused && !overview ? 'active' : ''}`} aria-current={stop === s.id ? 'true' : undefined} onClick={() => goTo(s.id)} title={`${tr(s.label, lang)} (${i + 1})`}>
           {tr(s.label, lang)}
         </button>
       ))}
+      <span className="pill-sep" aria-hidden />
+      <button className={`pill tour-btn ${touring ? 'on' : ''}`} onClick={() => setTouring(!touring)} aria-pressed={touring} title={`${tr(UI.tour, lang)} (T)`}>
+        {touring ? <span className="tour-dot" aria-hidden /> : <span aria-hidden>▶</span>}
+        {touring ? tr(UI.stopTour, lang) : tr(UI.tour, lang)}
+      </button>
     </nav>
   )
 }
@@ -96,7 +113,8 @@ export function Hint() {
     return () => clearTimeout(t)
   }, [])
   useEffect(() => { if (focused) setShow(false) }, [focused])
-  return <div className={`hint ${show ? '' : 'hide'}`} aria-hidden>{tr(UI.hint, lang)}</div>
+  const touch = typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches
+  return <div className={`hint ${show ? '' : 'hide'}`} aria-hidden>{tr(touch ? UI.hintTouch : UI.hint, lang)}</div>
 }
 
 export function Toast() {
@@ -104,16 +122,17 @@ export function Toast() {
   const lang = useStore((s) => s.lang)
   const showToast = useStore((s) => s.showToast)
   const chooseMode = useStore((s) => s.chooseMode)
+  const mode = useStore((s) => s.mode)
   useEffect(() => {
     if (!toast) return
-    const t = setTimeout(() => showToast(null), 9000)
+    const t = setTimeout(() => showToast(null), mode === '3d' ? 4500 : 9000)
     return () => clearTimeout(t)
-  }, [toast, showToast])
+  }, [toast, showToast, mode])
   if (!toast) return null
   return (
     <div className="toast" role="status">
       <span>{toast}</span>
-      <button className="link" onClick={() => { chooseMode('3d'); showToast(null) }}>{tr(UI.view3d, lang)}</button>
+      {mode === '2d' && <button className="link" onClick={() => { chooseMode('3d'); showToast(null) }}>{tr(UI.view3d, lang)}</button>}
       <button className="icon-btn sm ghost" onClick={() => showToast(null)} aria-label={tr(UI.close, lang)}><CloseIcon /></button>
     </div>
   )

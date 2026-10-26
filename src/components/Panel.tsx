@@ -24,7 +24,7 @@ export function Panel() {
     const onKey = (e: KeyboardEvent) => {
       if (!useStore.getState().focusId) return
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement || e.target instanceof HTMLSelectElement) return
-      if (e.key === 'Escape') focus(null)
+      if (e.key === 'Escape') { e.preventDefault(); focus(null) }
       if (e.key === 'ArrowRight') step(1)
       if (e.key === 'ArrowLeft') step(-1)
     }
