@@ -1,0 +1,556 @@
+<!doctype html>
+<!--
+  Coder Zone BD · Home wall film (seamless loop, no audio).
+  1600×900, 30 fps, 23 s. Rendered twice: lang=en and lang=bn (see README, "Home wall video").
+
+  Beats (absolute seconds)
+   0.00–0.25  blank white ground + orange base bar  (= the last frame: the loop seam)
+   0.25–3.40  logo: the mark lands with an orange ring, then the wordmark wipes open beside it
+   3.40–4.10  the lockup carries up to the top-left header
+   3.90–7.80  headline, word by word; "real business problems" takes the orange highlighter
+   7.80–8.30  ink flood rises from the base
+   8.40–12.3  four stats count up on ink
+  12.40–12.85 orange flood wipes in from the left
+  12.90–15.4  the four service lines whip in
+  15.40–16.0  "our own products" carries up to the header, orange recedes to white
+  15.85–19.3  the four products sweep through with their real logos
+  19.30–22.2  logo + "Khulna · since 2024" + call to action
+  22.15–22.6  everything clears; 22.6–23.0 blank again, identical to frame 0
+-->
+<html
+  lang="en"
+  data-composition-variables='[{"id":"lang","type":"enum","label":"Language","default":"en","options":[{"value":"en","label":"English"},{"value":"bn","label":"Bangla"}]}]'
+>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1600, height=900" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      @font-face {
+        font-family: "Anek Bangla";
+        font-weight: 400 700;
+        font-stretch: 88% 115%;
+        src: url("assets/fonts/anek-bangla-bengali.woff2") format("woff2-variations");
+        unicode-range: U+0951-0952, U+0964-0965, U+0980-09FE, U+1CD0-1CF7, U+200C-200D, U+20B9, U+25CC, U+A8F1;
+      }
+      @font-face {
+        font-family: "Anek Bangla";
+        font-weight: 400 700;
+        font-stretch: 88% 115%;
+        src: url("assets/fonts/anek-bangla-latin-ext.woff2") format("woff2-variations");
+        unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1E00-1E9F, U+20A0-20AB, U+20AD-20C0;
+      }
+      @font-face {
+        font-family: "Anek Bangla";
+        font-weight: 400 700;
+        font-stretch: 88% 115%;
+        src: url("assets/fonts/anek-bangla-latin.woff2") format("woff2-variations");
+        unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2212;
+      }
+      :root {
+        --brand: #ff931e;
+        --brand-text: #d46a00;
+        --ink: #12141c;
+        --page: #ffffff;
+        --muted: #5b6070;
+        --font: "Anek Bangla", sans-serif;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        width: 1600px;
+        height: 900px;
+        overflow: hidden;
+        background: var(--page);
+      }
+      #root {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        font-family: var(--font);
+        color: var(--ink);
+        background: var(--page);
+      }
+      .layer {
+        position: absolute;
+        inset: 0;
+      }
+      .abs {
+        position: absolute;
+      }
+
+      /* ground */
+      #ink-flood {
+        background: var(--ink);
+        clip-path: inset(100% 0 0 0);
+      }
+      #orange-flood {
+        background: var(--brand);
+        clip-path: inset(0 100% 0 0);
+      }
+      #base-bar {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 14px;
+        background: var(--brand);
+      }
+
+      /* logo */
+      #logo-ring {
+        left: 650px;
+        top: 300px;
+        width: 300px;
+        height: 300px;
+        border-radius: 50%;
+        border: 10px solid var(--brand);
+        opacity: 0;
+      }
+      #logo-wrap {
+        left: 420px;
+        top: 353px;
+        width: 760px;
+        height: 193px;
+        opacity: 0;
+      }
+      #logo {
+        width: 760px;
+        height: 193px;
+        display: block;
+        clip-path: inset(0 80% 0 0);
+      }
+
+      /* headline */
+      #headline {
+        left: 160px;
+        top: 330px;
+        width: 1280px;
+        font-weight: 700;
+        font-size: 92px;
+        line-height: 1.08;
+        letter-spacing: -0.01em;
+      }
+      html[lang="bn"] #headline {
+        font-size: 82px;
+        line-height: 1.3;
+        top: 300px;
+        letter-spacing: 0;
+      }
+      .w {
+        display: inline-block;
+        white-space: pre;
+      }
+      .hl {
+        color: var(--ink);
+        background-image: linear-gradient(var(--brand), var(--brand));
+        background-repeat: no-repeat;
+        background-position: 0 88%;
+        background-size: 0% 0.16em;
+      }
+
+      /* stats */
+      #stats {
+        left: 160px;
+        top: 300px;
+        width: 1280px;
+        display: flex;
+        gap: 48px;
+      }
+      .stat {
+        flex: 1 1 0;
+        color: #fff;
+      }
+      .stat .rule {
+        width: 64px;
+        height: 6px;
+        background: var(--brand);
+        transform-origin: left center;
+      }
+      .stat .val {
+        margin-top: 30px;
+        font-size: 112px;
+        line-height: 1;
+        font-weight: 700;
+        color: var(--brand);
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+      }
+      .stat .suf {
+        display: inline-block;
+      }
+      .stat .lab {
+        margin-top: 18px;
+        font-size: 36px;
+        line-height: 1.25;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.82);
+      }
+
+      /* services + products */
+      #svc-head {
+        left: 160px;
+        top: 120px;
+        font-size: 36px;
+        font-weight: 600;
+        color: var(--ink);
+      }
+      .line {
+        left: 160px;
+        height: 120px;
+        display: flex;
+        align-items: baseline;
+        gap: 34px;
+        white-space: nowrap;
+      }
+      .line .num {
+        font-size: 36px;
+        font-weight: 600;
+        color: #fff;
+        width: 56px;
+      }
+      .line .txt {
+        display: inline-block;
+        font-size: 100px;
+        line-height: 1.1;
+        font-weight: 700;
+        color: var(--ink);
+        transform-origin: left center;
+      }
+      html[lang="bn"] .line .txt {
+        font-size: 92px;
+      }
+      .card {
+        top: 250px;
+        width: 302px;
+        height: 430px;
+        border-radius: 26px;
+        padding: 28px;
+        color: #fff;
+        overflow: hidden;
+      }
+      .card .tile {
+        width: 104px;
+        height: 104px;
+        border-radius: 22px;
+        background: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .card .tile img {
+        width: 80px;
+        height: 80px;
+        object-fit: contain;
+      }
+      .card .name {
+        margin-top: 70px;
+        font-size: 42px;
+        font-stretch: 88%;
+        letter-spacing: -0.01em;
+        line-height: 1.05;
+        font-weight: 700;
+      }
+      .card .tag {
+        margin-top: 14px;
+        font-size: 28px;
+        line-height: 1.25;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.9);
+      }
+      /* the CheckoutGuard file carries its name under the shield: crop to the shield */
+      .card .tile.cg {
+        position: relative;
+        overflow: hidden;
+      }
+      .card .tile.cg img {
+        position: absolute;
+        width: 190px;
+        height: 190px;
+        left: -43px;
+        top: -28px;
+      }
+      .card .tile.cg::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 88px;
+        bottom: 0;
+        background: #fff;
+      }
+      .card .badge {
+        position: absolute;
+        left: 30px;
+        bottom: 30px;
+        padding: 8px 20px 6px;
+        border-radius: 999px;
+        background: #ffc93c;
+        color: var(--ink);
+        font-size: 26px;
+        font-weight: 700;
+      }
+
+      /* close */
+      #place {
+        left: 0;
+        width: 1600px;
+        top: 455px;
+        text-align: center;
+        font-size: 84px;
+        font-weight: 700;
+        line-height: 1.1;
+      }
+      #place .dot {
+        color: var(--brand);
+      }
+      #cta {
+        left: 0;
+        width: 1600px;
+        top: 610px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 30px;
+      }
+      #cta-pill {
+        background: var(--brand);
+        color: var(--ink);
+        font-size: 38px;
+        font-weight: 700;
+        padding: 18px 40px 14px;
+        border-radius: 999px;
+        white-space: nowrap;
+      }
+      #cta-site {
+        font-size: 38px;
+        font-weight: 600;
+        color: var(--muted);
+        white-space: nowrap;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="23" data-width="1600" data-height="900">
+      <!-- ground: white page, ink and orange floods -->
+      <div id="ground" class="clip layer" data-start="0" data-duration="23" data-track-index="0" data-track-kind="graphics" style="z-index: 1">
+        <div id="ink-flood" class="layer" data-layout-ignore></div>
+        <div id="orange-flood" class="layer" data-layout-ignore></div>
+      </div>
+
+      <!-- the logo lives across the opening and the close -->
+      <div id="logo-layer" class="clip layer" data-start="0" data-duration="23" data-track-index="1" data-track-kind="graphics" style="z-index: 3">
+        <div id="logo-ring" class="abs" data-layout-ignore></div>
+        <div id="logo-wrap" class="abs"><img id="logo" src="assets/logos/coderzone-wordmark.png" alt="Coder Zone BD" /></div>
+      </div>
+
+      <div id="sc-head" class="clip layer" data-start="3.5" data-duration="4.9" data-track-index="2" data-track-kind="graphics" style="z-index: 4">
+        <h1 id="headline" class="abs"></h1>
+      </div>
+
+      <div id="sc-stats" class="clip layer" data-start="8.2" data-duration="4.5" data-track-index="2" data-track-kind="graphics" style="z-index: 4">
+        <div id="stats" class="abs">
+          <div class="stat" id="st0"><div class="rule"></div><div class="val"><span class="n"></span><span class="suf"></span></div><div class="lab"></div></div>
+          <div class="stat" id="st1"><div class="rule"></div><div class="val"><span class="n"></span><span class="suf"></span></div><div class="lab"></div></div>
+          <div class="stat" id="st2"><div class="rule"></div><div class="val"><span class="n"></span><span class="suf"></span></div><div class="lab"></div></div>
+          <div class="stat" id="st3"><div class="rule"></div><div class="val"><span class="n"></span><span class="suf"></span></div><div class="lab"></div></div>
+        </div>
+      </div>
+
+      <div id="sc-work" class="clip layer" data-start="12.6" data-duration="6.8" data-track-index="2" data-track-kind="graphics" style="z-index: 4">
+        <div id="svc-head" class="abs"></div>
+        <div class="line abs" id="ln0" style="top: 230px"><span class="num">01</span><span class="txt"></span></div>
+        <div class="line abs" id="ln1" style="top: 360px"><span class="num">02</span><span class="txt"></span></div>
+        <div class="line abs" id="ln2" style="top: 490px"><span class="num">03</span><span class="txt"></span></div>
+        <div class="line abs" id="ln3" style="top: 620px"><span class="num">04</span><span class="txt"></span></div>
+
+        <div class="card abs" id="pc0" style="left: 160px; background: #2b3fd6">
+          <div class="tile"><img src="assets/logos/czcommerce.svg" alt="" /></div>
+          <div class="name">CZ Commerce</div><div class="tag"></div>
+        </div>
+        <div class="card abs" id="pc1" style="left: 486px; background: #0e8a5f">
+          <div class="tile cg"><img src="assets/logos/checkoutguard.png" alt="" /></div>
+          <div class="name">CheckoutGuard</div><div class="tag"></div>
+        </div>
+        <div class="card abs" id="pc2" style="left: 812px; background: #1c1e26">
+          <div class="tile"><img src="assets/logos/coderzone-mark.png" alt="" /></div>
+          <div class="name">Laravel Ecom</div><div class="tag"></div>
+        </div>
+        <div class="card abs" id="pc3" style="left: 1138px; background: #e87a0c">
+          <div class="tile"><img src="assets/logos/coderzone-mark.png" alt="" /></div>
+          <div class="name">CZ Social</div><div class="tag"></div><div class="badge"></div>
+        </div>
+      </div>
+
+      <div id="sc-close" class="clip layer" data-start="19.3" data-duration="3.7" data-track-index="2" data-track-kind="graphics" style="z-index: 4">
+        <div id="place" class="abs"></div>
+        <div id="cta" class="abs"><div id="cta-pill"></div><div id="cta-site">coderzonebd.com</div></div>
+      </div>
+
+      <div id="bar" class="clip layer" data-start="0" data-duration="23" data-track-index="3" data-track-kind="graphics" style="z-index: 9">
+        <div id="base-bar" data-layout-ignore></div>
+      </div>
+    </div>
+
+    <script>
+      // Copy comes from src/content.ts (COMPANY, PRODUCTS, CONTACT, UI) and textures.ts.
+      const COPY = {
+        en: {
+          headline: "We build software that solves real business problems",
+          hl: [5, 6, 7],
+          stats: [["100+", "stores run CheckoutGuard"], ["4", "service lines"], ["24/7", "monitoring"], ["100%", "in-house"]],
+          svcHead: "4 service lines",
+          lines: ["Websites", "E-commerce", "Custom software", "Our own products"],
+          tags: ["Bangla panel for f-commerce sellers", "WooCommerce order protection", "Licensed Laravel e-commerce", ""],
+          soon: "Coming soon",
+          place: ["Khulna", " · ", "since 2024"],
+          cta: "Ask on WhatsApp · +880 1885-660190",
+        },
+        bn: {
+          headline: "আমরা এমন সফটওয়্যার বানাই যা ব্যবসার আসল সমস্যার সমাধান করে",
+          hl: [5, 6, 7],
+          stats: [["100+", "স্টোরে চলে CheckoutGuard"], ["4", "সার্ভিস লাইন"], ["24/7", "মনিটরিং"], ["100%", "ইন-হাউস টিম"]],
+          svcHead: "4 সার্ভিস লাইন",
+          lines: ["ওয়েবসাইট", "ই-কমার্স", "কাস্টম সফটওয়্যার", "নিজেদের প্রোডাক্ট"],
+          tags: ["এফ-কমার্স সেলারদের বাংলা প্যানেল", "WooCommerce অর্ডার সুরক্ষা", "লাইসেন্সড Laravel ই-কমার্স", ""],
+          soon: "শীঘ্রই আসছে",
+          place: ["খুলনা", " · ", "২০২৪ থেকে"],
+          cta: "WhatsApp-এ জিজ্ঞেস করুন · +880 1885-660190",
+        },
+      };
+      const vars = (window.__hyperframes && window.__hyperframes.getVariables && window.__hyperframes.getVariables()) || {};
+      const lang = vars.lang === "bn" ? "bn" : "en";
+      const C = COPY[lang];
+      document.documentElement.lang = lang;
+      const $ = (s) => document.querySelector(s);
+      const $$ = (s) => Array.from(document.querySelectorAll(s));
+
+      // fill copy
+      const head = $("#headline");
+      C.headline.split(" ").forEach((word, i, a) => {
+        const s = document.createElement("span");
+        s.className = "w" + (C.hl.includes(i) ? " hl" : "");
+        s.textContent = word;
+        head.appendChild(s);
+        if (i < a.length - 1) head.appendChild(document.createTextNode(" "));
+      });
+      const statNums = C.stats.map(([v, label], i) => {
+        const m = v.match(/^(\d+)(.*)$/);
+        $(`#st${i} .lab`).textContent = label;
+        $(`#st${i} .suf`).textContent = m[2];
+        $(`#st${i} .n`).textContent = "0";
+        return +m[1];
+      });
+      $("#svc-head").textContent = C.svcHead;
+      C.lines.forEach((t, i) => ($(`#ln${i} .txt`).textContent = t));
+      C.tags.forEach((t, i) => ($(`#pc${i} .tag`).textContent = t));
+      $("#pc3 .badge").textContent = C.soon;
+      $("#place").innerHTML = C.place.map((p, i) => `<span class="w${i === 1 ? " dot" : ""}">${p}</span>`).join("");
+      $("#cta-pill").textContent = C.cta;
+
+      const tl = gsap.timeline({ paused: true });
+
+      // ── 1. logo build ─────────────────────────────────────
+      // The wrap is 760 wide and the mark is its left 20%; to centre the mark, x = (380 - 76) * scale.
+      const HEAD_S = 420 / 760;
+      const HEAD_X = 370 - 800;
+      const HEAD_Y = 110 + (193 * HEAD_S) / 2 - 450;
+      // the ring is a pure function of one progress value, so it is invisible before 0.3 s (the loop seam)
+      const ring = $("#logo-ring");
+      const ringP = { u: 0 };
+      const expoOut = gsap.parseEase("expo.out");
+      const drawRing = () => {
+        const u = ringP.u;
+        ring.style.opacity = u <= 0 || u >= 1 ? "0" : String(1 - u);
+        ring.style.transform = `scale(${0.2 + 1.1 * expoOut(u)})`;
+      };
+      tl.fromTo(ringP, { u: 0 }, { u: 1, duration: 1.0, ease: "none", onUpdate: drawRing }, 0.3);
+      tl.fromTo(
+        "#logo-wrap",
+        { opacity: 0, scale: 1.7, x: 304 * 1.7, y: 0, rotation: -10, filter: "blur(10px)" },
+        { opacity: 1, scale: 1.4, x: 304 * 1.4, rotation: 0, filter: "blur(0px)", duration: 0.8, ease: "expo.out" },
+        0.25,
+      );
+      tl.fromTo("#logo-wrap", { scale: 1.4, x: 304 * 1.4 }, { scale: 1.12, x: 0, duration: 0.85, ease: "power3.inOut", immediateRender: false }, 1.2);
+      tl.fromTo("#logo", { clipPath: "inset(0% 80% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.85, ease: "power3.inOut" }, 1.2);
+      // carry to the header, top-left
+      tl.fromTo("#logo-wrap", { scale: 1.12, x: 0, y: 0 }, { scale: HEAD_S, x: HEAD_X, y: HEAD_Y, duration: 0.7, ease: "power3.inOut", immediateRender: false }, 3.4);
+
+      // ── 2. headline ───────────────────────────────────────
+      const words = $$("#headline .w");
+      tl.fromTo(words, { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.16, ease: "power4.out", stagger: 0.085 }, 3.95);
+      const hlStart = 3.95 + words.length * 0.085 + 0.35;
+      tl.fromTo("#headline .hl", { backgroundSize: "0% 0.16em" }, { backgroundSize: "100% 0.16em", duration: 0.45, ease: "power3.inOut", stagger: 0.12 }, hlStart);
+      tl.fromTo("#headline .hl", { color: "#12141c" }, { color: "#d46a00", duration: 0.3, ease: "power2.out", stagger: 0.12 }, hlStart + 0.1);
+
+      // ── 3. ink flood, stats ───────────────────────────────
+      tl.fromTo("#ink-flood", { clipPath: "inset(100% 0% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.55, ease: "power2.inOut" }, 7.8);
+      tl.fromTo(
+        "#logo-wrap",
+        { opacity: 1, y: HEAD_Y, filter: "blur(0px)" },
+        { opacity: 0, y: HEAD_Y - 60, filter: "blur(6px)", duration: 0.35, ease: "power3.in", immediateRender: false },
+        7.75,
+      );
+      tl.fromTo("#headline", { y: 0, opacity: 1, filter: "blur(0px)" }, { y: -60, opacity: 0, filter: "blur(6px)", duration: 0.35, ease: "power3.in", immediateRender: false }, 7.8);
+
+      for (let i = 0; i < 4; i++) {
+        const t0 = 8.45 + i * 0.14;
+        tl.fromTo(`#st${i} .rule`, { scaleX: 0 }, { scaleX: 1, duration: 0.5, ease: "expo.out" }, t0);
+        tl.fromTo(`#st${i} .val`, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.5, ease: "expo.out" }, t0 + 0.05);
+        tl.fromTo(`#st${i} .lab`, { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.3, ease: "power4.out" }, t0 + 0.35);
+        const proxy = { v: 0 };
+        const el = $(`#st${i} .n`);
+        tl.fromTo(
+          proxy,
+          { v: 0 },
+          { v: statNums[i], duration: 1.4, ease: "power2.out", onUpdate: () => (el.textContent = String(Math.round(proxy.v))) },
+          t0 + 0.05,
+        );
+        tl.fromTo(`#st${i} .suf`, { opacity: 0, x: -14 }, { opacity: 1, x: 0, duration: 0.3, ease: "expo.out" }, t0 + 1.4);
+      }
+      tl.fromTo("#stats .stat", { opacity: 1, filter: "blur(0px)" }, { opacity: 0, filter: "blur(8px)", duration: 0.22, ease: "power2.in", stagger: 0.05, immediateRender: false }, 12.2);
+
+      // ── 4. orange flood, service lines ────────────────────
+      tl.fromTo("#orange-flood", { clipPath: "inset(0% 100% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.45, ease: "power2.inOut" }, 12.4);
+      tl.set("#ink-flood", { clipPath: "inset(100% 0% 0% 0%)" }, 12.9);
+      tl.fromTo("#svc-head", { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power4.out" }, 12.85);
+      for (let i = 0; i < 4; i++) {
+        tl.fromTo(`#ln${i}`, { x: 360, opacity: 0, filter: "blur(14px)" }, { x: 0, opacity: 1, filter: "blur(0px)", duration: 0.55, ease: "expo.out" }, 12.95 + i * 0.17);
+      }
+      // three lines leave; "our own products" carries up to become the products header
+      tl.to(["#svc-head", "#ln0", "#ln1", "#ln2"], { opacity: 0, filter: "blur(8px)", duration: 0.2, ease: "power2.in", stagger: 0.04 }, 15.25);
+      tl.fromTo("#ln3 .num", { opacity: 1 }, { opacity: 0, duration: 0.15, immediateRender: false }, 15.3);
+      tl.fromTo("#ln3", { x: 0, y: 0 }, { x: -90, y: 120 - 620 - 18, duration: 0.6, ease: "power3.inOut", immediateRender: false }, 15.4);
+      tl.fromTo("#ln3 .txt", { scale: 1 }, { scale: 0.46, duration: 0.6, ease: "power3.inOut" }, 15.4);
+      tl.fromTo("#orange-flood", { clipPath: "inset(0% 0% 0% 0%)" }, { clipPath: "inset(0% 0% 100% 0%)", duration: 0.45, ease: "power2.inOut", immediateRender: false }, 15.5);
+
+      // ── 5. products sweep ─────────────────────────────────
+      tl.fromTo(".card", { x: 760, opacity: 0, filter: "blur(10px)" }, { x: 0, opacity: 1, filter: "blur(0px)", duration: 0.75, ease: "expo.out", stagger: 0.11 }, 15.85);
+      tl.fromTo(".card", { x: 0, opacity: 1, filter: "blur(0px)" }, { x: -900, opacity: 0, filter: "blur(10px)", duration: 0.5, ease: "power3.in", stagger: 0.06, immediateRender: false }, 18.75);
+      tl.fromTo("#ln3", { opacity: 1, filter: "blur(0px)" }, { opacity: 0, filter: "blur(8px)", duration: 0.22, ease: "power2.in", immediateRender: false }, 18.8);
+
+      // ── 6. close: logo, place, call to action ─────────────
+      tl.fromTo(
+        "#logo-wrap",
+        { opacity: 0, scale: 0.82, x: 0, y: -180, filter: "blur(10px)" },
+        { opacity: 1, filter: "blur(0px)", duration: 0.4, ease: "power4.out", immediateRender: false },
+        19.35,
+      );
+      tl.fromTo("#place .w", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.18, ease: "power4.out", stagger: 0.1 }, 19.65);
+      tl.fromTo("#cta", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: "expo.out" }, 20.1);
+      // clear back to the opening frame
+      tl.fromTo(
+        ["#cta", "#place", "#logo-wrap"],
+        { opacity: 1, filter: "blur(0px)" },
+        { opacity: 0, filter: "blur(8px)", duration: 0.3, ease: "power2.in", stagger: 0.06, immediateRender: false },
+        22.15,
+      );
+
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>
