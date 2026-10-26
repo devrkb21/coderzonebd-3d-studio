@@ -77,7 +77,12 @@ export function Tooltip() {
       ref.current.style.transform = `translate(${e.clientX + 16}px, ${e.clientY + 18}px)`
     }
     window.addEventListener('pointermove', move)
-    return () => window.removeEventListener('pointermove', move)
+    // The label belongs to where you were: drop it as soon as the camera goes somewhere else,
+    // so "Go to Home →" can't linger over Home after you've arrived.
+    const unsub = useStore.subscribe((s, prev) => {
+      if (s.tip && (s.stop !== prev.stop || s.focusId !== prev.focusId || s.overview !== prev.overview || s.intro !== prev.intro)) s.setTip(null)
+    })
+    return () => { window.removeEventListener('pointermove', move); unsub() }
   }, [])
   return <div ref={ref} className={`tooltip ${tip ? 'on' : ''}`} aria-hidden>{tip}</div>
 }
