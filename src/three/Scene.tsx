@@ -4,7 +4,10 @@ import { Canvas, useFrame } from '@react-three/fiber'
 import { ContactShadows, PerformanceMonitor } from '@react-three/drei'
 import { UI, tr } from '../content'
 import { useStore } from '../store'
+import { AI_ENABLED } from '../ai/client'
 import { CameraRig } from './CameraRig'
+import { DemoScreen } from './DemoScreen'
+import { Ghosts } from './Ghosts'
 import { Items, DRAG_PX } from './Items'
 import { Office } from './Office'
 import { OfficeModels, Robot } from './Models'
@@ -116,6 +119,7 @@ export default function Scene({ onProgress }: { onProgress: (p: number) => void 
         <FloorShadows />
       </Suspense>
       <CameraRig />
+      {AI_ENABLED && <><DemoScreen /><Ghosts /></>}
     </Canvas>
   )
 }

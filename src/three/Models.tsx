@@ -5,6 +5,7 @@ import { useFrame } from '@react-three/fiber'
 import { useAnimations, useGLTF } from '@react-three/drei'
 import * as THREE from 'three'
 import { useStore } from '../store'
+import { AI_ENABLED } from '../ai/client'
 import { ROOM } from './layout'
 import { noHit } from './Life'
 
@@ -141,7 +142,7 @@ export function Robot() {
         if (e.delta > 6) return
         const s = useStore.getState()
         play('Yes', true)
-        s.focus('contact')
+        if (AI_ENABLED) s.openChat('receptionist'); else s.focus('contact')
       }}
     >
       <primitive object={scene} />
