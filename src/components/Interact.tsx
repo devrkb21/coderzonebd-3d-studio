@@ -9,7 +9,7 @@ const isTyping = (t: EventTarget | null) =>
 
 /**
  * Esc steps back one level (help → quote → panel → whole-studio overview). Arrows walk the
- * sections, 1–8 jump to one, T starts/stops the tour, L flips the lights, ? opens help.
+ * sections, 1–9 jump to one, T starts/stops the tour, L flips the lights, ? opens help.
  * The panel and the quote drawer handle their own Esc first and mark it handled.
  */
 export function Shortcuts() {
@@ -108,7 +108,7 @@ export function HelpOverlay() {
         [bn ? 'ক্লিক' : 'Click', bn ? 'জিনিস খুলুন, বা সেকশনে চলে যান' : 'Open an item, or fly to a section'],
         ['Esc', bn ? 'এক ধাপ পেছনে: প্যানেল বন্ধ, তারপর পুরো স্টুডিও' : 'Step back: close the panel, then see the whole studio'],
         ['← →', bn ? 'আগের / পরের সেকশন' : 'Previous / next section'],
-        ['1 – 8', bn ? 'সরাসরি কোনো সেকশনে' : 'Jump to a section'],
+        ['1 – 9', bn ? 'সরাসরি কোনো সেকশনে' : 'Jump to a section'],
         ['T', bn ? 'অটো ট্যুর চালু / বন্ধ' : 'Start or stop the auto tour'],
         ['L', bn ? 'অফিসের লাইট অন / অফ' : 'Office lights on / off'],
       ]

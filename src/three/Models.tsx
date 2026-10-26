@@ -5,7 +5,7 @@ import { useFrame } from '@react-three/fiber'
 import { useAnimations, useGLTF } from '@react-three/drei'
 import * as THREE from 'three'
 import { useStore } from '../store'
-import { ROOM } from './layout'
+import { LOUNGE_X, ROOM } from './layout'
 import { noHit } from './Life'
 
 const { halfW, halfD, height } = ROOM
@@ -57,15 +57,15 @@ function FanModel({ x, z }: { x: number; z: number }) {
 export function OfficeModels() {
   return (
     <group>
-      {/* lounge: sofa against the front wall, two armchairs, coffee table, side table */}
-      <Model name="sofa_03" position={[-8.6, 0, halfD - 0.75]} rotation-y={Math.PI} />
-      <Model name="modern_coffee_table_01" position={[-8.6, 0, 7.7]} rotation-y={Math.PI / 2} scale={1.15} />
-      <Model name="modern_arm_chair_01" position={[-10.9, 0, 7.0]} rotation-y={Math.PI / 2 - 0.35} />
-      <Model name="side_table_01" position={[-10.6, 0, halfD - 0.6]} />
-      <Model name="potted_plant_04" position={[-10.6, 0.55, halfD - 0.6]} scale={1.4} />
+      {/* lounge in the front-right corner: sofa against the front wall, armchair, coffee table, side table */}
+      <Model name="sofa_03" position={[LOUNGE_X, 0, halfD - 0.75]} rotation-y={Math.PI} />
+      <Model name="modern_coffee_table_01" position={[LOUNGE_X, 0, halfD - 2.2]} rotation-y={Math.PI / 2} scale={1.15} />
+      <Model name="modern_arm_chair_01" position={[LOUNGE_X - 2.3, 0, halfD - 2.9]} rotation-y={Math.PI / 2 - 0.35} />
+      <Model name="side_table_01" position={[halfW - 1.2, 0, halfD - 0.6]} />
+      <Model name="potted_plant_04" position={[halfW - 1.2, 0.55, halfD - 0.6]} scale={1.4} />
       {/* big plants by the entrance and in the corners */}
-      <Model name="potted_plant_02" position={[-2.3, 0, halfD - 0.65]} scale={1.75} rotation-y={0.6} />
-      <Model name="potted_plant_02" position={[2.3, 0, halfD - 0.65]} scale={1.75} rotation-y={2.2} />
+      <Model name="potted_plant_02" position={[-3.4, 0, halfD - 0.65]} scale={1.75} rotation-y={0.6} />
+      <Model name="potted_plant_02" position={[3.4, 0, halfD - 0.65]} scale={1.75} rotation-y={2.2} />
       <Model name="potted_plant_02" position={[halfW - 0.8, 0, -halfD + 0.8]} scale={1.9} rotation-y={1.2} />
       <Model name="potted_plant_02" position={[-halfW + 0.9, 0, 3.6]} scale={1.8} rotation-y={-0.4} />
       <Model name="potted_plant_02" position={[halfW - 0.9, 0, 2.0]} scale={1.8} rotation-y={2.8} />
@@ -74,9 +74,9 @@ export function OfficeModels() {
       <Model name="potted_plant_04" position={[9.55, 0.77, 7.05]} scale={1.2} />
       <Model name="desk_lamp_arm_01" position={[7.65, 0.77, 7.55]} rotation-y={Math.PI + 0.6} scale={0.9} />
       {/* ceiling fans */}
-      <FanModel x={-8.6} z={6.4} />
+      <FanModel x={LOUNGE_X} z={halfD - 2.2} />
       <FanModel x={7} z={5.3} />
-      {/* framed art either side of the windows, above the bookshelf and the coffee corner */}
+      {/* framed art either side of the windows, above the CEO's cabin and the lounge */}
       <Model name="hanging_picture_frame_01" position={[-14.2, 3.35, halfD - 0.02]} rotation-y={Math.PI} scale={1.5} />
       <Model name="hanging_picture_frame_02" position={[14.2, 3.2, halfD - 0.04]} rotation-y={Math.PI} scale={1.6} />
       {/* CCTV in the corner, watching the room */}

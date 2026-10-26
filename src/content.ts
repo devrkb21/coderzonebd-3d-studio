@@ -5,7 +5,7 @@ export type Lang = 'bn' | 'en'
 export type L = { bn: string; en: string }
 export const tr = (l: L, lang: Lang) => l[lang]
 
-export type StopId = 'home' | 'services' | 'products' | 'work' | 'tech' | 'courier' | 'process' | 'contact'
+export type StopId = 'home' | 'services' | 'products' | 'work' | 'tech' | 'courier' | 'process' | 'contact' | 'leadership'
 
 export const STOPS: { id: StopId; label: L }[] = [
   { id: 'home', label: { bn: 'হোম', en: 'Home' } },
@@ -16,6 +16,7 @@ export const STOPS: { id: StopId; label: L }[] = [
   { id: 'courier', label: { bn: 'কুরিয়ার চেক', en: 'Courier Check' } },
   { id: 'process', label: { bn: 'প্রসেস', en: 'Process' } },
   { id: 'contact', label: { bn: 'যোগাযোগ', en: 'Contact' } },
+  { id: 'leadership', label: { bn: 'নেতৃত্ব', en: 'Leadership' } },
 ]
 
 export const CONTACT = {
@@ -59,6 +60,23 @@ export const COMPANY = {
     { name: 'Rakib Uddin', role: 'CEO · CTO' },
     { name: 'Barek Mian', role: 'CMO · CFO' },
   ],
+}
+
+/** The founders' cabins: only facts already stated above (names, roles, the studio). */
+export const LEADERSHIP = {
+  intro: {
+    bn: 'Coder Zone BD চালান দুই প্রতিষ্ঠাতা। খুলনার এই স্টুডিও ২০২৪ সাল থেকে কাজ করছে, আর সবকিছু বানায় নিজেদের টিম। যারা বানাচ্ছে, তাদের সাথে সরাসরি কথা বলুন — মাঝে কোনো দালাল নেই।',
+    en: 'Coder Zone BD is led by its two founders. The Khulna studio has been working since 2024, and everything is built by its in-house team. You talk directly to the people who build your project — no middlemen.',
+  } as L,
+  founders: [
+    { who: 'ceo' as const, name: 'Rakib Uddin', role: 'CEO · CTO', duty: { bn: 'প্রধান নির্বাহী ও প্রযুক্তি প্রধান', en: 'Chief Executive and Chief Technology Officer' } as L },
+    { who: 'cmo' as const, name: 'Barek Mian', role: 'CMO · CFO', duty: { bn: 'প্রধান মার্কেটিং ও আর্থিক কর্মকর্তা', en: 'Chief Marketing and Chief Financial Officer' } as L },
+  ],
+  assistant: {
+    bn: 'প্রতিটি কেবিনের ডেস্কের স্ক্রিনে আছে একজন AI সহকারী। প্রতিষ্ঠাতা ব্যস্ত থাকলেও প্রশ্ন করুন — যেকোনো সময়।',
+    en: 'Each cabin has an AI assistant on the desk screen. Ask it anything, any time — even when the founder is busy.',
+  } as L,
+  ask: { bn: 'AI সহকারীকে জিজ্ঞেস করুন', en: 'Ask the AI assistant' } as L,
 }
 
 export interface Service {

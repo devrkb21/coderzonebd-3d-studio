@@ -18,7 +18,10 @@ export function phaseAt(h: number): Phase {
 
 /** `?time=day|night|dusk|dawn` previews a phase; otherwise it follows the clock, checked each minute. */
 export function usePhase(): Phase {
-  const forced = typeof location !== 'undefined' ? new URLSearchParams(location.search).get('time') : null
+  const q = typeof location !== 'undefined' ? new URLSearchParams(location.search) : null
+  // `?hour=` (the office schedule preview) also sets the sky
+  const hour = q?.has('hour') ? Number(q.get('hour')) : NaN
+  const forced = q?.get('time') ?? (hour >= 0 && hour < 24 ? phaseAt(hour) : null)
   const valid = (p: string | null): p is Phase => p === 'dawn' || p === 'day' || p === 'dusk' || p === 'night'
   const [phase, setPhase] = useState<Phase>(valid(forced) ? forced : phaseAt(dhakaHours()))
   useEffect(() => {

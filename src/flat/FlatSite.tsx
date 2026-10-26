@@ -4,7 +4,7 @@
 import {
   COMPANY, COURIER, PROCESS, PRODUCTS, SERVICES, SHOW_TESTIMONIALS, STOPS, TESTIMONIALS, tr, UI, WORK, type Lang,
 } from '../content'
-import { ContactDetails, CourierDetails, HomeDetails, ProductDetails, ServiceDetails, TechDetails, WorkDetails } from '../components/details'
+import { ContactDetails, CourierDetails, HomeDetails, LeadershipDetails, ProductDetails, ServiceDetails, TechDetails, WorkDetails } from '../components/details'
 
 export function FlatSite({ lang, visible, onQuote }: { lang: Lang; visible: boolean; onQuote?: () => void }) {
   const title = (id: string) => tr(STOPS.find((s) => s.id === id)!.label, lang)
@@ -91,6 +91,11 @@ export function FlatSite({ lang, visible, onQuote }: { lang: Lang; visible: bool
         <section id="contact">
           <h2>{tr(UI.contactTitle, lang)}</h2>
           <div className="card wide"><ContactDetails lang={lang} onQuote={onQuote} /></div>
+        </section>
+
+        <section id="leadership">
+          <h2>{title('leadership')}</h2>
+          <div className="card wide"><LeadershipDetails lang={lang} /></div>
         </section>
       </main>
       <footer className="flat-foot">© {COMPANY.name} · {lang === 'bn' ? 'খুলনা, বাংলাদেশ' : 'Khulna, Bangladesh'}</footer>

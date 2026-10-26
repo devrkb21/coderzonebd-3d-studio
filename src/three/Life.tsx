@@ -1,13 +1,14 @@
-// Things that move in the office: the team at work, ceiling fans, the AC, coffee steam, a
-// router's lights and a live digital clock. Nothing here catches clicks.
+// Things that move in the office: ceiling fans, the AC, coffee steam, a router's lights and a
+// live digital clock, plus the simple capsule people used out on the street (the office team are
+// realistic avatars: People.tsx). Nothing here catches clicks.
 import { useEffect, useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { useStore } from '../store'
-import { ROOM } from './layout'
+import { COFFEE_X, ROOM } from './layout'
 import { BRAND, INK } from './textures'
 
-const { halfD } = ROOM
+const { halfW, halfD } = ROOM
 
 /** Ref callback: let clicks pass straight through a group (people, fans, props). */
 export const noHit = (g: THREE.Object3D | null) => g?.traverse((o) => { o.raycast = () => {} })
@@ -15,13 +16,6 @@ export const noHit = (g: THREE.Object3D | null) => g?.traverse((o) => { o.raycas
 // ── people ─────────────────────────────────────────────────────
 
 export interface Look { shirt: string; pants: string; skin: string; hair: string }
-
-export const TEAM: Look[] = [
-  { shirt: BRAND, pants: '#2B2F3A', skin: '#A8714A', hair: '#17120F' },
-  { shirt: '#F4F4F2', pants: '#3A4256', skin: '#8E5B3A', hair: '#1C1612' },
-  { shirt: '#1F3A5F', pants: '#2A2A2E', skin: '#B9845C', hair: '#221A14' },
-]
-
 
 export interface Rig {
   root: THREE.Group | null
@@ -96,29 +90,6 @@ export function Person({ look, drive, mug, ...props }: JSX.IntrinsicElements['gr
   )
 }
 
-/** Sitting at a desk and typing; now and then glances aside and stretches. */
-export function typing(seed: number) {
-  return (r: Rig, t: number) => {
-    if (!r.hips) return
-    r.hips.position.y = 0.55
-    r.legL!.rotation.x = r.legR!.rotation.x = -Math.PI / 2
-    r.kneeL!.rotation.x = r.kneeR!.rotation.x = Math.PI / 2
-    const cycle = (t + seed * 7) % 14
-    const stretch = cycle > 12 ? Math.sin(((cycle - 12) / 2) * Math.PI) : 0
-    r.torso!.rotation.x = 0.12 - stretch * 0.25
-    r.torso!.scale.y = 1 + Math.sin(t * 1.6 + seed) * 0.012
-    r.head!.rotation.y = cycle > 8 && cycle < 9.6 ? Math.sin(((cycle - 8) / 1.6) * Math.PI) * 0.5 : Math.sin(t * 0.7 + seed) * 0.05
-    r.head!.rotation.x = 0.08 + Math.sin(t * 0.9 + seed) * 0.03
-    const k = 1 - stretch
-    r.armL!.rotation.x = -0.75 * k - 2.6 * stretch
-    r.armR!.rotation.x = -0.75 * k - 2.6 * stretch
-    r.armL!.rotation.z = 0.12
-    r.armR!.rotation.z = -0.12
-    r.elbowL!.rotation.x = (-0.95 + Math.max(0, Math.sin(t * 17 + seed)) * 0.12) * k
-    r.elbowR!.rotation.x = (-0.95 + Math.max(0, Math.sin(t * 15 + seed + 1.7)) * 0.12) * k
-  }
-}
-
 /** One step of the walk cycle at `phase` radians, `amp` 0 (standing) … 1 (walking). */
 export function walkPose(r: Rig, phase: number, amp: number) {
   if (!r.hips) return
@@ -138,61 +109,6 @@ export function walkPose(r: Rig, phase: number, amp: number) {
   r.torso!.rotation.y = s * 0.06 * amp
   r.head!.rotation.y = 0
   r.head!.rotation.x = 0
-}
-
-/** Walks a path back and forth, pausing at each end (sips from the mug at the coffee end). */
-export function patrol(points: [number, number][], speed: number, pause: number, mugHand = false) {
-  const segs = points.slice(1).map((p, i) => Math.hypot(p[0] - points[i][0], p[1] - points[i][1]))
-  const L = segs.reduce((a, b) => a + b, 0)
-  const leg = L / speed
-  const T = 2 * (leg + pause)
-  let heading = 0
-  return (r: Rig, t: number) => {
-    if (!r.root) return
-    const c = t % T
-    let d: number
-    let moving = true
-    let fwd = true
-    if (c < pause) { d = 0; moving = false }
-    else if (c < pause + leg) d = (c - pause) * speed
-    else if (c < 2 * pause + leg) { d = L; moving = false }
-    else { d = L - (c - 2 * pause - leg) * speed; fwd = false }
-    let i = 0
-    let rem = d
-    while (i < segs.length - 1 && rem > segs[i]) { rem -= segs[i]; i++ }
-    const a = points[i]
-    const b = points[i + 1]
-    const k = segs[i] ? Math.min(1, rem / segs[i]) : 0
-    r.root.position.set(a[0] + (b[0] - a[0]) * k, 0, a[1] + (b[1] - a[1]) * k)
-    if (moving) {
-      const target = fwd ? Math.atan2(b[0] - a[0], b[1] - a[1]) : Math.atan2(a[0] - b[0], a[1] - b[1])
-      let diff = target - heading
-      diff = Math.atan2(Math.sin(diff), Math.cos(diff))
-      heading += diff * 0.15
-    }
-    r.root.rotation.y = heading
-    walkPose(r, d * 5.2, moving ? 1 : 0)
-    if (!moving && mugHand && r.armR && r.elbowR) {
-      // a sip now and then
-      const sip = Math.max(0, Math.sin(t * 1.3)) ** 4
-      r.armR.rotation.x = -0.35 - sip * 0.5
-      r.elbowR.rotation.x = -0.6 - sip * 1.6
-    } else if (mugHand && r.elbowR) {
-      r.elbowR.rotation.x = -1.2
-      r.armR!.rotation.x = -0.15
-    }
-  }
-}
-
-export function Team() {
-  const walk = useMemo(() => patrol([[13.1, 8.2], [10.2, 5.4], [-3.8, 5.4], [-5.6, 6.0]], 1.15, 3.5, true), [])
-  return (
-    <group>
-      <Person look={TEAM[0]} position={[5.4, 0, 6.42]} drive={typing(0)} />
-      <Person look={TEAM[1]} position={[8.6, 0, 6.42]} drive={typing(3)} />
-      <Person look={TEAM[2]} drive={walk} mug />
-    </group>
-  )
 }
 
 // ── ceiling fans, AC, steam, router ────────────────────────────
@@ -359,10 +275,9 @@ export function DigitalClock({ position }: { position: [number, number, number] 
 export function OfficeLife() {
   return (
     <>
-      <Team />
       <AirCon position={[-8, 5.75, halfD - 0.17]} />
-      <Steam position={[14.0, 1.06, halfD - 0.65]} />
-      <Router position={[-14.2, 2.1, halfD - 0.35]} />
+      <Steam position={[COFFEE_X - 0.2, 1.06, halfD - 0.65]} />
+      <Router position={[halfW - 0.35, 2.1, 9]} />
       <DigitalClock position={[0, 6.36, -halfD + 0.02]} />
     </>
   )

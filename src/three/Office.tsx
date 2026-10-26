@@ -1,16 +1,19 @@
 // Office life in the front half of the room (behind every camera stop, so nothing blocks a
-// display): a Bangladesh-time wall clock, two workstations, a lounge, a bookshelf, a coffee corner.
-import { useMemo, useRef } from 'react'
+// display): a Bangladesh-time wall clock, two workstations, a lounge in the front-right corner
+// with a bookshelf, and a coffee corner by the entrance. Reception and cabins: Reception.tsx, Cabins.tsx.
+import { useEffect, useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
+import { useSchedule } from '../schedule'
 import { useStore } from '../store'
 import { Hot } from './Hot'
-import { ROOM } from './layout'
+import { COFFEE_X, LOUNGE_X, ROOM } from './layout'
 import { BRAND, INK } from './textures'
 import { dhakaHours } from './time'
 import { OfficeLife } from './Life'
+import { sleepTexture } from './PeopleScreens'
 
-const { halfD } = ROOM
+const { halfW, halfD } = ROOM
 
 function useOfficeMaterials() {
   return useMemo(() => ({
@@ -64,11 +67,19 @@ function screenTexture() {
   return t
 }
 
-/** Scrolls the editor on every monitor, a few lines at a time, like someone reading code. */
-function ScrollingCode({ tex }: { tex: THREE.Texture }) {
+/** Scrolls the editor on every monitor, a few lines at a time; after hours the screens sleep. */
+function ScrollingCode({ mat }: { mat: THREE.MeshBasicMaterial }) {
+  const { open } = useSchedule()
+  const code = useMemo(() => mat.map!, [mat])
+  useEffect(() => {
+    mat.map = open ? code : sleepTexture()
+    mat.needsUpdate = true
+  }, [mat, code, open])
   useFrame(({ clock }) => {
     const t = clock.elapsedTime
-    tex.offset.y = -(Math.floor(t * 1.6) * 0.0115 + (t % 0.625) * 0.004)
+    code.offset.y = -(Math.floor(t * 1.6) * 0.0115 + (t % 0.625) * 0.004)
+    // a sleeping screen breathes
+    mat.color.setScalar(open ? 1 : 0.75 + Math.sin(t * 0.8) * 0.25)
   })
   return null
 }
@@ -115,11 +126,11 @@ export function Office() {
         <Workstation m={m} position={[8.6, 0, 7.4]} />
       </Hot>
       <Lounge m={m} />
-      <Bookshelf m={m} position={[-14.2, 0, halfD - 0.35]} />
+      <Bookshelf m={m} position={[halfW - 0.35, 0, 9]} rotation-y={-Math.PI / 2} />
       <Hot tip={{ bn: 'এক কাপ চা/কফিতে কথা হোক ☕', en: "Let's talk over coffee ☕" }} onPick={coffee}>
-        <CoffeeCorner m={m} position={[14.2, 0, halfD - 0.55]} />
+        <CoffeeCorner m={m} position={[COFFEE_X, 0, halfD - 0.55]} />
       </Hot>
-      <ScrollingCode tex={m.screen.map!} />
+      <ScrollingCode mat={m.screen} />
       <OfficeLife />
     </group>
   )
@@ -206,10 +217,10 @@ function Workstation({ m, position }: { m: Mats; position: [number, number, numb
 
 function Lounge({ m }: { m: Mats }) {
   return (
-    <group position={[-8.6, 0, 7.6]}>
+    <group position={[LOUNGE_X, 0, halfD - 2.3]}>
       <mesh rotation-x={-Math.PI / 2} position-y={0.012} material={m.rug}><planeGeometry args={[4.6, 3]} /></mesh>
       {/* floor lamp */}
-      <group position={[2.1, 0, 1.4]}>
+      <group position={[-2.3, 0, 1.5]}>
         <mesh position-y={0.8} material={m.leg}><cylinderGeometry args={[0.025, 0.025, 1.6, 8]} /></mesh>
         <mesh position-y={1.65} material={m.lamp}><cylinderGeometry args={[0.18, 0.26, 0.32, 16, 1, true]} /></mesh>
         <mesh position-y={0.02} material={m.leg}><cylinderGeometry args={[0.2, 0.2, 0.04, 16]} /></mesh>
@@ -218,7 +229,7 @@ function Lounge({ m }: { m: Mats }) {
   )
 }
 
-function Bookshelf({ m, position }: { m: Mats; position: [number, number, number] }) {
+function Bookshelf({ m, position, ...props }: JSX.IntrinsicElements['group'] & { m: Mats; position: [number, number, number] }) {
   const books = useMemo(() => {
     const out: { x: number; y: number; h: number; mat: number }[] = []
     for (let shelf = 0; shelf < 4; shelf++) {
@@ -234,7 +245,7 @@ function Bookshelf({ m, position }: { m: Mats; position: [number, number, number
     return out
   }, [])
   return (
-    <group position={position} rotation-y={Math.PI}>
+    <group position={position} {...props}>
       <mesh position-y={1.05} material={m.wood}><boxGeometry args={[1.6, 2.1, 0.4]} /></mesh>
       {[0, 1, 2, 3].map((s) => (
         <mesh key={s} position={[0, 0.2 + s * 0.5 + 0.12, 0.05]} material={m.white}><boxGeometry args={[1.5, 0.44, 0.32]} /></mesh>

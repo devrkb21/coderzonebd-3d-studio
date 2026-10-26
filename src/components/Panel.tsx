@@ -4,7 +4,7 @@ import { itemById, itemsAt } from '../items'
 import { useStore } from '../store'
 import { inertUnless } from './inert'
 import {
-  ContactDetails, CourierDetails, HomeDetails, ProcessDetails, ProductDetails, ServiceDetails, TechDetails, WorkDetails,
+  ContactDetails, CourierDetails, HomeDetails, LeadershipDetails, ProcessDetails, ProductDetails, ServiceDetails, TechDetails, WorkDetails,
 } from './details'
 import { ChevronLeft, ChevronRight, CloseIcon } from './icons'
 
@@ -80,6 +80,10 @@ export function Panel() {
     case 'contact':
       title = tr(UI.contactTitle, lang)
       body = <ContactDetails lang={lang} onQuote={() => setQuoteOpen(true)} />
+      break
+    case 'leadership':
+      title = tr(STOPS.find((s) => s.id === 'leadership')!.label, lang)
+      body = <LeadershipDetails lang={lang} onAsk={(who) => useStore.getState().openChat(who)} />
       break
   }
 

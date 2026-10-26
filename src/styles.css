@@ -131,6 +131,7 @@ html:not(.mode-3d) .topbar { position: sticky; padding-bottom: 12px; background:
 .team { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .team li { padding: 10px 12px; border-radius: var(--r1); border: 1px solid var(--line); display: grid; }
 .team span { font-size: 13px; color: var(--ink-3); }
+.team .btn { margin-top: 8px; justify-self: start; }
 .faq details { border-bottom: 1px solid var(--line); padding: 10px 0; }
 .faq summary { cursor: pointer; font-weight: 600; }
 .faq p { margin: 6px 0 0; color: var(--ink-2); }

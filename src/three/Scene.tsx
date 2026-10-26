@@ -3,11 +3,15 @@ import * as THREE from 'three'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { ContactShadows, PerformanceMonitor } from '@react-three/drei'
 import { UI, tr } from '../content'
+import { useSchedule } from '../schedule'
 import { useStore } from '../store'
 import { CameraRig } from './CameraRig'
 import { Items, DRAG_PX } from './Items'
 import { Office } from './Office'
 import { OfficeModels, Robot } from './Models'
+import { Cabins } from './Cabins'
+import { PeopleCast } from './PeopleCast'
+import { Reception } from './Reception'
 import { Outside, SKY } from './Outside'
 import { Room } from './Room'
 import { prepareTextures } from './textures'
@@ -26,6 +30,8 @@ function FloorShadows() {
 /** Office lights, dimmed by the switch by the door; daylight through the windows stays. */
 function Lights() {
   const phase = usePhase()
+  // after hours the office is a little dimmer (the switch still turns everything off)
+  const dim = useSchedule().open ? 1 : 0.72
   const amb = useRef<THREE.AmbientLight>(null)
   const hemi = useRef<THREE.HemisphereLight>(null)
   const sun = useRef<THREE.DirectionalLight>(null)
@@ -36,9 +42,9 @@ function Lights() {
     const go = (l: THREE.Light | null, onI: number, offI: number) => {
       if (l) l.intensity = THREE.MathUtils.damp(l.intensity, on ? onI : offI, 4, d)
     }
-    go(amb.current, 1.6, 0.22 + 0.9 * day)
-    go(hemi.current, 0.8, 0.12 + 0.4 * day)
-    go(sun.current, 1, 0.08 + 0.5 * day)
+    go(amb.current, 1.6 * dim, 0.22 + 0.9 * day)
+    go(hemi.current, 0.8 * dim, 0.12 + 0.4 * day)
+    go(sun.current, dim, 0.08 + 0.5 * day)
   })
   return (
     <>
@@ -113,6 +119,9 @@ export default function Scene({ onProgress }: { onProgress: (p: number) => void 
       <Suspense fallback={null}>
         <OfficeModels />
         <Robot />
+        <PeopleCast />
+        <Reception />
+        <Cabins />
         <FloorShadows />
       </Suspense>
       <CameraRig />
