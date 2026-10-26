@@ -415,6 +415,74 @@ export function frontWallTexture(lang: Lang) {
   })
 }
 
+/** Soft cloudy mottling + fine grain, drawn wrapped so the texture tiles without seams. */
+function mottle(ctx: Ctx, w: number, h: number, base: string, light: string, dark: string, seed: number, blobs = 70) {
+  ctx.fillStyle = base
+  ctx.fillRect(0, 0, w, h)
+  const rnd = (i: number) => { const x = Math.sin(i * 127.1 + seed * 311.7) * 43758.5453; return x - Math.floor(x) }
+  for (let i = 0; i < blobs; i++) {
+    const x = rnd(i) * w
+    const y = rnd(i + 99) * h
+    const r = 24 + rnd(i + 7) * 70
+    for (const dx of [-w, 0, w]) {
+      for (const dy of [-h, 0, h]) {
+        const g = ctx.createRadialGradient(x + dx, y + dy, 0, x + dx, y + dy, r)
+        g.addColorStop(0, i % 2 ? light : dark)
+        g.addColorStop(1, 'rgba(0,0,0,0)')
+        ctx.fillStyle = g
+        ctx.fillRect(x + dx - r, y + dy - r, r * 2, r * 2)
+      }
+    }
+  }
+  const img = ctx.getImageData(0, 0, w, h)
+  for (let i = 0; i < img.data.length; i += 4) {
+    const n = (rnd(i / 4 + 5) - 0.5) * 6
+    img.data[i] += n
+    img.data[i + 1] += n
+    img.data[i + 2] += n
+  }
+  ctx.putImageData(img, 0, 0)
+}
+
+/** Warm limewash plaster for the walls. */
+export function plasterTexture() {
+  const t = make('plaster', 512, 512, (ctx, w, h) => mottle(ctx, w, h, '#F4EFE7', 'rgba(255,253,248,0.10)', 'rgba(170,150,120,0.05)', 1))
+  t.wrapS = t.wrapT = THREE.RepeatWrapping
+  return t
+}
+
+/** Dark charcoal microcement for the feature wall behind the displays. */
+export function microcementTexture() {
+  const t = make('microcement', 512, 512, (ctx, w, h) => mottle(ctx, w, h, '#2C2F37', 'rgba(110,116,130,0.09)', 'rgba(8,10,14,0.10)', 2, 90))
+  t.wrapS = t.wrapT = THREE.RepeatWrapping
+  return t
+}
+
+/** Oak wall panelling: vertical boards with grooves and grain. */
+export function panelTexture() {
+  const t = make('panel', 512, 256, (ctx, w, h) => {
+    const board = w / 6
+    for (let i = 0; i < 6; i++) {
+      const tone = 0.92 + ((i * 41) % 9) / 100
+      ctx.fillStyle = new THREE.Color('#B98E62').multiplyScalar(tone).getStyle()
+      ctx.fillRect(i * board, 0, board, h)
+      ctx.strokeStyle = 'rgba(90,60,30,0.12)'
+      for (let g = 0; g < 6; g++) {
+        const x = i * board + 6 + g * (board / 6)
+        ctx.beginPath(); ctx.moveTo(x, 0)
+        for (let y = 0; y <= h; y += 16) ctx.lineTo(x + Math.sin((y + i * 40 + g * 17) / 30) * 1.6, y)
+        ctx.stroke()
+      }
+      ctx.fillStyle = 'rgba(40,26,14,0.55)'
+      ctx.fillRect(i * board, 0, 3, h)
+      ctx.fillStyle = 'rgba(255,240,215,0.18)'
+      ctx.fillRect(i * board + 3, 0, 2, h)
+    }
+  })
+  t.wrapS = t.wrapT = THREE.RepeatWrapping
+  return t
+}
+
 /** Backlit storefront sign: the wordmark on a white light box. */
 export function signboardTexture() {
   return make('signboard', 1600, 320, (ctx, w, h) => {

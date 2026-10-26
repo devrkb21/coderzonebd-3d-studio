@@ -6,6 +6,7 @@ import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { useWeather } from '../weather'
 import { ROOM } from './layout'
+import { Avatar, type AvatarId } from './People'
 import { Person, walkPose, type Look, type Rig } from './Life'
 
 const { halfD } = ROOM
@@ -163,8 +164,44 @@ const WALK_SPAN = 90
 
 const UMBRELLAS = ['#1A1B20', '#7A1F2B', '#1F3A6B', '#2E5E3A']
 
+const coarse = typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches
+/** Realistic avatars for the people on the pavements (desktop); phones keep the light capsule people. */
+const STREET_AVATARS: AvatarId[] = ['dev2', 'walker', 'guard', 'dev1']
+
 function Pedestrians({ wet }: { wet: boolean }) {
-  return <>{WALKERS.map((w, i) => <Walker key={i} {...w} umbrella={wet ? UMBRELLAS[i % UMBRELLAS.length] : null} />)}</>
+  return (
+    <>
+      {WALKERS.map((w, i) => coarse
+        ? <Walker key={i} {...w} umbrella={wet ? UMBRELLAS[i % UMBRELLAS.length] : null} />
+        : <StreetAvatar key={i} {...w} who={STREET_AVATARS[i % STREET_AVATARS.length]} seed={i} umbrella={wet ? UMBRELLAS[i % UMBRELLAS.length] : null} />)}
+    </>
+  )
+}
+
+/** A Rocketbox avatar walking the pavement loop, with an umbrella over the head when it rains. */
+function StreetAvatar({ who, dir, speed, offset, z, seed, umbrella }: { who: AvatarId; dir: number; speed: number; offset: number; z: number; seed: number; umbrella: string | null }) {
+  const ref = useRef<THREE.Group>(null)
+  const m = useMemo(() => umbrella ? {
+    canopy: new THREE.MeshBasicMaterial({ color: umbrella, side: THREE.DoubleSide }),
+    stick: new THREE.MeshBasicMaterial({ color: '#2A2A2E' }),
+  } : null, [umbrella])
+  useFrame(({ clock }) => {
+    const g = ref.current
+    if (!g) return
+    const d = (clock.elapsedTime * speed + offset) % WALK_SPAN
+    g.position.set(dir > 0 ? -WALK_SPAN / 2 + d : WALK_SPAN / 2 - d, 0, z)
+  })
+  return (
+    <group ref={ref} rotation-y={dir > 0 ? Math.PI / 2 : -Math.PI / 2}>
+      <Avatar who={who} clip="walk" seed={seed} />
+      {m && (
+        <group>
+          <mesh position={[0.18, 1.6, 0.18]} material={m.stick}><cylinderGeometry args={[0.012, 0.012, 0.9, 6]} /></mesh>
+          <mesh position={[0.18, 2.1, 0.12]} material={m.canopy}><coneGeometry args={[0.62, 0.28, 8, 1, true]} /></mesh>
+        </group>
+      )}
+    </group>
+  )
 }
 
 function Walker({ look, dir, speed, offset, z, umbrella }: { look: Look; dir: number; speed: number; offset: number; z: number; umbrella: string | null }) {

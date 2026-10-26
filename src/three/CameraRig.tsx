@@ -38,14 +38,13 @@ export function CameraRig() {
   const overview = useStore((s) => s.overview)
   const intro = useStore((s) => s.intro)
   const introPlayed = useRef(false)
-  const moveId = useRef(0)
-  const transit = useRef(false)
-  const dest = useRef<{ p: THREE.Vector3; t: THREE.Vector3 } | null>(null)
-  const tmp = useRef(new THREE.Vector3())
+  /** The current flight: a camera crane move along a curve from where we are to the next view. */
+  const flight = useRef<{ p0: THREE.Vector3; t0: THREE.Vector3; ctrl: THREE.Vector3; p: THREE.Vector3; t: THREE.Vector3; start: number; dur: number } | null>(null)
+  const pos = useRef(new THREE.Vector3())
+  const tgt = useRef(new THREE.Vector3())
 
   /** Landed: switch to look-around in place and give the drag back. */
   const land = (c: CameraControls, p: THREE.Vector3, t: THREE.Vector3) => {
-    transit.current = false
     c.smoothTime = 0.6
     // Move the orbit pivot to just in front of the camera, so a drag turns the head in place
     // instead of swinging the camera around the wall. The view doesn't change.
@@ -62,14 +61,22 @@ export function CameraRig() {
     c.touches.one = ACTION.TOUCH_ROTATE
   }
 
-  // Land as soon as the camera is visually there, instead of waiting for the damping to rest.
+  // Fly: ease in and out along a gentle arc that rises mid-way, the gaze leading the move a
+  // little, like a camera crane between sections. Land exactly at the end.
   useFrame(() => {
     const c = ref.current
-    const d = dest.current
-    if (!c || !d || !transit.current) return
-    if (c.camera.position.distanceTo(d.p) < 0.06 && c.getTarget(tmp.current).distanceTo(d.t) < 0.12) {
-      moveId.current++
-      land(c, d.p, d.t)
+    const f = flight.current
+    if (!c || !f) return
+    const k = Math.min(1, (performance.now() / 1000 - f.start) / f.dur)
+    const e = k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2
+    const a = (1 - e) * (1 - e)
+    const b = 2 * (1 - e) * e
+    pos.current.set(0, 0, 0).addScaledVector(f.p0, a).addScaledVector(f.ctrl, b).addScaledVector(f.p, e * e)
+    tgt.current.copy(f.t0).lerp(f.t, Math.min(1, e * 1.15))
+    c.setLookAt(pos.current.x, pos.current.y, pos.current.z, tgt.current.x, tgt.current.y, tgt.current.z, false)
+    if (k >= 1) {
+      flight.current = null
+      land(c, f.p, f.t)
     }
   })
 
@@ -128,13 +135,11 @@ export function CameraRig() {
     c.maxAzimuthAngle = Infinity
     c.minPolarAngle = 0
     c.maxPolarAngle = Math.PI
-    const id = ++moveId.current
-    transit.current = true
     // A drag mid-flight would orbit the far target and swing the camera out of the room,
     // so look-around is off until the camera lands (see useFrame below).
     c.mouseButtons.left = ACTION.NONE
     c.touches.one = ACTION.NONE
-    dest.current = { p: p.clone(), t: t.clone() }
+    flight.current = null
     const animate = !reducedMotion()
 
     // First visit: start across the street, cross to the shop, the glass doors swing open,
@@ -143,7 +148,6 @@ export function CameraRig() {
       const H = ROOM.halfD
       let cancelled = false
       const wait = (ms: number) => new Promise((r) => setTimeout(r, ms))
-      dest.current = null
       ;(async () => {
         c.smoothTime = 0
         c.setLookAt(0, 3.1, H + 11.8, 0, 2.6, H, false)
@@ -160,12 +164,27 @@ export function CameraRig() {
       })()
       return () => { cancelled = true }
     }
-    c.smoothTime = introPlayed.current ? 0.6 : 0.9
     introPlayed.current = true
-    c.setLookAt(p.x, p.y, p.z, t.x, t.y, t.z, animate).then(() => {
-      if (id !== moveId.current || !transit.current) return
+    if (!animate) {
+      c.setLookAt(p.x, p.y, p.z, t.x, t.y, t.z, false)
       land(c, p, t)
-    })
+      return
+    }
+    // Start from exactly where the camera is and where it looks.
+    const p0 = c.camera.position.clone()
+    const dir = new THREE.Vector3()
+    c.camera.getWorldDirection(dir)
+    const t0 = p0.clone().addScaledVector(dir, Math.max(1, t.distanceTo(p)))
+    const dist = p0.distanceTo(p)
+    // Rise mid-way in proportion to the distance, but stay under the ceiling and inside the walls.
+    const ctrl = p0.clone().lerp(p, 0.5)
+    ctrl.y = Math.min(ROOM.height - 0.7, ctrl.y + Math.min(2.2, dist * (itemFrame ? 0.05 : 0.12)))
+    if (Math.abs(p0.x) < ROOM.halfW && Math.abs(p0.z) < ROOM.halfD) {
+      ctrl.x = THREE.MathUtils.clamp(ctrl.x, -ROOM.halfW + 0.6, ROOM.halfW - 0.6)
+      ctrl.z = THREE.MathUtils.clamp(ctrl.z, -ROOM.halfD + 0.6, ROOM.halfD - 0.6)
+    }
+    const dur = THREE.MathUtils.clamp(0.75 + dist * 0.055, itemFrame ? 0.7 : 0.95, 2.1)
+    flight.current = { p0, t0, ctrl, p: p.clone(), t: t.clone(), start: performance.now() / 1000, dur }
   }, [ready, intro, stop, focusId, overview, size.width, size.height, camera])
 
   return <CameraControls ref={ref} makeDefault />

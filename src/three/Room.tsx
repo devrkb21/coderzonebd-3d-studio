@@ -8,16 +8,26 @@ import {
   KIOSK_NORMAL, KIOSK_POS, PRODUCT_BOX, PROCESS_BOARD, ROOM, SERVICE_CARD, SERVICE_RAIL_Y, STOP_FRAMES, yawOf,
 } from './layout'
 import { Hot } from './Hot'
-import { BRAND, deskTexture, floorTexture, frontWallTexture, signboardTexture, signTexture } from './textures'
+import { BRAND, deskTexture, floorTexture, frontWallTexture, microcementTexture, panelTexture, plasterTexture, signboardTexture, signTexture } from './textures'
 import { usePhase } from './time'
 import { useWeather } from '../weather'
 import { WelcomeBanner } from './Welcome'
 
 const { halfW, halfD, height } = ROOM
 
+/** A copy of a tiling texture with its own repeat, so each wall keeps the pattern at real scale. */
+const tiled = (t: THREE.Texture, rx: number, ry: number) => {
+  const c = t.clone()
+  c.repeat.set(rx, ry)
+  c.needsUpdate = true
+  return c
+}
+
 function useMaterials() {
   return useMemo(() => ({
-    wall: new THREE.MeshLambertMaterial({ color: '#EEF0F5' }),
+    wall: new THREE.MeshLambertMaterial({ map: tiled(plasterTexture(), 12, 3.5) }),
+    feature: new THREE.MeshLambertMaterial({ map: tiled(microcementTexture(), 14, 3) }),
+    panel: new THREE.MeshLambertMaterial({ map: tiled(panelTexture(), (halfD * 2) / 1.8, 1) }),
     ceiling: new THREE.MeshLambertMaterial({ color: '#F8F9FB' }),
     floor: new THREE.MeshLambertMaterial({ map: floorTexture() }),
     white: new THREE.MeshLambertMaterial({ color: '#ffffff' }),
@@ -88,7 +98,8 @@ export function Room() {
       <mesh rotation-x={Math.PI / 2} position-y={height} material={m.ceiling}>
         <planeGeometry args={[halfW * 2, halfD * 2]} />
       </mesh>
-      <mesh position={[0, height / 2, -halfD]} material={m.wall}>
+      {/* the back wall is a dark feature wall, so the white displays stand out like in a gallery */}
+      <mesh position={[0, height / 2, -halfD]} material={m.feature}>
         <planeGeometry args={[halfW * 2, height]} />
       </mesh>
       <mesh position={[-halfW, height / 2, 0]} rotation-y={Math.PI / 2} material={m.wall}>
@@ -97,6 +108,7 @@ export function Room() {
       <mesh position={[halfW, height / 2, 0]} rotation-y={-Math.PI / 2} material={m.wall}>
         <planeGeometry args={[halfD * 2, height]} />
       </mesh>
+      <Wainscot m={m} />
       {/* Front wall, so a full look-around never shows the void. It faces inward only:
           from outside (the intro fly-in) it is invisible. */}
       <FrontWall m={m} />
@@ -362,6 +374,21 @@ function Exterior({ hw }: { hw: number }) {
       <mesh position={[0, DOOR.h + 0.32, -0.62]} rotation-x={-0.18} material={m.canopy}><boxGeometry args={[DOOR.w + 1.4, 0.06, 1.0]} /></mesh>
       <WelcomeBanner position={[0, 4.0, -0.2]} />
     </group>
+  )
+}
+
+/** Oak panelling to waist height along both side walls, with a walnut cap rail. */
+function Wainscot({ m }: { m: Mats }) {
+  const H = 1.1
+  return (
+    <>
+      {[-1, 1].map((sx) => (
+        <group key={sx} position={[sx * (halfW - 0.015), 0, 0]} rotation-y={-sx * Math.PI / 2}>
+          <mesh position-y={H / 2 + 0.12} material={m.panel}><planeGeometry args={[halfD * 2, H - 0.12]} /></mesh>
+          <mesh position={[0, H + 0.02, 0.02]} material={m.walnut}><boxGeometry args={[halfD * 2, 0.05, 0.05]} /></mesh>
+        </group>
+      ))}
+    </>
   )
 }
 

@@ -189,3 +189,31 @@ export function IntroOverlay() {
     </div>
   )
 }
+
+/** A cinematic title card as the camera moves to a section: its number and name sweep in, then fade. */
+export function SectionTitle() {
+  const [card, setCard] = useState<{ key: number; n: string; label: string } | null>(null)
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | undefined
+    const unsub = useStore.subscribe((s, prev) => {
+      if (s.intro || s.focusId) return
+      const moved = s.stop !== prev.stop || (s.overview && !prev.overview) || (!s.overview && prev.overview)
+      if (!moved) return
+      const i = STOPS.findIndex((x) => x.id === s.stop)
+      const label = s.overview ? tr(UI.overview, s.lang) : tr(STOPS[i].label, s.lang)
+      const n = s.overview ? '00' : String(i + 1).padStart(2, '0')
+      setCard({ key: Date.now(), n: s.lang === 'bn' ? n.replace(/\d/g, (d) => '০১২৩৪৫৬৭৮৯'[Number(d)]) : n, label })
+      clearTimeout(timer)
+      timer = setTimeout(() => setCard(null), 2300)
+    })
+    return () => { unsub(); clearTimeout(timer) }
+  }, [])
+  if (!card) return null
+  return (
+    <div key={card.key} className="section-title" aria-hidden>
+      <span className="st-num">{card.n}</span>
+      <span className="st-bar" />
+      <span className="st-label">{card.label}</span>
+    </div>
+  )
+}

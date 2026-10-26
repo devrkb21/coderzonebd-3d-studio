@@ -8,7 +8,7 @@ import { AiLayer } from './ai/AiLayer'
 import { CoinHud, CoinReward } from './components/Coins'
 import { PostcardDialog } from './components/Postcard'
 import { WelcomeCard } from './components/WelcomeCard'
-import { HelpOverlay, IntroOverlay, Shortcuts, SoundSwitch, Tooltip, TourRunner } from './components/Interact'
+import { HelpOverlay, IntroOverlay, SectionTitle, Shortcuts, SoundSwitch, Tooltip, TourRunner } from './components/Interact'
 
 const Scene = lazy(() => import('./three/Scene'))
 
@@ -44,6 +44,7 @@ export default function App() {
           <NavPills />
           <Panel />
           <Hint />
+          <SectionTitle />
           <Shortcuts />
           <TourRunner />
           <Tooltip />

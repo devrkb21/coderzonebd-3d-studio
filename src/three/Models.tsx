@@ -14,7 +14,7 @@ const url = (name: string) => `${import.meta.env.BASE_URL}models/${name}.glb`
 
 export const MODEL_NAMES = [
   'sofa_03', 'modern_arm_chair_01', 'modern_coffee_table_01', 'side_table_01', 'potted_plant_02', 'potted_plant_04',
-  'ceiling_fan', 'desk_lamp_arm_01', 'hanging_picture_frame_01', 'hanging_picture_frame_02', 'security_camera_01',
+  'ceiling_fan', 'desk_lamp_arm_01', 'hanging_picture_frame_02', 'security_camera_01',
 ]
 
 /** One placed copy of a model; never catches clicks. */
@@ -78,7 +78,6 @@ export function OfficeModels() {
       <FanModel x={LOUNGE_X} z={halfD - 2.2} />
       <FanModel x={7} z={5.3} />
       {/* framed art either side of the windows, above the CEO's cabin and the lounge */}
-      <Model name="hanging_picture_frame_01" position={[-14.2, 3.35, halfD - 0.02]} rotation-y={Math.PI} scale={1.5} />
       <Model name="hanging_picture_frame_02" position={[14.2, 3.2, halfD - 0.04]} rotation-y={Math.PI} scale={1.6} />
       {/* CCTV in the corner, watching the room */}
       <Model name="security_camera_01" position={[halfW - 0.15, height - 0.35, halfD - 0.15]} rotation={[0, -Math.PI * 0.75, 0]} scale={1.1} />
