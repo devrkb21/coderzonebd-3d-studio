@@ -349,7 +349,7 @@ function FrontWall({ m }: { m: Mats }) {
       <mesh position={[0, (DOOR.h + 0.12 + WIN.y1) / 2, 0]} material={m.walnut}><planeGeometry args={[hw * 2, WIN.y1 - DOOR.h - 0.12]} /></mesh>
       <GlassDoor m={m} />
       <LightSwitch x={hw + 0.35} />
-      <mesh position={[0, 4.4, 0.02]} material={sign}>
+      <mesh position={[0, 5.45, 0.02]} material={sign}>
         <planeGeometry args={[7.2, 1.84]} />
       </mesh>
     </group>

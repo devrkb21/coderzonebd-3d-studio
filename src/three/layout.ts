@@ -28,7 +28,8 @@ export interface Frame {
 const v = (x: number, y: number, z: number) => new THREE.Vector3(x, y, z)
 
 export const STOP_FRAMES: Record<StopId, Frame> = {
-  home: { center: v(0, 3.45, -halfD), normal: BACK, width: 9, height: 5 },
+  // tall enough to take in the digital clock above the home wall
+  home: { center: v(0, 3.8, -halfD), normal: BACK, width: 9, height: 5.7 },
   services: { center: v(-halfW, 2.9, -3), normal: LEFT, width: 11.6, height: 3.6 },
   products: { center: v(-10, 2.1, -halfD), normal: BACK, width: 8, height: 3.6 },
   work: { center: v(10, 3.3, -halfD), normal: BACK, width: 9.8, height: 4.7 },

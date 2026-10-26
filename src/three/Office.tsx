@@ -8,6 +8,7 @@ import { Hot } from './Hot'
 import { ROOM } from './layout'
 import { BRAND, INK } from './textures'
 import { dhakaHours } from './time'
+import { OfficeLife } from './Life'
 
 const { halfW, halfD } = ROOM
 
@@ -33,25 +34,43 @@ function useOfficeMaterials() {
 }
 type Mats = ReturnType<typeof useOfficeMaterials>
 
-/** A code editor on the monitors. */
+/** A code editor on the monitors; the texture is tall and scrolls (see ScrollingCode). */
 function screenTexture() {
   const c = document.createElement('canvas')
   c.width = 256
-  c.height = 160
+  c.height = 1024
   const ctx = c.getContext('2d')!
   ctx.fillStyle = '#12141C'
-  ctx.fillRect(0, 0, 256, 160)
-  ctx.fillStyle = '#1F2230'
-  ctx.fillRect(0, 0, 256, 14)
-  const cols = ['#FF931E', '#7FB2FF', '#9BE29B', '#E6E6E6', '#C792EA']
-  for (let i = 0; i < 12; i++) {
-    const indent = (i * 3) % 4 * 10
-    ctx.fillStyle = cols[i % cols.length]
-    ctx.fillRect(10 + indent, 22 + i * 11, 40 + ((i * 53) % 120), 5)
+  ctx.fillRect(0, 0, 256, 1024)
+  const cols = ['#FF931E', '#7FB2FF', '#9BE29B', '#E6E6E6', '#C792EA', '#E6E6E6']
+  for (let i = 0; i < 88; i++) {
+    const indent = ((i * 7) % 5) % 4 * 12
+    const y = 10 + i * 11.5
+    ctx.fillStyle = '#3A3F52'
+    ctx.fillRect(4, y, 8, 5)
+    let x = 18 + indent
+    const words = 1 + ((i * 13) % 4)
+    for (let w = 0; w < words; w++) {
+      const len = 14 + ((i * 31 + w * 17) % 50)
+      ctx.fillStyle = cols[(i + w * 2) % cols.length]
+      ctx.fillRect(x, y, len, 5)
+      x += len + 6
+    }
   }
   const t = new THREE.CanvasTexture(c)
   t.colorSpace = THREE.SRGBColorSpace
+  t.wrapT = THREE.RepeatWrapping
+  t.repeat.set(1, 0.16)
   return t
+}
+
+/** Scrolls the editor on every monitor, a few lines at a time, like someone reading code. */
+function ScrollingCode({ tex }: { tex: THREE.Texture }) {
+  useFrame(({ clock }) => {
+    const t = clock.elapsedTime
+    tex.offset.y = -(Math.floor(t * 1.6) * 0.0115 + (t % 0.625) * 0.004)
+  })
+  return null
 }
 
 function clockFaceTexture() {
@@ -103,6 +122,8 @@ export function Office() {
       <Pot m={m} position={[-2.2, 0, halfD - 0.6]} />
       <Pot m={m} position={[2.2, 0, halfD - 0.6]} />
       <Pot m={m} position={[halfW - 0.8, 0, -halfD + 0.8]} />
+      <ScrollingCode tex={m.screen.map!} />
+      <OfficeLife />
     </group>
   )
 }
@@ -261,12 +282,23 @@ function CoffeeCorner({ m, position }: { m: Mats; position: [number, number, num
 }
 
 function Pot({ m, position }: { m: Mats; position: [number, number, number] }) {
+  const leaves = useRef<THREE.Group>(null)
+  const seed = position[0] * 1.7 + position[2]
+  // a gentle sway, as if the fan's air reaches it
+  useFrame(({ clock }) => {
+    if (!leaves.current) return
+    const t = clock.elapsedTime
+    leaves.current.rotation.z = Math.sin(t * 1.1 + seed) * 0.035
+    leaves.current.rotation.x = Math.sin(t * 0.8 + seed * 2) * 0.025
+  })
   return (
     <group position={position}>
       <mesh position-y={0.3} material={m.pot}><cylinderGeometry args={[0.28, 0.22, 0.6, 14]} /></mesh>
-      {[[0, 0.95, 0, 0.42], [0.18, 1.25, 0.08, 0.3], [-0.16, 1.2, -0.08, 0.3]].map(([x, y, z, r], i) => (
-        <mesh key={i} position={[x, y, z]} material={m.plant}><icosahedronGeometry args={[r, 1]} /></mesh>
-      ))}
+      <group ref={leaves} position-y={0.6}>
+        {[[0, 0.35, 0, 0.42], [0.18, 0.65, 0.08, 0.3], [-0.16, 0.6, -0.08, 0.3]].map(([x, y, z, r], i) => (
+          <mesh key={i} position={[x, y, z]} material={m.plant}><icosahedronGeometry args={[r, 1]} /></mesh>
+        ))}
+      </group>
     </group>
   )
 }

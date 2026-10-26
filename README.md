@@ -29,7 +29,10 @@ Brand: the real Coder Zone BD logo and wordmark, orange `#FF931E` on ink `#12141
 ### A living office
 
 - **Real Bangladesh time.** Through the windows and the glass entrance, the street follows the time in Dhaka (GMT+6): dawn, day, dusk and night, with the sun or moon, lit building windows and street lights after dark. `?time=day|dawn|dusk|night` forces a phase.
-- **Traffic.** Cars and a bus drive past on the street outside.
+- **Street life.** Cars, a bus, green CNG auto-rickshaws and cycle rickshaws with painted hoods (the riders pedal, the wheels turn) pass outside. People walk along both pavements, and birds cross the sky by day.
+- **The team at work.** Two people type at their desks (and stretch now and then), while a third walks between the coffee corner and the lounge, sipping from a mug.
+- **Everything moves a little.** Ceiling fans spin, the AC louver sweeps, steam rises from a coffee cup, the router's lights blink, code scrolls on the monitors, the plants sway and the service cards swing gently on their wires. Turn the lights off and the fans wind down too.
+- **Digital clock.** An LED clock centred above the Home wall shows Dhaka time with ticking seconds, a blinking colon and the date.
 - **Glass entrance.** Double glass doors in slim black frames, with tall orange pulls and an etched "CODER ZONE BD" band, set in walnut and oak-slat panels. The street shows through.
 - **Office furniture.** Two workstations with code on the monitors, a lounge with a sofa and floor lamp, a bookshelf, a coffee corner, plants, and a wall clock showing Dhaka time.
 - **Premium finish.** Recessed ceiling light strips with a soft glow, a satin floor that reflects the displays (desktop only), and frosted-glass controls.
@@ -76,6 +79,8 @@ Vite, React 18, TypeScript, React Three Fiber + drei (`CameraControls` for the c
 | `src/store.ts` | App state: section, focus, overview, tour, lights, help, quote list |
 | `src/three/Room.tsx` | Walls, floor, ceiling lights, displays, glass entrance, light switch |
 | `src/three/Office.tsx` | Furniture, wall clock, clickable office objects |
+| `src/three/Life.tsx` | The animated team, fans, AC, steam, router, digital clock |
+| `src/three/Street.tsx` | Rickshaws, CNGs, pedestrians, birds |
 | `src/three/Outside.tsx` | Sky, buildings, street, traffic, day/night |
 | `src/three/CameraRig.tsx` | Camera moves, look-around, zoom, overview |
 | `src/components/Interact.tsx` | Keyboard shortcuts, auto tour, pointer label, help overlay |

@@ -105,6 +105,11 @@ function ItemMesh({ pl }: { pl: Placement }) {
   }, [front, pl, lang])
 
   const tmp = useMemo(() => new THREE.Vector3(), [])
+  const swing = useRef<THREE.Group>(null)
+  const hangs = pl.item.kind === 'service'
+  const seed = pl.position.z * 2.3 + pl.position.x
+  // Physical boards: a thin backing panel behind every flat card, so they read as real objects.
+  const backing = useMemo(() => new THREE.MeshLambertMaterial({ color: '#ffffff', transparent: true }), [])
   useFrame((_, dt) => {
     const g = group.current
     if (!g) return
@@ -112,6 +117,12 @@ function ItemMesh({ pl }: { pl: Placement }) {
     const o = THREE.MathUtils.damp(front.opacity, focusId && !focused && !isWall ? 0.25 : 1, 7, d)
     front.opacity = o
     side.opacity = o
+    backing.opacity = o
+    // service cards hang from wires and sway a little
+    if (swing.current && hangs) {
+      const t = performance.now() / 1000
+      swing.current.rotation.x = focused || hovered ? THREE.MathUtils.damp(swing.current.rotation.x, 0, 8, d) : Math.sin(t * 1.25 + seed) * 0.035
+    }
     if (isWall) return
     g.scale.setScalar(THREE.MathUtils.damp(g.scale.x, focused ? 1.03 : hovered ? 1.06 : 1, 10, d))
     tmp.copy(pl.position).addScaledVector(pl.normal, focused ? 0.08 : hovered ? 0.05 : 0)
@@ -142,9 +153,18 @@ function ItemMesh({ pl }: { pl: Placement }) {
           <boxGeometry args={[pl.width, pl.height, pl.depth]} />
         </mesh>
       ) : (
-        <mesh material={front} {...handlers}>
-          <planeGeometry args={[pl.width, pl.height]} />
-        </mesh>
+        <group ref={swing} position-y={hangs ? pl.height / 2 : 0}>
+          <group position-y={hangs ? -pl.height / 2 : 0}>
+            <mesh material={front} {...handlers}>
+              <planeGeometry args={[pl.width, pl.height]} />
+            </mesh>
+            {!isWall && (
+              <mesh position-z={-0.022} material={backing}>
+                <boxGeometry args={[pl.width + 0.04, pl.height + 0.04, 0.04]} />
+              </mesh>
+            )}
+          </group>
+        </group>
       )}
     </group>
   )

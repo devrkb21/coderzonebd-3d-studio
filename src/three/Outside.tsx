@@ -4,6 +4,7 @@ import { useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { ROOM } from './layout'
+import { StreetLife } from './Street'
 import { usePhase, type Phase } from './time'
 
 const { halfD } = ROOM
@@ -148,6 +149,7 @@ export function Outside() {
       })}
 
       <Traffic night={night} />
+      <StreetLife night={night} />
     </group>
   )
 }

@@ -108,8 +108,8 @@ export function HelpOverlay() {
         ['L', bn ? 'অফিসের লাইট অন / অফ' : 'Office lights on / off'],
       ]
   const extras = bn
-    ? ['দেয়ালের ঘড়িতে ক্লিক করুন: ঢাকার সময়', 'দরজার পাশের সুইচ: লাইট অন / অফ', 'কফি মেশিন: চলুন কথা বলি', 'মনিটর: আমাদের কাজ দেখুন', 'জানালার বাইরে দিন-রাত চলে বাংলাদেশের আসল সময়ে']
-    : ['Click the wall clock for the time in Dhaka', 'The switch by the door turns the lights on and off', 'The coffee machine: let\'s talk', 'The monitors: see our work', 'Day and night outside follow the real time in Bangladesh']
+    ? ['দেয়ালের ঘড়িতে ক্লিক করুন: ঢাকার সময়', 'দরজার পাশের সুইচ: লাইট অন / অফ', 'কফি মেশিন: চলুন কথা বলি', 'মনিটর: আমাদের কাজ দেখুন', 'জানালার বাইরে দিন-রাত চলে বাংলাদেশের আসল সময়ে', 'বাইরে রিকশা, সিএনজি আর মানুষ চলে; ভেতরে টিম কাজ করছে']
+    : ['Click the wall clock for the time in Dhaka', 'The switch by the door turns the lights on and off', 'The coffee machine: let\'s talk', 'The monitors: see our work', 'Day and night outside follow the real time in Bangladesh', 'Rickshaws, CNGs and people pass outside; the team is at work inside']
   return (
     <div className="help" role="dialog" aria-modal="true" aria-label={tr(UI.help, lang)} onClick={() => setOpen(false)}>
       <div className="help-card" onClick={(e) => e.stopPropagation()}>

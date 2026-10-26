@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { useThree } from '@react-three/fiber'
+import { useFrame, useThree } from '@react-three/fiber'
 import { CameraControls } from '@react-three/drei'
 import CameraControlsImpl from 'camera-controls'
 import * as THREE from 'three'
@@ -38,6 +38,39 @@ export function CameraRig() {
   const overview = useStore((s) => s.overview)
   const introPlayed = useRef(false)
   const moveId = useRef(0)
+  const transit = useRef(false)
+  const dest = useRef<{ p: THREE.Vector3; t: THREE.Vector3 } | null>(null)
+  const tmp = useRef(new THREE.Vector3())
+
+  /** Landed: switch to look-around in place and give the drag back. */
+  const land = (c: CameraControls, p: THREE.Vector3, t: THREE.Vector3) => {
+    transit.current = false
+    c.smoothTime = 0.6
+    // Move the orbit pivot to just in front of the camera, so a drag turns the head in place
+    // instead of swinging the camera around the wall. The view doesn't change.
+    const ahead = t.clone().sub(p).normalize()
+    const pivot = p.clone().addScaledVector(ahead, 0.05)
+    c.setLookAt(p.x, p.y, p.z, pivot.x, pivot.y, pivot.z, false)
+    c.minAzimuthAngle = -Infinity
+    c.maxAzimuthAngle = Infinity
+    // Polar is measured from the pivot to the camera (pointing backwards): keep the
+    // horizon in view, no flipping to the floor or the ceiling.
+    c.minPolarAngle = Math.PI / 2 - 0.55
+    c.maxPolarAngle = Math.PI / 2 + 0.45
+    c.mouseButtons.left = ACTION.ROTATE
+    c.touches.one = ACTION.TOUCH_ROTATE
+  }
+
+  // Land as soon as the camera is visually there, instead of waiting for the damping to rest.
+  useFrame(() => {
+    const c = ref.current
+    const d = dest.current
+    if (!c || !d || !transit.current) return
+    if (c.camera.position.distanceTo(d.p) < 0.06 && c.getTarget(tmp.current).distanceTo(d.t) < 0.12) {
+      moveId.current++
+      land(c, d.p, d.t)
+    }
+  })
 
   useEffect(() => {
     const c = ref.current
@@ -93,6 +126,12 @@ export function CameraRig() {
     c.minPolarAngle = 0
     c.maxPolarAngle = Math.PI
     const id = ++moveId.current
+    transit.current = true
+    // A drag mid-flight would orbit the far target and swing the camera out of the room,
+    // so look-around is off until the camera lands (see useFrame below).
+    c.mouseButtons.left = ACTION.NONE
+    c.touches.one = ACTION.NONE
+    dest.current = { p: p.clone(), t: t.clone() }
     const animate = !reducedMotion()
 
     if (!introPlayed.current) {
@@ -103,19 +142,8 @@ export function CameraRig() {
       c.smoothTime = 0.6
     }
     c.setLookAt(p.x, p.y, p.z, t.x, t.y, t.z, animate).then(() => {
-      if (id !== moveId.current) return
-      c.smoothTime = 0.6
-      // Look-around: move the orbit pivot to just in front of the camera, so a drag turns the
-      // head in place instead of swinging the camera around the wall. The view doesn't change.
-      const ahead = t.clone().sub(p).normalize()
-      const pivot = p.clone().addScaledVector(ahead, 0.05)
-      c.setLookAt(p.x, p.y, p.z, pivot.x, pivot.y, pivot.z, false)
-      c.minAzimuthAngle = -Infinity
-      c.maxAzimuthAngle = Infinity
-      // Polar is measured from the pivot to the camera (pointing backwards): keep the
-      // horizon in view, no flipping to the floor or the ceiling.
-      c.minPolarAngle = Math.PI / 2 - 0.55
-      c.maxPolarAngle = Math.PI / 2 + 0.45
+      if (id !== moveId.current || !transit.current) return
+      land(c, p, t)
     })
   }, [ready, stop, focusId, overview, size.width, size.height, camera])
 
