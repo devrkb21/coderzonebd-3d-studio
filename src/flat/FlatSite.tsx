@@ -4,7 +4,7 @@
 import {
   COMPANY, COURIER, PROCESS, PRODUCTS, SERVICES, SHOW_TESTIMONIALS, STOPS, TESTIMONIALS, tr, UI, WORK, type Lang,
 } from '../content'
-import { ContactDetails, CourierDetails, HomeDetails, ProductDetails, ServiceDetails, WorkDetails } from '../components/details'
+import { ContactDetails, CourierDetails, HomeDetails, ProductDetails, ServiceDetails, TechDetails, WorkDetails } from '../components/details'
 
 export function FlatSite({ lang, visible, onQuote }: { lang: Lang; visible: boolean; onQuote?: () => void }) {
   const title = (id: string) => tr(STOPS.find((s) => s.id === id)!.label, lang)
@@ -54,6 +54,11 @@ export function FlatSite({ lang, visible, onQuote }: { lang: Lang; visible: bool
               </article>
             ))}
           </div>
+        </section>
+
+        <section id="tech">
+          <h2>{title('tech')}</h2>
+          <div className="card wide"><TechDetails lang={lang} /></div>
         </section>
 
         <section id="courier">

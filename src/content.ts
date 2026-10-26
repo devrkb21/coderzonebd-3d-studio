@@ -5,13 +5,14 @@ export type Lang = 'bn' | 'en'
 export type L = { bn: string; en: string }
 export const tr = (l: L, lang: Lang) => l[lang]
 
-export type StopId = 'home' | 'services' | 'products' | 'work' | 'courier' | 'process' | 'contact'
+export type StopId = 'home' | 'services' | 'products' | 'work' | 'tech' | 'courier' | 'process' | 'contact'
 
 export const STOPS: { id: StopId; label: L }[] = [
   { id: 'home', label: { bn: 'হোম', en: 'Home' } },
   { id: 'services', label: { bn: 'সার্ভিস', en: 'Services' } },
   { id: 'products', label: { bn: 'প্রোডাক্ট', en: 'Products' } },
   { id: 'work', label: { bn: 'কাজ', en: 'Work' } },
+  { id: 'tech', label: { bn: 'টেক স্ট্যাক', en: 'Tech Stack' } },
   { id: 'courier', label: { bn: 'কুরিয়ার চেক', en: 'Courier Check' } },
   { id: 'process', label: { bn: 'প্রসেস', en: 'Process' } },
   { id: 'contact', label: { bn: 'যোগাযোগ', en: 'Contact' } },

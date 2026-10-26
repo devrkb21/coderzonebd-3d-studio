@@ -4,7 +4,7 @@ import { itemById, itemsAt } from '../items'
 import { useStore } from '../store'
 import { inertUnless } from './inert'
 import {
-  ContactDetails, CourierDetails, HomeDetails, ProcessDetails, ProductDetails, ServiceDetails, WorkDetails,
+  ContactDetails, CourierDetails, HomeDetails, ProcessDetails, ProductDetails, ServiceDetails, TechDetails, WorkDetails,
 } from './details'
 import { ChevronLeft, ChevronRight, CloseIcon } from './icons'
 
@@ -63,6 +63,10 @@ export function Panel() {
       body = <WorkDetails work={w} lang={lang} />
       break
     }
+    case 'tech':
+      title = lang === 'bn' ? 'আমাদের টেক স্ট্যাক' : 'Our tech stack'
+      body = <TechDetails lang={lang} />
+      break
     case 'courier':
       title = tr(COURIER.title, lang)
       body = <CourierDetails lang={lang} />

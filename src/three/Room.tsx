@@ -5,7 +5,7 @@ import { useStore } from '../store'
 import {
   KIOSK_NORMAL, KIOSK_POS, PRODUCT_BOX, PROCESS_BOARD, ROOM, SERVICE_CARD, SERVICE_RAIL_Y, STOP_FRAMES, yawOf,
 } from './layout'
-import { BRAND, deskTexture, floorTexture, frontWallTexture, signTexture, techBoardTexture } from './textures'
+import { BRAND, deskTexture, floorTexture, frontWallTexture, signTexture } from './textures'
 
 const { halfW, halfD, height } = ROOM
 
@@ -81,8 +81,7 @@ export function Room() {
       <Kiosk m={m} />
       <ProcessArrows m={m} />
       <ContactDesk m={m} />
-      <TechBoard />
-      {(['services', 'products', 'work', 'process'] as StopId[]).map((s) => <HangingSign key={s} stop={s} m={m} />)}
+      {(['services', 'products', 'work', 'tech', 'process'] as StopId[]).map((s) => <HangingSign key={s} stop={s} m={m} />)}
       <Plant m={m} position={[-halfW + 0.9, 0, 3.6]} />
       <Plant m={m} position={[halfW - 0.9, 0, 2.2]} />
     </group>
@@ -194,14 +193,36 @@ function ContactDesk({ m }: { m: Mats }) {
   )
 }
 
+const WIN = { x0: 4, x1: 12, y0: 1, y1: 4.2 }
+
+function Window({ m, cx }: { m: Mats; cx: number }) {
+  const glass = useMemo(() => new THREE.MeshBasicMaterial({ color: '#CFE4F2', transparent: true, opacity: 0.1, depthWrite: false }), [])
+  const w = WIN.x1 - WIN.x0
+  const h = WIN.y1 - WIN.y0
+  const cy = (WIN.y0 + WIN.y1) / 2
+  return (
+    <group position={[cx, 0, 0]}>
+      <mesh position={[0, cy, -0.02]} material={glass}><planeGeometry args={[w, h]} /></mesh>
+      {/* frame, mullions and sill */}
+      {[WIN.y0, WIN.y1].map((y) => <mesh key={y} position={[0, y, 0.03]} material={m.ink}><boxGeometry args={[w + 0.12, 0.1, 0.08]} /></mesh>)}
+      {[-w / 2, -w / 4, 0, w / 4, w / 2].map((x) => <mesh key={x} position={[x, cy, 0.03]} material={m.ink}><boxGeometry args={[0.08, h, 0.08]} /></mesh>)}
+      <mesh position={[0, WIN.y0 - 0.04, 0.12]} material={m.white}><boxGeometry args={[w + 0.3, 0.06, 0.26]} /></mesh>
+    </group>
+  )
+}
+
 function FrontWall({ m }: { m: Mats }) {
   const lang = useStore((s) => s.lang)
   const sign = useMemo(() => new THREE.MeshBasicMaterial({ map: frontWallTexture(lang), transparent: true }), [lang])
   return (
     <group position={[0, 0, halfD]} rotation-y={Math.PI}>
-      <mesh position-y={height / 2} material={m.wall}>
-        <planeGeometry args={[halfW * 2, height]} />
-      </mesh>
+      {/* wall built around two big windows (|x| 4…12, y 1…4.2) that look onto the street */}
+      <mesh position-y={WIN.y0 / 2} material={m.wall}><planeGeometry args={[halfW * 2, WIN.y0]} /></mesh>
+      <mesh position-y={(WIN.y1 + height) / 2} material={m.wall}><planeGeometry args={[halfW * 2, height - WIN.y1]} /></mesh>
+      {[[-(halfW + WIN.x1) / 2, halfW - WIN.x1], [0, WIN.x0 * 2], [(halfW + WIN.x1) / 2, halfW - WIN.x1]].map(([x, w]) => (
+        <mesh key={x} position={[x, (WIN.y0 + WIN.y1) / 2, 0]} material={m.wall}><planeGeometry args={[w, WIN.y1 - WIN.y0]} /></mesh>
+      ))}
+      {[-1, 1].map((side) => <Window key={side} m={m} cx={side * (WIN.x0 + WIN.x1) / 2} />)}
       {/* entrance doors */}
       <mesh position={[0, 1.4, 0.02]} material={m.ink}>
         <planeGeometry args={[2.6, 2.8]} />
@@ -213,16 +234,6 @@ function FrontWall({ m }: { m: Mats }) {
         <planeGeometry args={[7.2, 1.84]} />
       </mesh>
     </group>
-  )
-}
-
-function TechBoard() {
-  const lang = useStore((s) => s.lang)
-  const mat = useMemo(() => new THREE.MeshBasicMaterial({ map: techBoardTexture(lang) }), [lang])
-  return (
-    <mesh position={[-halfW + 0.03, 2.7, 6.6]} rotation-y={Math.PI / 2} material={mat}>
-      <planeGeometry args={[5, 2.64]} />
-    </mesh>
   )
 }
 

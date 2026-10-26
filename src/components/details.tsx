@@ -38,7 +38,16 @@ export function HomeDetails({ lang }: { lang: Lang }) {
       <ul className="checks">
         {COMPANY.why.map((w) => <li key={w.en}>{tr(w, lang)}</li>)}
       </ul>
-      <h3>{lang === 'bn' ? 'আমাদের টেক স্ট্যাক' : 'Our tech stack'}</h3>
+    </>
+  )
+}
+
+export function TechDetails({ lang }: { lang: Lang }) {
+  return (
+    <>
+      <p className="lead">{lang === 'bn'
+        ? 'যে টুল দিয়ে আমরা প্রতিদিন কাজ করি — ওয়েব, মোবাইল, ব্যাকএন্ড, পেমেন্ট আর হোস্টিং।'
+        : 'The tools we build with every day: web, mobile, backend, payments and hosting.'}</p>
       <TechGrid />
     </>
   )

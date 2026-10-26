@@ -13,6 +13,9 @@ const LEFT = new THREE.Vector3(1, 0, 0)
 const RIGHT = new THREE.Vector3(-1, 0, 0)
 export const KIOSK_NORMAL = new THREE.Vector3(0.35, 0, 1).normalize()
 export const KIOSK_POS = new THREE.Vector3(-3.4, 0, 3)
+/** Tech-stack board on the left wall, near the entrance. */
+export const TECH_Z = 6.6
+export const TECH_BOARD = { w: 5, h: 2.64, y: 2.7 }
 
 export interface Frame {
   center: THREE.Vector3
@@ -29,6 +32,7 @@ export const STOP_FRAMES: Record<StopId, Frame> = {
   services: { center: v(-halfW, 2.9, -3), normal: LEFT, width: 11.6, height: 3.6 },
   products: { center: v(-10, 2.1, -halfD), normal: BACK, width: 8, height: 3.6 },
   work: { center: v(10, 3.3, -halfD), normal: BACK, width: 9.8, height: 4.7 },
+  tech: { center: v(-halfW, 2.75, TECH_Z), normal: LEFT, width: 5.6, height: 3.2 },
   courier: { center: v(KIOSK_POS.x, 1.45, KIOSK_POS.z), normal: KIOSK_NORMAL, width: 2.4, height: 2.6 },
   process: { center: v(halfW, 2.6, -4), normal: RIGHT, width: 9.8, height: 3.4 },
   contact: { center: v(halfW, 2.3, 5.5), normal: RIGHT, width: 4.6, height: 4.4 },
@@ -85,6 +89,8 @@ function placeItem(item: Item): Placement {
       p.y = WORK_POSTER.rowY[row] ?? 1.9
       return { item, position: p, normal: BACK, width: WORK_POSTER.w, height: WORK_POSTER.h }
     }
+    case 'tech':
+      return { item, position: v(-halfW + 0.04, TECH_BOARD.y, TECH_Z), normal: LEFT, width: TECH_BOARD.w, height: TECH_BOARD.h }
     case 'courier': {
       const p = KIOSK_POS.clone().addScaledVector(KIOSK_NORMAL, 0.13)
       p.y = 1.55

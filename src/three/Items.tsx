@@ -2,11 +2,11 @@ import { useEffect, useMemo, useRef } from 'react'
 import { useFrame, type ThreeEvent } from '@react-three/fiber'
 import { useCursor } from '@react-three/drei'
 import * as THREE from 'three'
-import { PROCESS, PRODUCTS, SERVICES, WORK, type Lang } from '../content'
+import { PROCESS, PRODUCTS, SERVICES, STOPS, WORK, type Lang, type StopId } from '../content'
 import { useStore } from '../store'
-import { PLACEMENTS, yawOf, type Placement } from './layout'
+import { PLACEMENTS, STOP_FRAMES, yawOf, type Placement } from './layout'
 import {
-  contactTexture, homeWallTexture, kioskTexture, processTexture, productFrontTexture, serviceCardTexture, workPosterTexture,
+  contactTexture, homeWallTexture, kioskTexture, processTexture, productFrontTexture, serviceCardTexture, techBoardTexture, workPosterTexture,
 } from './textures'
 
 /** Pointer movement (px) above which a press counts as a drag, not a click. */
@@ -19,6 +19,7 @@ function textureFor(pl: Placement, lang: Lang) {
     case 'service': return serviceCardTexture(SERVICES.find((s) => s.id === ref)!, lang)
     case 'product': return productFrontTexture(PRODUCTS.find((p) => p.id === ref)!, lang)
     case 'work': return workPosterTexture(WORK.find((w) => w.id === ref)!, lang)
+    case 'tech': return techBoardTexture(lang)
     case 'courier': return kioskTexture(lang)
     case 'process': return processTexture(PROCESS.findIndex((p) => p.id === ref), lang)
     case 'contact': return contactTexture(lang)
@@ -26,7 +27,40 @@ function textureFor(pl: Placement, lang: Lang) {
 }
 
 export function Items() {
-  return <>{PLACEMENTS.map((pl) => <ItemMesh key={pl.item.id} pl={pl} />)}</>
+  return (
+    <>
+      {STOPS.map((s) => <StopZone key={s.id} stop={s.id} />)}
+      {PLACEMENTS.map((pl) => <ItemMesh key={pl.item.id} pl={pl} />)}
+    </>
+  )
+}
+
+/**
+ * An invisible hit area over each section (a bit larger than its frame, just in front of the
+ * wall and behind the items). Clicking a section's empty space flies there; items in front of
+ * it still open their own panel because they catch the click first.
+ */
+function StopZone({ stop }: { stop: StopId }) {
+  const F = STOP_FRAMES[stop]
+  const mat = useMemo(() => new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, colorWrite: false }), [])
+  const pos = useMemo(() => F.center.clone().addScaledVector(F.normal, 0.02), [F])
+  return (
+    <mesh
+      position={pos}
+      rotation-y={yawOf(F.normal)}
+      material={mat}
+      onPointerOver={(e) => { e.stopPropagation(); document.body.style.cursor = 'pointer' }}
+      onPointerOut={() => { document.body.style.cursor = '' }}
+      onClick={(e) => {
+        e.stopPropagation()
+        if (e.delta > DRAG_PX) return
+        const s = useStore.getState()
+        if (s.stop !== stop || s.focusId) s.goTo(stop)
+      }}
+    >
+      <planeGeometry args={[F.width * 1.12, F.height * 1.25]} />
+    </mesh>
+  )
 }
 
 function ItemMesh({ pl }: { pl: Placement }) {
@@ -39,7 +73,7 @@ function ItemMesh({ pl }: { pl: Placement }) {
   const focus = useStore((s) => s.focus)
   const focused = focusId === id
   // The big home wall is a backdrop: it doesn't grow or dim like the smaller items.
-  const isWall = pl.item.kind === 'home'
+  const isWall = pl.item.kind === 'home' || pl.item.kind === 'tech'
   useCursor(hovered)
 
   const front = useMemo(() => new THREE.MeshBasicMaterial({ transparent: true, toneMapped: false }), [])
