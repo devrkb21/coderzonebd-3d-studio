@@ -10,7 +10,7 @@ import { BRAND, INK } from './textures'
 import { dhakaHours } from './time'
 import { OfficeLife } from './Life'
 
-const { halfW, halfD } = ROOM
+const { halfD } = ROOM
 
 function useOfficeMaterials() {
   return useMemo(() => ({
@@ -119,9 +119,6 @@ export function Office() {
       <Hot tip={{ bn: 'এক কাপ চা/কফিতে কথা হোক ☕', en: "Let's talk over coffee ☕" }} onPick={coffee}>
         <CoffeeCorner m={m} position={[14.2, 0, halfD - 0.55]} />
       </Hot>
-      <Pot m={m} position={[-2.2, 0, halfD - 0.6]} />
-      <Pot m={m} position={[2.2, 0, halfD - 0.6]} />
-      <Pot m={m} position={[halfW - 0.8, 0, -halfD + 0.8]} />
       <ScrollingCode tex={m.screen.map!} />
       <OfficeLife />
     </group>
@@ -211,19 +208,6 @@ function Lounge({ m }: { m: Mats }) {
   return (
     <group position={[-8.6, 0, 7.6]}>
       <mesh rotation-x={-Math.PI / 2} position-y={0.012} material={m.rug}><planeGeometry args={[4.6, 3]} /></mesh>
-      {/* sofa against the front wall, facing the room */}
-      <group position={[0, 0, 1.6]} rotation-y={Math.PI}>
-        <mesh position-y={0.25} material={m.sofa}><boxGeometry args={[3.2, 0.5, 0.95]} /></mesh>
-        <mesh position={[0, 0.72, 0.38]} material={m.sofa}><boxGeometry args={[3.2, 0.6, 0.2]} /></mesh>
-        {[-1.5, 1.5].map((x) => <mesh key={x} position={[x, 0.55, 0]} material={m.sofa}><boxGeometry args={[0.2, 0.6, 0.95]} /></mesh>)}
-        {[-0.8, 0.8].map((x) => <mesh key={x} position={[x, 0.68, 0.22]} rotation-x={-0.25} material={m.cushion}><boxGeometry args={[0.5, 0.42, 0.12]} /></mesh>)}
-      </group>
-      {/* coffee table with a laptop */}
-      <mesh position={[0, 0.4, 0]} material={m.wood}><boxGeometry args={[1.6, 0.06, 0.8]} /></mesh>
-      {[[-0.7, -0.32], [0.7, -0.32], [-0.7, 0.32], [0.7, 0.32]].map(([x, z]) => (
-        <mesh key={`${x}${z}`} position={[x, 0.2, z]} material={m.leg}><boxGeometry args={[0.05, 0.4, 0.05]} /></mesh>
-      ))}
-      <mesh position={[0.2, 0.44, 0]} material={m.metal}><boxGeometry args={[0.5, 0.02, 0.34]} /></mesh>
       {/* floor lamp */}
       <group position={[2.1, 0, 1.4]}>
         <mesh position-y={0.8} material={m.leg}><cylinderGeometry args={[0.025, 0.025, 1.6, 8]} /></mesh>
@@ -281,24 +265,3 @@ function CoffeeCorner({ m, position }: { m: Mats; position: [number, number, num
   )
 }
 
-function Pot({ m, position }: { m: Mats; position: [number, number, number] }) {
-  const leaves = useRef<THREE.Group>(null)
-  const seed = position[0] * 1.7 + position[2]
-  // a gentle sway, as if the fan's air reaches it
-  useFrame(({ clock }) => {
-    if (!leaves.current) return
-    const t = clock.elapsedTime
-    leaves.current.rotation.z = Math.sin(t * 1.1 + seed) * 0.035
-    leaves.current.rotation.x = Math.sin(t * 0.8 + seed * 2) * 0.025
-  })
-  return (
-    <group position={position}>
-      <mesh position-y={0.3} material={m.pot}><cylinderGeometry args={[0.28, 0.22, 0.6, 14]} /></mesh>
-      <group ref={leaves} position-y={0.6}>
-        {[[0, 0.35, 0, 0.42], [0.18, 0.65, 0.08, 0.3], [-0.16, 0.6, -0.08, 0.3]].map(([x, y, z, r], i) => (
-          <mesh key={i} position={[x, y, z]} material={m.plant}><icosahedronGeometry args={[r, 1]} /></mesh>
-        ))}
-      </group>
-    </group>
-  )
-}

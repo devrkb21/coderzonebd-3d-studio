@@ -1,16 +1,27 @@
-import { useEffect, useRef, useState } from 'react'
+import { Suspense, useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
 import { Canvas, useFrame } from '@react-three/fiber'
-import { PerformanceMonitor } from '@react-three/drei'
+import { ContactShadows, PerformanceMonitor } from '@react-three/drei'
 import { UI, tr } from '../content'
 import { useStore } from '../store'
 import { CameraRig } from './CameraRig'
 import { Items, DRAG_PX } from './Items'
 import { Office } from './Office'
+import { OfficeModels, Robot } from './Models'
 import { Outside, SKY } from './Outside'
 import { Room } from './Room'
 import { prepareTextures } from './textures'
 import { usePhase } from './time'
+
+/**
+ * Soft shadows under and around everything that stands on the floor (furniture, plinths, the
+ * kiosk, people, the robot), rendered from below and blurred. On phones they're baked once.
+ */
+function FloorShadows() {
+  return (
+    <ContactShadows position={[0, 0.02, 0]} scale={[32, 20]} resolution={1024} far={2.4} blur={2.2} opacity={0.62} color="#2A2018" frames={coarse ? 1 : Infinity} />
+  )
+}
 
 /** Office lights, dimmed by the switch by the door; daylight through the windows stays. */
 function Lights() {
@@ -96,8 +107,14 @@ export default function Scene({ onProgress }: { onProgress: (p: number) => void 
       <Lights />
       <Room />
       <Office />
-      <Outside />
       <Items />
+      <Outside />
+      {/* Real models stream in after the room is up; the floor shadows render once they're in. */}
+      <Suspense fallback={null}>
+        <OfficeModels />
+        <Robot />
+        <FloorShadows />
+      </Suspense>
       <CameraRig />
     </Canvas>
   )

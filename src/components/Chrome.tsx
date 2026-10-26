@@ -22,6 +22,8 @@ export function TopBar() {
   const goTo = useStore((s) => s.goTo)
   const setQuoteOpen = useStore((s) => s.setQuoteOpen)
   const setHelpOpen = useStore((s) => s.setHelpOpen)
+  const soundOn = useStore((s) => s.soundOn)
+  const setSoundOn = useStore((s) => s.setSoundOn)
   return (
     <header className="topbar">
       <a
@@ -41,6 +43,20 @@ export function TopBar() {
         <button className="pill-btn" onClick={() => chooseMode(mode === '3d' ? '2d' : '3d')}>
           {mode === '3d' ? tr(UI.skip3d, lang) : tr(UI.view3d, lang)}
         </button>
+        {mode === '3d' && (
+          <button
+            className={`icon-btn sound-btn ${soundOn ? 'on' : ''}`}
+            onClick={() => setSoundOn(!soundOn)}
+            aria-pressed={soundOn}
+            aria-label={lang === 'bn' ? (soundOn ? 'শব্দ বন্ধ' : 'শব্দ চালু') : (soundOn ? 'Sound off' : 'Sound on')}
+            title={lang === 'bn' ? 'অফিস আর রাস্তার শব্দ' : 'Office and street sound'}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M4 9h4l5-4v14l-5-4H4z" />
+              {soundOn ? <><path d="M16.5 8.5a5 5 0 0 1 0 7" /><path d="M19 6a8.5 8.5 0 0 1 0 12" /></> : <path d="M17 9l5 6M22 9l-5 6" />}
+            </svg>
+          </button>
+        )}
         {mode === '3d' && (
           <button className="icon-btn help-btn" onClick={() => setHelpOpen(true)} aria-label={tr(UI.help, lang)} title={tr(UI.help, lang)}>?</button>
         )}

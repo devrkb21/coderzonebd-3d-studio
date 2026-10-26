@@ -7,7 +7,7 @@ import { useStore } from '../store'
 import { ROOM } from './layout'
 import { BRAND, INK } from './textures'
 
-const { halfD, height } = ROOM
+const { halfD } = ROOM
 
 /** Ref callback: let clicks pass straight through a group (people, fans, props). */
 export const noHit = (g: THREE.Object3D | null) => g?.traverse((o) => { o.raycast = () => {} })
@@ -185,7 +185,7 @@ export function patrol(points: [number, number][], speed: number, pause: number,
 }
 
 export function Team() {
-  const walk = useMemo(() => patrol([[13.1, 8.2], [10.2, 5.4], [-3.8, 5.4], [-5.9, 6.3]], 1.15, 3.5, true), [])
+  const walk = useMemo(() => patrol([[13.1, 8.2], [10.2, 5.4], [-3.8, 5.4], [-5.6, 6.0]], 1.15, 3.5, true), [])
   return (
     <group>
       <Person look={TEAM[0]} position={[5.4, 0, 6.42]} drive={typing(0)} />
@@ -196,36 +196,6 @@ export function Team() {
 }
 
 // ── ceiling fans, AC, steam, router ────────────────────────────
-
-/** Bangladesh-office ceiling fans; they spin down when the switch turns the power off. */
-export function CeilingFan({ x, z }: { x: number; z: number }) {
-  const rotor = useRef<THREE.Group>(null)
-  const speed = useRef(5)
-  const m = useMemo(() => ({
-    body: new THREE.MeshLambertMaterial({ color: '#E9E6DF' }),
-    blade: new THREE.MeshLambertMaterial({ color: '#7A5A3C' }),
-    rod: new THREE.MeshLambertMaterial({ color: '#C9C4BA' }),
-  }), [])
-  useFrame((_, dt) => {
-    const d = Math.min(dt, 0.05)
-    speed.current = THREE.MathUtils.damp(speed.current, useStore.getState().lightsOn ? 5 : 0, 0.8, d)
-    if (rotor.current) rotor.current.rotation.y += speed.current * d
-  })
-  return (
-    <group ref={noHit} position={[x, height, z]}>
-      <mesh position-y={-0.3} material={m.rod}><cylinderGeometry args={[0.025, 0.025, 0.6, 8]} /></mesh>
-      <mesh position-y={-0.04} material={m.body}><cylinderGeometry args={[0.12, 0.08, 0.08, 16]} /></mesh>
-      <group ref={rotor} position-y={-0.66}>
-        <mesh material={m.body}><cylinderGeometry args={[0.16, 0.2, 0.14, 20]} /></mesh>
-        {[0, 1, 2].map((i) => (
-          <group key={i} rotation-y={(i * Math.PI * 2) / 3}>
-            <mesh position={[0.62, 0, 0]} rotation-x={0.12} material={m.blade}><boxGeometry args={[0.9, 0.012, 0.18]} /></mesh>
-          </group>
-        ))}
-      </group>
-    </group>
-  )
-}
 
 function acTexture() {
   const c = document.createElement('canvas')
@@ -390,8 +360,6 @@ export function OfficeLife() {
   return (
     <>
       <Team />
-      <CeilingFan x={-8.6} z={6.4} />
-      <CeilingFan x={7} z={5.3} />
       <AirCon position={[-8, 5.75, halfD - 0.17]} />
       <Steam position={[14.0, 1.06, halfD - 0.65]} />
       <Router position={[-14.2, 2.1, halfD - 0.35]} />

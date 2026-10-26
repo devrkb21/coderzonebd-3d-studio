@@ -36,6 +36,7 @@ export function CameraRig() {
   const stop = useStore((s) => s.stop)
   const focusId = useStore((s) => s.focusId)
   const overview = useStore((s) => s.overview)
+  const intro = useStore((s) => s.intro)
   const introPlayed = useRef(false)
   const moveId = useRef(0)
   const transit = useRef(false)
@@ -134,18 +135,36 @@ export function CameraRig() {
     dest.current = { p: p.clone(), t: t.clone() }
     const animate = !reducedMotion()
 
-    if (!introPlayed.current) {
-      introPlayed.current = true
-      c.smoothTime = 1.2
-      if (animate) c.setLookAt(p.x, p.y + 2.5, p.z + 9, t.x, t.y + 0.6, t.z, false)
-    } else {
-      c.smoothTime = 0.6
+    // First visit: start across the street, cross to the shop, the glass doors swing open,
+    // walk in, then fly to the first stop. Skipping ends it early (endIntro re-runs this).
+    if (intro && animate) {
+      const H = ROOM.halfD
+      let cancelled = false
+      const wait = (ms: number) => new Promise((r) => setTimeout(r, ms))
+      dest.current = null
+      ;(async () => {
+        c.smoothTime = 0
+        c.setLookAt(0, 3.1, H + 11.8, 0, 2.6, H, false)
+        await wait(1700); if (cancelled) return
+        c.smoothTime = 1.5
+        c.setLookAt(0, 1.85, H + 3.4, 0, 2.1, H, true)
+        await wait(2700); if (cancelled) return
+        useStore.getState().setDoorOpen(true)
+        await wait(900); if (cancelled) return
+        c.smoothTime = 1.2
+        c.setLookAt(0, 1.8, H - 2.6, 0, 2.2, -H, true)
+        await wait(2100); if (cancelled) return
+        useStore.getState().endIntro()
+      })()
+      return () => { cancelled = true }
     }
+    c.smoothTime = introPlayed.current ? 0.6 : 0.9
+    introPlayed.current = true
     c.setLookAt(p.x, p.y, p.z, t.x, t.y, t.z, animate).then(() => {
       if (id !== moveId.current || !transit.current) return
       land(c, p, t)
     })
-  }, [ready, stop, focusId, overview, size.width, size.height, camera])
+  }, [ready, intro, stop, focusId, overview, size.width, size.height, camera])
 
   return <CameraControls ref={ref} makeDefault />
 }

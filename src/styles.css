@@ -282,3 +282,13 @@ kbd { display: inline-block; min-width: 30px; padding: 3px 9px; border-radius: 7
   .keys > div { grid-template-columns: 1fr; gap: 2px; }
   .pill-sep { display: none; }
 }
+
+/* sound toggle */
+.sound-btn { color: var(--ink-2); }
+.sound-btn.on { color: var(--brand-text); }
+
+/* street-to-door intro */
+.intro { position: fixed; inset: 0; z-index: 15; pointer-events: none; background: linear-gradient(180deg, transparent 60%, rgba(10, 12, 18, 0.45)); }
+.intro-line { position: absolute; left: 50%; bottom: calc(max(24px, env(safe-area-inset-bottom)) + 64px); transform: translateX(-50%); margin: 0; width: max-content; max-width: calc(100vw - 32px); text-align: center; color: #fff; font-size: clamp(20px, 3.2vw, 34px); font-weight: 700; letter-spacing: 0.01em; text-shadow: 0 2px 18px rgba(0, 0, 0, 0.5); animation: rise 0.9s var(--ease); }
+.intro-skip { position: absolute; right: max(16px, env(safe-area-inset-right)); bottom: max(20px, env(safe-area-inset-bottom)); pointer-events: auto; padding: 10px 16px; border-radius: 999px; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); font-weight: 700; font-size: 14px; color: var(--ink); box-shadow: var(--float); }
+.intro-skip:hover { background: #fff; }

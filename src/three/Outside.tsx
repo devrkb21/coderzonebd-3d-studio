@@ -131,14 +131,14 @@ export function Outside() {
 
       {/* street lights and trees along the near sidewalk */}
       {Array.from({ length: 9 }, (_, i) => {
-        const x = -40 + i * 10
+        const x = -45 + i * 10 // none right in front of the door
         return (
           <group key={i} position={[x, 0, SIDEWALK.z1 - 0.4]}>
             <mesh position-y={2.6} material={mats.pole}><cylinderGeometry args={[0.07, 0.09, 5.2, 8]} /></mesh>
             <mesh position={[0, 5.15, 0.6]} material={mats.pole}><boxGeometry args={[0.08, 0.08, 1.2]} /></mesh>
             <mesh position={[0, 5.05, 1.15]} material={mats.lamp}><boxGeometry args={[0.5, 0.12, 0.3]} /></mesh>
             <mesh rotation-x={-Math.PI / 2} position={[0, 0.03, 1.4]} material={mats.glow}><circleGeometry args={[2.4, 24]} /></mesh>
-            {i % 2 === 0 && (
+            {i % 2 === 1 && (
               <group position={[5, 0, -0.9]}>
                 <mesh position-y={1.2} material={mats.trunk}><cylinderGeometry args={[0.12, 0.16, 2.4, 8]} /></mesh>
                 <mesh position-y={3.1} material={mats.tree}><icosahedronGeometry args={[1.5, 1]} /></mesh>

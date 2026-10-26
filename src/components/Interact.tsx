@@ -130,3 +130,54 @@ export function HelpOverlay() {
     </div>
   )
 }
+
+/** Starts and stops the synthesised ambience; a saved "on" waits for the first tap (autoplay rules). */
+export function SoundSwitch() {
+  const on = useStore((s) => s.soundOn)
+  useEffect(() => {
+    let saved: string | null = null
+    try { saved = localStorage.getItem('cz3d-sound') } catch { /* storage unavailable */ }
+    if (saved !== 'on') return
+    const first = () => useStore.getState().setSoundOn(true)
+    window.addEventListener('pointerdown', first, { once: true })
+    return () => window.removeEventListener('pointerdown', first)
+  }, [])
+  useEffect(() => {
+    let stop: (() => void) | undefined
+    import('../audio').then((a) => {
+      if (on) a.startSound()
+      else a.stopSound()
+      stop = a.stopSound
+    })
+    return () => { if (!on) stop?.() }
+  }, [on])
+  return null
+}
+
+/** Lower-third caption and a Skip button while the street-to-door intro plays. */
+export function IntroOverlay() {
+  const intro = useStore((s) => s.intro)
+  const lang = useStore((s) => s.lang)
+  const [line, setLine] = useState(0)
+  useEffect(() => {
+    if (!intro) return
+    const skip = (e: Event) => {
+      if (e instanceof KeyboardEvent && !['Escape', 'Enter', ' '].includes(e.key)) return
+      useStore.getState().endIntro()
+    }
+    const t1 = setTimeout(() => setLine(1), 3600)
+    window.addEventListener('keydown', skip)
+    return () => { clearTimeout(t1); window.removeEventListener('keydown', skip) }
+  }, [intro])
+  if (!intro) return null
+  const bn = lang === 'bn'
+  const lines = bn
+    ? ['কোডার জোন বিডি-তে স্বাগতম', 'খুলনার একটি সফটওয়্যার স্টুডিও · ভেতরে আসুন']
+    : ['Welcome to Coder Zone BD', 'A software studio in Khulna · Come on in']
+  return (
+    <div className="intro">
+      <p key={line} className="intro-line">{lines[line]}</p>
+      <button className="intro-skip" onClick={() => useStore.getState().endIntro()}>{bn ? 'স্কিপ' : 'Skip intro'} ›</button>
+    </div>
+  )
+}

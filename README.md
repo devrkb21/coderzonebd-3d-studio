@@ -36,6 +36,10 @@ Brand: the real Coder Zone BD logo and wordmark, orange `#FF931E` on ink `#12141
 - **Glass entrance.** Double glass doors in slim black frames, with tall orange pulls and an etched "CODER ZONE BD" band, set in walnut and oak-slat panels. The street shows through.
 - **Office furniture.** Two workstations with code on the monitors, a lounge with a sofa and floor lamp, a bookshelf, a coffee corner, plants, and a wall clock showing Dhaka time.
 - **Premium finish.** Recessed ceiling light strips with a soft glow, a satin floor that reflects the displays (desktop only), and frosted-glass controls.
+- **Intro.** On the first visit of a session the camera starts across the street, crosses to the storefront (backlit sign, orange canopy, glass doors), the doors swing open with a chime and the camera walks in. **Skip intro**, Esc or Enter skips it; it never plays with reduced motion, a deep link or `?nointro`.
+- **Real 3D models.** The lounge sofa, armchair, coffee and side tables, potted plants, ceiling fans, desk lamp, framed art and the CCTV camera are real CC0 models from Poly Haven. **CZ Bot**, the robot receptionist by the quote desk, waves when you arrive at Contact or hover it, gives a thumbs-up when you add to the quote, and opens Contact when clicked.
+- **Baked-looking light.** Soft contact shadows under everything on the floor (live on desktop, rendered once on phones), shading where walls meet the ceiling and each other, and sunlight patches through the windows that follow the time of day.
+- **Sound** (off until you turn it on, top bar). Synthesised live with Web Audio, so there are no sound files: fan and AC hum, distant traffic, keyboard typing, rickshaw bells, the odd horn, birds by day, a door chime, and soft ticks when you move around.
 
 ## How to explore
 
@@ -81,9 +85,20 @@ Vite, React 18, TypeScript, React Three Fiber + drei (`CameraControls` for the c
 | `src/three/Office.tsx` | Furniture, wall clock, clickable office objects |
 | `src/three/Life.tsx` | The animated team, fans, AC, steam, router, digital clock |
 | `src/three/Street.tsx` | Rickshaws, CNGs, pedestrians, birds |
+| `src/three/Models.tsx` | Real 3D models and the CZ Bot receptionist |
+| `src/audio.ts` | The synthesised office and street sound |
 | `src/three/Outside.tsx` | Sky, buildings, street, traffic, day/night |
 | `src/three/CameraRig.tsx` | Camera moves, look-around, zoom, overview |
 | `src/components/Interact.tsx` | Keyboard shortcuts, auto tour, pointer label, help overlay |
+
+## 3D models and credits
+
+All models are CC0 (public domain), in `public/models/`, meshopt-compressed with textures cut to 512 px (about 2.9 MB in total, loaded after the room appears):
+
+- Furniture, plants and props: [Poly Haven](https://polyhaven.com/models) (CC0)
+- CZ Bot: "RobotExpressive" by Tomás Laulhé / [Quaternius](https://quaternius.com), via the three.js examples (CC0)
+
+To add one: download the glTF from Poly Haven at 1k, shrink its textures, then run `gltf-transform optimize in.gltf public/models/name.glb --compress meshopt --texture-compress false`, and place it in `src/three/Models.tsx`.
 
 ## Edit the content
 

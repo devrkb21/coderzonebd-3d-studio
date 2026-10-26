@@ -22,6 +22,10 @@ interface State {
   helpOpen: boolean
   /** Label shown next to the pointer while hovering something in the room. */
   tip: string | null
+  /** First visit of the session: the street-to-door intro is playing. */
+  intro: boolean
+  doorOpen: boolean
+  soundOn: boolean
   setLang: (lang: Lang) => void
   setMode: (mode: Mode) => void
   /** A visitor's explicit choice; remembered, and it disables the automatic 2D switch. */
@@ -41,6 +45,9 @@ interface State {
   toggleLights: () => void
   setHelpOpen: (open: boolean) => void
   setTip: (tip: string | null) => void
+  endIntro: () => void
+  setDoorOpen: (open: boolean) => void
+  setSoundOn: (on: boolean) => void
 }
 
 const read = (k: string) => { try { return localStorage.getItem(k) } catch { return null } }
@@ -81,6 +88,14 @@ function initialLang(): Lang {
   return read('cz3d-lang') === 'bn' ? 'bn' : 'en'
 }
 
+/** The intro plays once per browser session, never with reduced motion or a deep link. */
+function initialIntro(): boolean {
+  const q = new URLSearchParams(location.search)
+  if (q.has('nointro') || q.has('2d') || location.hash.length > 1) return false
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return false
+  try { return sessionStorage.getItem('cz3d-intro') !== 'done' } catch { return true }
+}
+
 export const useStore = create<State>((set, get) => ({
   lang: typeof window === 'undefined' ? 'en' : initialLang(),
   mode: typeof window === 'undefined' ? '2d' : initialMode(),
@@ -96,6 +111,9 @@ export const useStore = create<State>((set, get) => ({
   lightsOn: true,
   helpOpen: false,
   tip: null,
+  intro: typeof window === 'undefined' ? false : initialIntro(),
+  doorOpen: false,
+  soundOn: false,
 
   setLang: (lang) => {
     write('cz3d-lang', lang)
@@ -146,4 +164,13 @@ export const useStore = create<State>((set, get) => ({
   toggleLights: () => set({ lightsOn: !get().lightsOn }),
   setHelpOpen: (helpOpen) => set({ helpOpen }),
   setTip: (tip) => set({ tip }),
+  endIntro: () => {
+    try { sessionStorage.setItem('cz3d-intro', 'done') } catch { /* storage unavailable */ }
+    set({ intro: false, doorOpen: false })
+  },
+  setDoorOpen: (doorOpen) => set({ doorOpen }),
+  setSoundOn: (soundOn) => {
+    write('cz3d-sound', soundOn ? 'on' : 'off')
+    set({ soundOn })
+  },
 }))

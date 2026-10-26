@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { MeshReflectorMaterial } from '@react-three/drei'
 import * as THREE from 'three'
@@ -8,7 +8,8 @@ import {
   KIOSK_NORMAL, KIOSK_POS, PRODUCT_BOX, PROCESS_BOARD, ROOM, SERVICE_CARD, SERVICE_RAIL_Y, STOP_FRAMES, yawOf,
 } from './layout'
 import { Hot } from './Hot'
-import { BRAND, deskTexture, floorTexture, frontWallTexture, signTexture } from './textures'
+import { BRAND, deskTexture, floorTexture, frontWallTexture, signboardTexture, signTexture } from './textures'
+import { usePhase } from './time'
 
 const { halfW, halfD, height } = ROOM
 
@@ -105,6 +106,8 @@ export function Room() {
         </group>
       ))}
       <CeilingLights m={m} />
+      <CornerShade m={m} />
+      <SunPatches />
       <DoorMat m={m} />
 
       <ServiceRail m={m} />
@@ -114,8 +117,6 @@ export function Room() {
       <ProcessArrows m={m} />
       <ContactDesk m={m} />
       {(['services', 'products', 'work', 'tech', 'process'] as StopId[]).map((s) => <HangingSign key={s} stop={s} m={m} />)}
-      <Plant m={m} position={[-halfW + 0.9, 0, 3.6]} />
-      <Plant m={m} position={[halfW - 0.9, 0, 2.2]} />
     </group>
   )
 }
@@ -275,7 +276,8 @@ function GlassDoor({ m }: { m: Mats }) {
     <Hot tip={{ bn: 'পুরো স্টুডিও দেখুন', en: 'See the whole studio' }} onPick={() => useStore.getState().setOverview(true)}>
       <group>
         {[-1, 1].map((side) => (
-          <group key={side} position={[side * leaf / 2, 0, 0]}>
+          <Hinge key={side} side={side} x={side * DOOR.w / 2}>
+          <group position={[-side * leaf / 2, 0, 0]}>
             <mesh position-y={DOOR.h / 2} material={glass}><planeGeometry args={[leaf - 0.08, DOOR.h - 0.08]} /></mesh>
             {/* a diagonal reflection streak, so the glass reads as glass */}
             <mesh position={[side * -0.15, DOOR.h * 0.55, 0.005]} rotation-z={0.5} material={sheen}><planeGeometry args={[0.18, 2.2]} /></mesh>
@@ -289,12 +291,128 @@ function GlassDoor({ m }: { m: Mats }) {
               {[-0.55, 0.55].map((y) => <mesh key={y} position={[0, y, -0.045]} rotation-x={Math.PI / 2} material={m.blue}><cylinderGeometry args={[0.012, 0.012, 0.09, 8]} /></mesh>)}
             </group>
           </group>
+          </Hinge>
         ))}
         {/* header and floor threshold */}
         <mesh position={[0, DOOR.h + 0.06, 0]} material={steel}><boxGeometry args={[DOOR.w + 0.16, 0.12, 0.14]} /></mesh>
         <mesh position={[0, 0.005, 0]} material={m.metal}><boxGeometry args={[DOOR.w + 0.16, 0.01, 0.2]} /></mesh>
       </group>
     </Hot>
+  )
+}
+
+/** A door leaf on its hinge at the outer edge; swings into the room when the door opens. */
+function Hinge({ side, x, children }: { side: number; x: number; children: React.ReactNode }) {
+  const ref = useRef<THREE.Group>(null)
+  useFrame((_, dt) => {
+    if (!ref.current) return
+    const open = useStore.getState().doorOpen
+    ref.current.rotation.y = THREE.MathUtils.damp(ref.current.rotation.y, open ? side * 1.45 : 0, 2.6, Math.min(dt, 0.05))
+  })
+  return <group ref={ref} position-x={x}>{children}</group>
+}
+
+/** The storefront seen from the street: dark cladding, a backlit sign, an orange canopy and the upper floors. */
+function Exterior({ hw }: { hw: number }) {
+  const m = useMemo(() => {
+    const c = document.createElement('canvas')
+    c.width = 256
+    c.height = 128
+    const ctx = c.getContext('2d')!
+    ctx.fillStyle = '#CFC8BC'
+    ctx.fillRect(0, 0, 256, 128)
+    for (let row = 0; row < 2; row++) {
+      for (let col = 0; col < 8; col++) {
+        ctx.fillStyle = (row + col) % 3 ? '#5D7286' : '#7F95A8'
+        ctx.fillRect(10 + col * 31, 14 + row * 58, 20, 36)
+        ctx.fillStyle = '#B9B1A4'
+        ctx.fillRect(8 + col * 31, 50 + row * 58, 24, 4)
+      }
+    }
+    const upper = new THREE.CanvasTexture(c)
+    upper.colorSpace = THREE.SRGBColorSpace
+    return {
+      clad: new THREE.MeshLambertMaterial({ color: '#2B2E36' }),
+      upper: new THREE.MeshLambertMaterial({ map: upper }),
+      sign: new THREE.MeshBasicMaterial({ map: signboardTexture(), toneMapped: false }),
+      canopy: new THREE.MeshLambertMaterial({ color: BRAND }),
+      ink: new THREE.MeshLambertMaterial({ color: '#16181D' }),
+    }
+  }, [])
+  const side = halfW - WIN.x1
+  // Built in the front wall's own frame: local -z is the street side.
+  const out = (x: number, y: number, w: number, h: number, mat: THREE.Material, key: string) => (
+    <mesh key={key} position={[x, y, -0.14]} rotation-y={Math.PI} material={mat}><planeGeometry args={[w, h]} /></mesh>
+  )
+  return (
+    <group>
+      {[-1, 1].flatMap((sx) => [
+        out(sx * (WIN.x0 + halfW) / 2, WIN.y0 / 2, halfW - WIN.x0, WIN.y0, m.clad, `b${sx}`),
+        out(sx * (halfW - side / 2), (WIN.y0 + WIN.y1) / 2, side, WIN.y1 - WIN.y0, m.clad, `s${sx}`),
+        out(sx * (hw + WIN.x0) / 2, WIN.y1 / 2, WIN.x0 - hw, WIN.y1, m.clad, `m${sx}`),
+      ])}
+      {out(0, (DOOR.h + 0.12 + WIN.y1) / 2, hw * 2, WIN.y1 - DOOR.h - 0.12, m.clad, 'top-door')}
+      {out(0, (WIN.y1 + height) / 2, halfW * 2, height - WIN.y1, m.clad, 'band')}
+      {out(0, height + 3, halfW * 2, 6, m.upper, 'upper')}
+      {/* backlit sign and a slim orange canopy over the entrance */}
+      <mesh position={[0, 5.45, -0.2]} rotation-y={Math.PI} material={m.sign}><planeGeometry args={[8, 1.6]} /></mesh>
+      <mesh position={[0, 5.45, -0.17]} material={m.ink}><boxGeometry args={[8.2, 1.8, 0.04]} /></mesh>
+      <mesh position={[0, DOOR.h + 0.32, -0.62]} rotation-x={-0.18} material={m.canopy}><boxGeometry args={[DOOR.w + 1.4, 0.06, 1.0]} /></mesh>
+    </group>
+  )
+}
+
+/** Soft shading where walls meet each other and the ceiling, like baked ambient occlusion. */
+function CornerShade({ m }: { m: Mats }) {
+  const walls = [
+    { pos: [0, 0, -halfD + 0.012] as const, rot: 0, len: halfW * 2 },
+    { pos: [-halfW + 0.012, 0, 0] as const, rot: Math.PI / 2, len: halfD * 2 },
+    { pos: [halfW - 0.012, 0, 0] as const, rot: -Math.PI / 2, len: halfD * 2 },
+    { pos: [0, 0, halfD - 0.012] as const, rot: Math.PI, len: halfW * 2 },
+  ]
+  return (
+    <group>
+      {walls.map((w, i) => (
+        <group key={i} position={w.pos as unknown as [number, number, number]} rotation-y={w.rot}>
+          {/* ceiling line */}
+          <mesh position-y={height - 0.6} rotation-z={Math.PI} material={m.ao}><planeGeometry args={[w.len, 1.2]} /></mesh>
+          {/* both vertical corners */}
+          {[-1, 1].map((sx) => (
+            <mesh key={sx} position={[sx * (w.len / 2 - 0.55), height / 2, 0]} rotation-z={sx * Math.PI / 2} material={m.ao}><planeGeometry args={[height, 1.1]} /></mesh>
+          ))}
+        </group>
+      ))}
+    </group>
+  )
+}
+
+/** Sunlight through the front windows, falling on the floor; follows the sun in Dhaka. */
+function SunPatches() {
+  const phase = usePhase()
+  const mat = useMemo(() => {
+    const c = document.createElement('canvas')
+    c.width = 512
+    c.height = 128
+    const ctx = c.getContext('2d')!
+    ctx.filter = 'blur(6px)'
+    ctx.fillStyle = '#ffffff'
+    for (let i = 0; i < 4; i++) ctx.fillRect(16 + i * 124, 16, 108, 96)
+    const t = new THREE.CanvasTexture(c)
+    t.colorSpace = THREE.SRGBColorSpace
+    return new THREE.MeshBasicMaterial({ map: t, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending })
+  }, [])
+  const light = phase === 'day' ? { c: '#FFF1D2', o: 0.16, skew: -1.2 } : phase === 'dawn' ? { c: '#FFC48A', o: 0.12, skew: 2.2 } : phase === 'dusk' ? { c: '#FFA65C', o: 0.12, skew: -2.6 } : null
+  if (!light) return null
+  mat.color.set(light.c)
+  mat.opacity = light.o
+  return (
+    <group position-y={0.016}>
+      {[-1, 1].map((sx) => (
+        <mesh key={sx} position={[sx * (WIN.x0 + WIN.x1) / 2 + light.skew, 0, halfD - 2.4]} rotation-x={-Math.PI / 2} material={mat}>
+          <planeGeometry args={[WIN.x1 - WIN.x0, 3.2]} />
+        </mesh>
+      ))}
+    </group>
   )
 }
 
@@ -348,6 +466,7 @@ function FrontWall({ m }: { m: Mats }) {
       <mesh position-y={(WIN.y1 + height) / 2} material={m.wall}><planeGeometry args={[halfW * 2, height - WIN.y1]} /></mesh>
       <mesh position={[0, (DOOR.h + 0.12 + WIN.y1) / 2, 0]} material={m.walnut}><planeGeometry args={[hw * 2, WIN.y1 - DOOR.h - 0.12]} /></mesh>
       <GlassDoor m={m} />
+      <Exterior hw={hw} />
       <LightSwitch x={hw + 0.35} />
       <mesh position={[0, 5.45, 0.02]} material={sign}>
         <planeGeometry args={[7.2, 1.84]} />
@@ -430,17 +549,3 @@ function HangingSignInline({ stop, position }: { stop: StopId; position?: [numbe
   )
 }
 
-function Plant({ m, position }: { m: Mats; position: [number, number, number] }) {
-  return (
-    <group position={position}>
-      <mesh position-y={0.35} material={m.ink}>
-        <cylinderGeometry args={[0.32, 0.25, 0.7, 14]} />
-      </mesh>
-      {[[0, 1.1, 0, 0.5], [0.22, 1.45, 0.1, 0.38], [-0.2, 1.4, -0.1, 0.36], [0, 1.75, 0, 0.3]].map(([x, y, z, r], i) => (
-        <mesh key={i} position={[x, y, z]} material={m.plant}>
-          <icosahedronGeometry args={[r, 1]} />
-        </mesh>
-      ))}
-    </group>
-  )
-}

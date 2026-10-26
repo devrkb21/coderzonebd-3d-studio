@@ -415,6 +415,15 @@ export function frontWallTexture(lang: Lang) {
   })
 }
 
+/** Backlit storefront sign: the wordmark on a white light box. */
+export function signboardTexture() {
+  return make('signboard', 1600, 320, (ctx, w, h) => {
+    ctx.fillStyle = '#ffffff'
+    ctx.fillRect(0, 0, w, h)
+    drawImg(ctx, WORDMARK, 60, 30, w - 120, h - 60)
+  })
+}
+
 export function floorTexture() {
   const tex = make('floor', 512, 512, (ctx, w, h) => {
     const plank = h / 8
