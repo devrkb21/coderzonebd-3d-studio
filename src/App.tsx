@@ -4,6 +4,7 @@ import { FlatSite } from './flat/FlatSite'
 import { Hint, Loader, NavPills, Toast, TopBar } from './components/Chrome'
 import { Panel } from './components/Panel'
 import { QuoteDrawer } from './components/QuoteDrawer'
+import { AiLayer } from './ai/AiLayer'
 import { HelpOverlay, IntroOverlay, Shortcuts, SoundSwitch, Tooltip, TourRunner } from './components/Interact'
 
 const Scene = lazy(() => import('./three/Scene'))
@@ -48,6 +49,7 @@ export default function App() {
       )}
       {is3d && <SoundSwitch />}
       <QuoteDrawer />
+      <AiLayer room={is3d && ready && !intro} />
       <Toast />
       {is3d && <Loader progress={ready ? 1 : progress} done={ready} />}
     </>

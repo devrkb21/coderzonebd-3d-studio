@@ -1,0 +1,25 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "cz3d-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": { "enabled": true },
+  "durable_objects": {
+    "bindings": [
+      { "name": "LIMITER", "class_name": "Limiter" },
+      { "name": "PRESENCE", "class_name": "Presence" }
+    ]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Limiter", "Presence"] }],
+  // Limits that protect the Anthropic credit. Change them here and redeploy.
+  "vars": {
+    "ALLOWED_ORIGINS": "https://3d.coderzonebd.com",
+    "CHAT_MODEL": "claude-sonnet-5-5",
+    "DEMO_MODEL": "claude-sonnet-5-5",
+    "CHAT_PER_HOUR": "30",
+    "DEMO_PER_HOUR": "5",
+    "CHAT_PER_DAY": "600",
+    "DEMO_PER_DAY": "60"
+  }
+}

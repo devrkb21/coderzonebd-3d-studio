@@ -39,7 +39,7 @@ Brand: the real Coder Zone BD logo and wordmark, orange `#FF931E` on ink `#12141
 - **Office furniture.** Two workstations with code on the monitors, a lounge with a sofa and floor lamp, a bookshelf, a coffee corner, plants, and a wall clock showing Dhaka time.
 - **Premium finish.** Recessed ceiling light strips with a soft glow, a satin floor that reflects the displays (desktop only), and frosted-glass controls.
 - **Intro.** On the first visit of a session the camera starts across the street, crosses to the storefront (backlit sign, orange canopy, glass doors), the doors swing open with a chime and the camera walks in. **Skip intro**, Esc or Enter skips it; it never plays with reduced motion, a deep link or `?nointro`.
-- **Real 3D models.** The lounge sofa, armchair, coffee and side tables, potted plants, ceiling fans, desk lamp, framed art and the CCTV camera are real CC0 models from Poly Haven. **CZ Bot**, the robot receptionist by the quote desk, waves when you arrive at Contact or hover it, gives a thumbs-up when you add to the quote, and opens Contact when clicked.
+- **Real 3D models.** The lounge sofa, armchair, coffee and side tables, potted plants, ceiling fans, desk lamp, framed art and the CCTV camera are real CC0 models from Poly Haven. **CZ Bot**, the robot receptionist by the quote desk, waves when you arrive at Contact or hover it, gives a thumbs-up when you add to the quote, and opens the AI receptionist chat when clicked (Contact, when the AI is off).
 - **Baked-looking light.** Soft contact shadows under everything on the floor (live on desktop, rendered once on phones), shading where walls meet the ceiling and each other, and sunlight patches through the windows that follow the time of day.
 - **Sound** (off until you turn it on, top bar). Synthesised live with Web Audio, so there are no sound files: fan and AC hum, distant traffic, keyboard typing, rickshaw bells, the odd horn, birds by day, a door chime, and soft ticks when you move around.
 
@@ -63,6 +63,53 @@ On desktop, a label next to the pointer says what you're about to open ("Go to W
 Things to click in the office: the **wall clock** tells you the time in Dhaka, the **coffee machine** takes you to Contact, the **monitors** take you to Work, the **door** shows the whole studio, and the **switch** by the door turns the lights off.
 
 Clicking an item zooms to it and opens a side panel; on phones the panel is a bottom sheet. The quote list (top right) collects services, then takes a name, phone, budget and note. **Send on WhatsApp** opens `wa.me/8801885660190` with the whole list prefilled, and **Send by email** is the fallback.
+
+## AI: receptionist chat, live site builder, live visitors
+
+A small Cloudflare Worker (`worker/`, deployed as **https://cz3d-api.electroherebd.workers.dev**) runs the AI and the live presence. The site only shows AI features when it is built with `VITE_API_URL` set (the GitHub workflow sets it; locally, `cp .env.example .env.local`). Without it the site is exactly as before.
+
+- **Chat** (`src/components/Chat.tsx`). The **Chat with us** button and a click on CZ Bot open the AI front-desk receptionist. `openChat('ceo' | 'cmo')` in the store opens **Rakib's assistant** (CEO · CTO office: tech, architecture, timelines) or **Barek's assistant** (CMO · CFO office: prices, packages, payment). The assistants speak for the founders' offices and never pretend to be them. Replies stream in, in the visitor's language (Bangla, English or Banglish), with quick-reply chips. The assistant can add services to the quote list, fly the camera to a section, and show a WhatsApp button prefilled with a summary (it never sends anything itself). Replies can be read aloud (a Bangla voice when the browser has one) and there's a push-to-talk mic (Bangla or English, following the site language) where the browser supports speech recognition; both buttons are hidden where it doesn't. Esc closes the chat first. Conversations last for the browser session only.
+- **Build my site live** (`src/three/DemoScreen.tsx`, `src/ai/DemoPanel.tsx`). A big screen faces the entrance, mirroring the courier kiosk (it's behind the camera at every section, so it never blocks a view; it shows in the overview). Click it, or **Build my site live**, and the camera flies over. The visitor types a business name, what they sell and a note; the screen types out the HTML as the AI writes it, then shows the finished e-commerce home page mock-up. **Make this real** adds E-commerce Store to the quote list and opens it; **Talk on WhatsApp** and **Open full size** are next to it. The mock-up runs in an iframe with `sandbox=""` and a CSP that blocks every script and network request.
+- **Live visitors** (`src/three/Ghosts.tsx`, `src/ai/presence.tsx`). Every open studio sends only its camera position and heading, about twice a second while it moves. Other visitors appear as soft translucent figures (they fade out when they stand where you are), and a chip shows "N people in the studio now". The socket closes while the tab is hidden.
+- **Knowledge.** The assistants know only what's in `src/content.ts` (services, prices, durations, products and plans, work, process, FAQ, contacts, address): `worker/src/knowledge.ts` builds their facts from it when the Worker is deployed. After changing content, redeploy the Worker. They're told never to invent prices, clients or promises and to say the team will confirm.
+
+### Worker endpoints
+
+| Endpoint | What it does |
+| --- | --- |
+| `POST /chat` | `{ persona, lang, messages }` → server-sent events: `{t:'text'}`, `{t:'tool', name, input}`, `{t:'done'}` or `{t:'error'}`. Tool calls run in the browser; the Worker answers them and lets the model finish its reply. |
+| `POST /demo` | `{ name, type, description, lang }` → server-sent events `{t:'html'}` with one self-contained HTML page (inline CSS, no scripts, no external URLs). |
+| `GET /presence` | WebSocket. Send `{ p: [x, y, z, heading] }`; receive `{ you }` once, then `{ n, v: [[id, x, y, z, heading], ...] }`. |
+| `GET /health` | `{ ok, ai }`: whether the API key is set. |
+
+Models: `claude-sonnet-5-5` for chat and the site builder (both at low effort, with server-side refusal fallback), set in `worker/wrangler.jsonc`. The big shared system prompt (rules + facts) is prompt-cached. Without the API key, `/chat` and `/demo` answer `503 { error: 'not_configured' }` and the site shows a polite note with a WhatsApp button instead.
+
+### Limits that protect the API credit
+
+All in `worker/wrangler.jsonc` (`vars`), counted in a Durable Object:
+
+| Limit | Default |
+| --- | --- |
+| Chat messages per visitor (by IP hash) per hour | 30 |
+| Site demos per visitor per hour | 5 |
+| Chat messages per day, everyone together | 600 |
+| Site demos per day, everyone together | 60 |
+| Request body / one message / whole history | 16 KB / 1,000 chars / 6,000 chars (last 16 turns) |
+| Demo inputs | name and type 60 chars, note 400 |
+| Output | chat 2,000 tokens, demo 16,000 tokens |
+| Live visitors per room | 60 sockets, 40 shown |
+
+Over a limit, the visitor gets a friendly `429` message in their language. Only `https://3d.coderzonebd.com` and `http://localhost:*` may call the Worker (CORS and an Origin check), set in `ALLOWED_ORIGINS`.
+
+### Set up and deploy the Worker
+
+```bash
+cd worker
+npm ci
+npx wrangler secret put ANTHROPIC_API_KEY   # paste the key when asked; it's stored only in Cloudflare
+npx wrangler deploy                         # after changing worker/ or src/content.ts
+npx wrangler tail                           # live logs
+```
 
 ## 2D version, SEO and slow devices
 
@@ -94,6 +141,10 @@ Vite, React 18, TypeScript, React Three Fiber + drei (`CameraControls` for the c
 | `src/three/Outside.tsx` | Sky, buildings, street, traffic, day/night |
 | `src/three/CameraRig.tsx` | Camera moves, look-around, zoom, overview |
 | `src/components/Interact.tsx` | Keyboard shortcuts, auto tour, pointer label, help overlay |
+| `src/components/Chat.tsx` | The AI chat panel: receptionist and the founders' assistants, voice in and out |
+| `src/ai/` | Worker client and tool calls, the site builder's state and panel, live presence |
+| `src/three/DemoScreen.tsx`, `src/three/Ghosts.tsx` | The "Build my site live" screen, other live visitors |
+| `worker/` | The Cloudflare Worker: chat, site builder, presence, rate limits |
 
 ## 3D models and credits
 
