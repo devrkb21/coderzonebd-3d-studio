@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 
 // GitHub Pages serves the site from /<repo>/. For a custom domain such as
 // 3d.coderzonebd.com, build with BASE_PATH=/ .
-const base = process.env.BASE_PATH ?? '/coderzonebd-3d-studio/'
+const base = process.env.BASE_PATH ?? '/'
 
 export default defineConfig({
   base,

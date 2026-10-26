@@ -2,7 +2,7 @@
 
 A walk-through 3D showroom for [Coder Zone BD](https://coderzonebd.com), a software studio in Khulna. Visitors move between seven stops, open any service, product or project, build a quote list, and send it on WhatsApp. The site is Bangla by default, with an English toggle.
 
-**Live:** https://devrkb21.github.io/coderzonebd-3d-studio/
+**Live:** https://3d.coderzonebd.com/
 
 ![Home wall](docs/home.jpg)
 ![Service card with its panel and Add to quote](docs/service.jpg)
@@ -54,7 +54,7 @@ npm install
 npm run dev
 ```
 
-Then open http://localhost:5173/coderzonebd-3d-studio/
+Then open http://localhost:5173/
 
 `npm run build` type-checks, builds, server-renders the 2D page into `dist/index.html`, and writes everything to `dist/`.
 
