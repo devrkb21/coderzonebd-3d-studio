@@ -5,7 +5,7 @@ import CameraControlsImpl from 'camera-controls'
 import * as THREE from 'three'
 import type { StopId } from '../content'
 import { useStore } from '../store'
-import { fitFrame, frameForItem, STOP_FRAMES, type Insets } from './layout'
+import { fitFrame, frameForItem, ROOM, STOP_FRAMES, type Insets } from './layout'
 
 const { ACTION } = CameraControlsImpl
 
@@ -16,6 +16,16 @@ export const PANEL_WIDTH = 420
 const CROPPABLE = new Set<StopId>(['services', 'products', 'work', 'process'])
 
 const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+/** How far the camera can back away from a frame before it reaches the opposite wall. */
+function roomDepthAlong(frame: { center: THREE.Vector3; normal: THREE.Vector3 }) {
+  const { halfW, halfD } = ROOM
+  const n = frame.normal
+  const c = frame.center
+  const tx = n.x > 1e-6 ? (halfW - c.x) / n.x : n.x < -1e-6 ? (-halfW - c.x) / n.x : Infinity
+  const tz = n.z > 1e-6 ? (halfD - c.z) / n.z : n.z < -1e-6 ? (-halfD - c.z) / n.z : Infinity
+  return Math.min(tx, tz)
+}
 
 /** Flies the camera between stops and items; drag gives a small look-around. */
 export function CameraRig() {
@@ -38,8 +48,9 @@ export function CameraRig() {
     c.touches.one = ACTION.TOUCH_ROTATE
     c.touches.two = ACTION.NONE
     c.touches.three = ACTION.NONE
-    c.azimuthRotateSpeed = 0.3
-    c.polarRotateSpeed = 0.3
+    // Negative speeds = "grab the room and drag it", like Street View.
+    c.azimuthRotateSpeed = -0.35
+    c.polarRotateSpeed = -0.35
     c.draggingSmoothTime = 0.15
   }, [])
 
@@ -64,7 +75,9 @@ export function CameraRig() {
     // On phones a wide display wall would push the camera far back; crop it instead and let
     // prev/next walk the items. Single-piece stops (home wall, kiosk, desk) are always shown whole.
     const cropped = mobile && !itemFrame && CROPPABLE.has(stop)
-    const { position: p, target: t } = fitFrame(frame, camera.fov, vw, vh, insets, margin, cropped ? 13 : 24)
+    // Never back the camera through the opposite wall: it has to stay inside the room to look around.
+    const maxDist = Math.min(cropped ? 13 : 24, roomDepthAlong(frame) - 0.8)
+    const { position: p, target: t } = fitFrame(frame, camera.fov, vw, vh, insets, margin, maxDist)
 
     c.minAzimuthAngle = -Infinity
     c.maxAzimuthAngle = Infinity
@@ -83,14 +96,17 @@ export function CameraRig() {
     c.setLookAt(p.x, p.y, p.z, t.x, t.y, t.z, animate).then(() => {
       if (id !== moveId.current) return
       c.smoothTime = 0.6
-      const dir = p.clone().sub(t).normalize()
-      const az = Math.atan2(dir.x, dir.z)
-      const pol = Math.acos(dir.y)
-      const range = itemFrame ? 0.3 : 0.22
-      c.minAzimuthAngle = az - range
-      c.maxAzimuthAngle = az + range
-      c.minPolarAngle = pol - 0.16
-      c.maxPolarAngle = Math.min(pol + 0.16, Math.PI / 2 + 0.2)
+      // Look-around: move the orbit pivot to just in front of the camera, so a drag turns the
+      // head in place instead of swinging the camera around the wall. The view doesn't change.
+      const ahead = t.clone().sub(p).normalize()
+      const pivot = p.clone().addScaledVector(ahead, 0.05)
+      c.setLookAt(p.x, p.y, p.z, pivot.x, pivot.y, pivot.z, false)
+      c.minAzimuthAngle = -Infinity
+      c.maxAzimuthAngle = Infinity
+      // Polar is measured from the pivot to the camera (pointing backwards): keep the
+      // horizon in view, no flipping to the floor or the ceiling.
+      c.minPolarAngle = Math.PI / 2 - 0.55
+      c.maxPolarAngle = Math.PI / 2 + 0.45
     })
   }, [ready, stop, focusId, size.width, size.height, camera])
 

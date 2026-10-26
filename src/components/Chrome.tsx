@@ -4,16 +4,13 @@ import { COMPANY, STOPS, tr, UI } from '../content'
 import { useStore } from '../store'
 import { CloseIcon, ListIcon } from './icons'
 
-export function Logo({ size = 36 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 44 44" aria-hidden>
-      <rect width="44" height="44" rx="10" fill="var(--blue)" />
-      <g fill="none" stroke="#fff" strokeWidth="4.2" strokeLinecap="round" strokeLinejoin="round" transform="translate(1.25 0)">
-        <path d="M19.3 16.2A7.6 7.6 0 1 0 19.3 27.8" />
-        <path d="M24.6 14.8h9.2l-9.2 14.4h9.6" />
-      </g>
-    </svg>
-  )
+const BASE = import.meta.env.BASE_URL
+
+/** The real Coder Zone BD logo: the full wordmark, or just the CZ mark. */
+export function Logo({ size = 36, mark = false }: { size?: number; mark?: boolean }) {
+  return mark
+    ? <img className="logo-mark" src={`${BASE}logos/coderzone-mark.png`} width={size} height={size} alt="" />
+    : <img className="logo-word" src={`${BASE}logos/coderzone-wordmark.png`} height={size} style={{ width: 'auto' }} alt="" />
 }
 
 export function TopBar() {
@@ -32,11 +29,8 @@ export function TopBar() {
         onClick={(e) => { if (mode === '3d') { e.preventDefault(); goTo('home') } }}
         aria-label={COMPANY.name}
       >
-        <Logo />
-        <span className="brand-text">
-          <strong>{COMPANY.name}</strong>
-          <small>{tr(UI.tagline, lang)}</small>
-        </span>
+        <Logo size={34} />
+        <Logo size={34} mark />
       </a>
       <div className="top-actions">
         <div className="seg" role="group" aria-label="Language">
@@ -83,7 +77,7 @@ export function Loader({ progress, done }: { progress: number; done: boolean }) 
   return (
     <div className={`loader ${done ? 'done' : ''}`} role="status" aria-live="polite">
       <div className="loader-inner">
-        <Logo size={64} />
+        <Logo size={72} mark />
         <strong>{COMPANY.name}</strong>
         <p>{tr(UI.loading, lang)}</p>
         <div className="bar" aria-hidden><span style={{ transform: `scaleX(${progress})` }} /></div>

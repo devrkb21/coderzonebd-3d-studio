@@ -3,5 +3,5 @@ import { renderToString } from 'react-dom/server'
 import { FlatSite } from './flat/FlatSite'
 
 export function render() {
-  return renderToString(<FlatSite lang="bn" visible />)
+  return renderToString(<FlatSite lang="en" visible />)
 }

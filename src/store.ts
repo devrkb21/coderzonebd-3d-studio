@@ -65,11 +65,11 @@ export const userChose3d = () => typeof window !== 'undefined' && (new URLSearch
 function initialLang(): Lang {
   const q = new URLSearchParams(location.search).get('lang')
   if (q === 'en' || q === 'bn') return q
-  return read('cz3d-lang') === 'en' ? 'en' : 'bn'
+  return read('cz3d-lang') === 'bn' ? 'bn' : 'en'
 }
 
 export const useStore = create<State>((set, get) => ({
-  lang: typeof window === 'undefined' ? 'bn' : initialLang(),
+  lang: typeof window === 'undefined' ? 'en' : initialLang(),
   mode: typeof window === 'undefined' ? '2d' : initialMode(),
   ready: false,
   stop: 'home',

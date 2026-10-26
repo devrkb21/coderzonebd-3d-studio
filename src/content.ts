@@ -199,6 +199,8 @@ export interface ProductInfo {
   id: string
   name: string
   color: string
+  /** Path under the site base, e.g. logos/czcommerce.svg */
+  logo: string
   tagline: L
   desc: L
   features: L[]
@@ -210,7 +212,7 @@ export interface ProductInfo {
 
 export const PRODUCTS: ProductInfo[] = [
   {
-    id: 'czcommerce', name: 'CZ Commerce', color: '#2B3FD6',
+    id: 'czcommerce', name: 'CZ Commerce', color: '#2B3FD6', logo: 'logos/czcommerce.svg',
     tagline: { bn: 'এফ-কমার্স সেলারদের বাংলা প্যানেল', en: 'Bangla panel for f-commerce sellers' },
     desc: { bn: 'ফেসবুক সেলারদের জন্য অনলাইন স্টোর আর অর্ডার ম্যানেজমেন্ট — এক জায়গায়, বাংলায়।', en: 'Online store and order management for Facebook sellers — in one place, in Bangla.' },
     features: [
@@ -229,7 +231,7 @@ export const PRODUCTS: ProductInfo[] = [
     links: [{ label: { bn: 'czcommerce.app দেখুন', en: 'Visit czcommerce.app' }, url: 'https://czcommerce.app/' }],
   },
   {
-    id: 'checkoutguard', name: 'CheckoutGuard', color: '#0E8A5F',
+    id: 'checkoutguard', name: 'CheckoutGuard', color: '#0E8A5F', logo: 'logos/checkoutguard.png',
     tagline: { bn: 'WooCommerce অর্ডার সুরক্ষা', en: 'WooCommerce order protection' },
     desc: { bn: 'অসম্পূর্ণ চেকআউট ধরে, ফ্রড অর্ডার আটকায়, আর ৫টি কুরিয়ারে কাস্টমারের ডেলিভারি সাকসেস রেট দেখায়।', en: 'Captures incomplete checkouts, blocks fraud and shows a customer\'s delivery success rate across 5 couriers.' },
     features: [
@@ -250,7 +252,7 @@ export const PRODUCTS: ProductInfo[] = [
     ],
   },
   {
-    id: 'laravel-ecom', name: 'Laravel Ecom', color: '#E0473A',
+    id: 'laravel-ecom', name: 'Laravel Ecom', color: '#1C1E26', logo: 'logos/coderzone-mark.png',
     tagline: { bn: 'লাইসেন্সড Laravel ই-কমার্স', en: 'Licensed Laravel e-commerce' },
     desc: { bn: 'নিজের সার্ভারে চালানোর মতো পূর্ণ Laravel ই-কমার্স সিস্টেম, লাইসেন্সসহ।', en: 'A complete Laravel e-commerce system to run on your own server, with a licence.' },
     features: [
@@ -264,7 +266,7 @@ export const PRODUCTS: ProductInfo[] = [
     links: [{ label: { bn: 'প্রোডাক্ট পেজ', en: 'Product page' }, url: 'https://coderzonebd.com/products/laravel-ecom' }],
   },
   {
-    id: 'czsocial', name: 'CZ Social', color: '#7A4BD6',
+    id: 'czsocial', name: 'CZ Social', color: '#E87A0C', logo: 'logos/coderzone-mark.png',
     tagline: { bn: 'শীঘ্রই আসছে', en: 'Coming soon' },
     desc: { bn: 'সোশ্যাল মিডিয়া অটোমেশন প্ল্যাটফর্ম — এখন ডেভেলপমেন্টে আছে, এখনো বিক্রি হচ্ছে না।', en: 'A social media automation platform — in development, not for sale yet.' },
     features: [],
@@ -309,6 +311,10 @@ export const COURIER = {
     en: 'Enter a phone number and see that customer\'s delivery history across Pathao, Steadfast, RedX, Paperfly and Carrybee. Free, no login.',
   } as L,
   couriers: ['Pathao', 'Steadfast', 'RedX', 'Paperfly', 'Carrybee'],
+  logos: {
+    Pathao: 'logos/couriers/pathao.svg', Steadfast: 'logos/couriers/steadfast.webp', RedX: 'logos/couriers/redx.svg',
+    Paperfly: 'logos/couriers/paperfly.svg', Carrybee: 'logos/couriers/carrybee.webp',
+  } as Record<string, string>,
   url: 'https://coderzonebd.com/courier-check',
   cta: { bn: 'এখনই চেক করুন', en: 'Check now' } as L,
 }
@@ -329,6 +335,14 @@ export const FAQ: { q: L; a: L }[] = [
 ]
 
 export const TECH = ['Next.js', 'React', 'Go', 'PostgreSQL', 'Laravel', 'WordPress', 'WooCommerce', 'Node.js', 'TypeScript', 'Flutter', 'Stripe', 'bKash', 'Cloudflare']
+
+/** Official marks: Simple Icons (CC0) in each brand's own colour; bKash from bkash.com. */
+export const TECH_LOGOS: Record<string, string> = {
+  'Next.js': 'logos/tech/nextjs.svg', React: 'logos/tech/react.svg', Go: 'logos/tech/go.svg', PostgreSQL: 'logos/tech/postgresql.svg',
+  Laravel: 'logos/tech/laravel.svg', WordPress: 'logos/tech/wordpress.svg', WooCommerce: 'logos/tech/woocommerce.svg',
+  'Node.js': 'logos/tech/nodejs.svg', TypeScript: 'logos/tech/typescript.svg', Flutter: 'logos/tech/flutter.svg',
+  Stripe: 'logos/tech/stripe.svg', bKash: 'logos/tech/bkash.svg', Cloudflare: 'logos/tech/cloudflare.svg',
+}
 
 /** Reviews stay off until real ones exist; flip this and fill TESTIMONIALS then. */
 export const SHOW_TESTIMONIALS = false

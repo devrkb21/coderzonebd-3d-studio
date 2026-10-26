@@ -1,6 +1,6 @@
 // Detail views shared by the 3D side panel and the 2D / SEO page.
 import {
-  COMPANY, CONTACT, COURIER, FAQ, PROCESS, priceText, tr, UI, waLink, workById,
+  COMPANY, CONTACT, COURIER, FAQ, PROCESS, priceText, TECH, TECH_LOGOS, tr, UI, waLink, workById,
   type Lang, type ProductInfo, type Service, type WorkItem,
 } from '../content'
 import { useStore } from '../store'
@@ -38,7 +38,19 @@ export function HomeDetails({ lang }: { lang: Lang }) {
       <ul className="checks">
         {COMPANY.why.map((w) => <li key={w.en}>{tr(w, lang)}</li>)}
       </ul>
+      <h3>{lang === 'bn' ? 'আমাদের টেক স্ট্যাক' : 'Our tech stack'}</h3>
+      <TechGrid />
     </>
+  )
+}
+
+export function TechGrid() {
+  return (
+    <ul className="tech-grid">
+      {TECH.map((t) => (
+        <li key={t}><img src={`${BASE}${TECH_LOGOS[t]}`} alt="" loading="lazy" height={36} />{t}</li>
+      ))}
+    </ul>
   )
 }
 
@@ -76,6 +88,7 @@ export function ServiceDetails({ service: s, lang, actions = true }: { service: 
 export function ProductDetails({ product: p, lang }: { product: ProductInfo; lang: Lang }) {
   return (
     <>
+      <img className="product-logo" src={`${BASE}${p.logo}`} alt={p.name} height={48} loading="lazy" />
       {p.comingSoon && <span className="badge-soon">{tr(UI.comingSoon, lang)}</span>}
       <p className="lead">{tr(p.desc, lang)}</p>
       {p.features.length > 0 && <ul className="checks">{p.features.map((f) => <li key={f.en}>{tr(f, lang)}</li>)}</ul>}
@@ -128,7 +141,9 @@ export function CourierDetails({ lang }: { lang: Lang }) {
   return (
     <>
       <p className="lead">{tr(COURIER.desc, lang)}</p>
-      <ul className="chips">{COURIER.couriers.map((c) => <li key={c}><span>{c}</span></li>)}</ul>
+      <ul className="logo-chips">
+        {COURIER.couriers.map((c) => <li key={c}><img src={`${BASE}${COURIER.logos[c]}`} alt={c} title={c} loading="lazy" height={26} /></li>)}
+      </ul>
       <div className="actions">
         <a className="btn primary" href={COURIER.url} target="_blank" rel="noopener noreferrer">{tr(COURIER.cta, lang)} ↗</a>
       </div>

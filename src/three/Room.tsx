@@ -5,7 +5,7 @@ import { useStore } from '../store'
 import {
   KIOSK_NORMAL, KIOSK_POS, PRODUCT_BOX, PROCESS_BOARD, ROOM, SERVICE_CARD, SERVICE_RAIL_Y, STOP_FRAMES, yawOf,
 } from './layout'
-import { BLUE, deskTexture, floorTexture, signTexture, techBoardTexture } from './textures'
+import { BRAND, deskTexture, floorTexture, frontWallTexture, signTexture, techBoardTexture } from './textures'
 
 const { halfW, halfD, height } = ROOM
 
@@ -16,7 +16,7 @@ function useMaterials() {
     floor: new THREE.MeshLambertMaterial({ map: floorTexture() }),
     white: new THREE.MeshLambertMaterial({ color: '#ffffff' }),
     ink: new THREE.MeshLambertMaterial({ color: '#12141C' }),
-    blue: new THREE.MeshLambertMaterial({ color: BLUE }),
+    blue: new THREE.MeshLambertMaterial({ color: BRAND }),
     oak: new THREE.MeshLambertMaterial({ color: '#C9A77C' }),
     light: new THREE.MeshBasicMaterial({ color: '#ffffff' }),
     ao: new THREE.MeshBasicMaterial({ map: gradient(), transparent: true, depthWrite: false }),
@@ -59,8 +59,11 @@ export function Room() {
       <mesh position={[halfW, height / 2, 0]} rotation-y={-Math.PI / 2} material={m.wall}>
         <planeGeometry args={[halfD * 2, height]} />
       </mesh>
-      {/* contact shadows + a CZ-blue skirting line */}
-      {([[0, -halfD + 0.01, 0, halfW * 2], [-halfW + 0.01, 0, Math.PI / 2, halfD * 2], [halfW - 0.01, 0, -Math.PI / 2, halfD * 2]] as const).map(([x, z, r, len], i) => (
+      {/* Front wall, so a full look-around never shows the void. It faces inward only:
+          from outside (the intro fly-in) it is invisible. */}
+      <FrontWall m={m} />
+      {/* contact shadows + a brand-orange skirting line */}
+      {([[0, -halfD + 0.01, 0, halfW * 2], [-halfW + 0.01, 0, Math.PI / 2, halfD * 2], [halfW - 0.01, 0, -Math.PI / 2, halfD * 2], [0, halfD - 0.01, Math.PI, halfW * 2]] as const).map(([x, z, r, len], i) => (
         <group key={i} position={[x, 0, z]} rotation-y={r}>
           <mesh position-y={0.45} material={m.ao}><planeGeometry args={[len, 0.9]} /></mesh>
           <mesh position={[0, 0.06, 0.005]} material={m.blue}><planeGeometry args={[len, 0.12]} /></mesh>
@@ -186,6 +189,28 @@ function ContactDesk({ m }: { m: Mats }) {
       </mesh>
       <mesh position={[0, 0.55, 0.455]} material={front}>
         <planeGeometry args={[2.4, 0.94]} />
+      </mesh>
+    </group>
+  )
+}
+
+function FrontWall({ m }: { m: Mats }) {
+  const lang = useStore((s) => s.lang)
+  const sign = useMemo(() => new THREE.MeshBasicMaterial({ map: frontWallTexture(lang), transparent: true }), [lang])
+  return (
+    <group position={[0, 0, halfD]} rotation-y={Math.PI}>
+      <mesh position-y={height / 2} material={m.wall}>
+        <planeGeometry args={[halfW * 2, height]} />
+      </mesh>
+      {/* entrance doors */}
+      <mesh position={[0, 1.4, 0.02]} material={m.ink}>
+        <planeGeometry args={[2.6, 2.8]} />
+      </mesh>
+      <mesh position={[0, 1.4, 0.03]} material={m.blue}>
+        <planeGeometry args={[0.06, 2.8]} />
+      </mesh>
+      <mesh position={[0, 4.4, 0.02]} material={sign}>
+        <planeGeometry args={[7.2, 1.84]} />
       </mesh>
     </group>
   )

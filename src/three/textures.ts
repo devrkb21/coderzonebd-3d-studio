@@ -2,11 +2,13 @@
 // language. Only the six project screenshots are image files.
 import * as THREE from 'three'
 import {
-  COMPANY, CONTACT, COURIER, PROCESS, PRODUCTS, SERVICES, STOPS, TECH, WORK, tr, UI,
+  COMPANY, CONTACT, COURIER, PROCESS, PRODUCTS, SERVICES, STOPS, TECH, TECH_LOGOS, WORK, tr, UI,
   type Lang, type ProductInfo, type Service, type StopId, type WorkItem,
 } from '../content'
 
-export const BLUE = '#2B3FD6'
+/** Coder Zone BD orange (from the logo) and its darker tone for text on light grounds. */
+export const BRAND = '#FF931E'
+export const BRAND_TEXT = '#D46A00'
 export const INK = '#12141C'
 export const PAGE = '#F6F7FA'
 const MUTED = '#5B6070'
@@ -55,22 +57,42 @@ function wrap(ctx: Ctx, text: string, x: number, y: number, maxW: number, lineH:
   return y + lineH
 }
 
-/** The CZ mark from the favicon (44×44 viewBox). */
-export function drawLogo(ctx: Ctx, x: number, y: number, size: number, bg = BLUE, fg = '#ffffff') {
-  ctx.save()
-  ctx.translate(x, y)
-  ctx.scale(size / 44, size / 44)
-  ctx.fillStyle = bg
-  rr(ctx, 0, 0, 44, 44, 10)
-  ctx.fill()
-  ctx.translate(1.25, 0)
-  ctx.strokeStyle = fg
-  ctx.lineWidth = 4.2
-  ctx.lineCap = 'round'
-  ctx.lineJoin = 'round'
-  ctx.stroke(new Path2D('M19.3 16.2A7.6 7.6 0 1 0 19.3 27.8'))
-  ctx.stroke(new Path2D('M24.6 14.8h9.2l-9.2 14.4h9.6'))
-  ctx.restore()
+// ── real logos (files under public/logos) ───────────────────
+export const MARK = 'logos/coderzone-mark.png'
+export const WORDMARK = 'logos/coderzone-wordmark.png'
+const images = new Map<string, HTMLImageElement>()
+
+function loadImage(base: string, path: string) {
+  return new Promise<void>((resolve) => {
+    if (images.has(path)) return resolve()
+    const img = new Image()
+    img.onload = () => { images.set(path, img); resolve() }
+    img.onerror = () => resolve()
+    img.src = `${base}${path}`
+  })
+}
+
+export function loadLogos(base: string) {
+  const paths = new Set<string>([MARK, WORDMARK, ...Object.values(TECH_LOGOS), ...Object.values(COURIER.logos), ...PRODUCTS.map((p) => p.logo)])
+  return Promise.all([...paths].map((p) => loadImage(base, p)))
+}
+
+/** Draws a logo file to fit inside the box, keeping its aspect ratio; returns the drawn width (0 if not loaded). */
+export function drawImg(ctx: Ctx, path: string, x: number, y: number, w: number, h: number, align: 'left' | 'center' = 'center') {
+  const img = images.get(path)
+  if (!img) return 0
+  const iw = img.naturalWidth || img.width
+  const ih = img.naturalHeight || img.height
+  const k = Math.min(w / iw, h / ih)
+  const dw = iw * k
+  const dh = ih * k
+  ctx.drawImage(img, align === 'center' ? x + (w - dw) / 2 : x, y + (h - dh) / 2, dw, dh)
+  return dw
+}
+
+/** The Coder Zone BD mark. */
+export function drawLogo(ctx: Ctx, x: number, y: number, size: number) {
+  drawImg(ctx, MARK, x, y, size, size)
 }
 
 // ── home wall ────────────────────────────────────────────────
@@ -78,17 +100,18 @@ export function homeWallTexture(lang: Lang) {
   return make(`home|${lang}`, 1600, 900, (ctx, w, h) => {
     ctx.fillStyle = '#ffffff'
     ctx.fillRect(0, 0, w, h)
-    ctx.fillStyle = BLUE
+    ctx.fillStyle = BRAND
     ctx.fillRect(0, h - 14, w, 14)
-    drawLogo(ctx, 90, 80, 120)
-    ctx.fillStyle = INK
-    ctx.font = font(700, 64)
-    ctx.textBaseline = 'middle'
-    ctx.fillText(COMPANY.name, 236, 128)
+    if (!drawImg(ctx, WORDMARK, 90, 56, 640, 162, 'left')) {
+      ctx.fillStyle = INK
+      ctx.font = font(700, 64)
+      ctx.fillText(COMPANY.name, 90, 160)
+    }
     ctx.fillStyle = MUTED
     ctx.font = font(500, 32)
-    ctx.fillText(lang === 'bn' ? 'খুলনা · ২০২৪ থেকে' : 'Khulna · since 2024', 240, 182)
-    ctx.textBaseline = 'alphabetic'
+    ctx.textAlign = 'right'
+    ctx.fillText(lang === 'bn' ? 'খুলনা · ২০২৪ থেকে' : 'Khulna · since 2024', w - 90, 150)
+    ctx.textAlign = 'left'
     ctx.fillStyle = INK
     ctx.font = font(700, lang === 'bn' ? 76 : 80)
     wrap(ctx, tr(COMPANY.headline, lang), 90, 340, w - 180, lang === 'bn' ? 100 : 94, 3)
@@ -100,7 +123,7 @@ export function homeWallTexture(lang: Lang) {
       ctx.fillStyle = PAGE
       rr(ctx, x, 600, bw, 200, 14)
       ctx.fill()
-      ctx.fillStyle = BLUE
+      ctx.fillStyle = BRAND_TEXT
       ctx.font = font(700, 72)
       ctx.fillText(s.value, x + 30, 690)
       ctx.fillStyle = MUTED
@@ -116,19 +139,19 @@ export function serviceCardTexture(s: Service, lang: Lang) {
     ctx.fillStyle = '#ffffff'
     rr(ctx, 0, 0, w, h, 22)
     ctx.fill()
-    ctx.fillStyle = BLUE
+    ctx.fillStyle = BRAND
     rr(ctx, 0, 0, w, 150, 22)
     ctx.fill()
     ctx.fillRect(0, 120, w, 30)
     // hang hole
     ctx.fillStyle = '#ffffff'
     ctx.beginPath(); ctx.arc(w / 2, 26, 9, 0, Math.PI * 2); ctx.fill()
-    ctx.fillStyle = 'rgba(255,255,255,0.22)'
+    ctx.fillStyle = 'rgba(18,20,28,0.13)'
     ctx.font = font(700, 130)
     ctx.textAlign = 'right'
     ctx.fillText(s.letter.toUpperCase(), w - 22, 140)
     ctx.textAlign = 'left'
-    ctx.fillStyle = '#ffffff'
+    ctx.fillStyle = INK
     ctx.font = font(600, 22)
     ctx.fillText(lang === 'bn' ? 'সার্ভিস' : 'SERVICE', 28, 74)
     ctx.fillStyle = INK
@@ -140,7 +163,7 @@ export function serviceCardTexture(s: Service, lang: Lang) {
     ctx.fillStyle = PAGE
     rr(ctx, 20, h - 104, w - 40, 80, 12)
     ctx.fill()
-    ctx.fillStyle = BLUE
+    ctx.fillStyle = BRAND_TEXT
     ctx.font = font(700, 30)
     const price = s.price ? (lang === 'bn' ? `${s.price.bn} থেকে` : `from ${s.price.en}`) : (lang === 'bn' ? 'আলোচনা সাপেক্ষে' : 'On discussion')
     ctx.fillText(price, 38, h - 54)
@@ -158,7 +181,10 @@ export function productFrontTexture(p: ProductInfo, lang: Lang) {
     ctx.strokeStyle = 'rgba(255,255,255,0.12)'
     ctx.lineWidth = 2
     for (let i = -h; i < w; i += 34) { ctx.beginPath(); ctx.moveTo(i, h); ctx.lineTo(i + h, 0); ctx.stroke() }
-    drawLogo(ctx, 32, 32, 64, '#ffffff', p.color)
+    ctx.fillStyle = '#ffffff'
+    rr(ctx, 32, 32, 96, 96, 20)
+    ctx.fill()
+    drawImg(ctx, p.logo, 44, 44, 72, 72)
     ctx.fillStyle = '#ffffff'
     ctx.font = font(700, 50)
     wrap(ctx, p.name, 32, 220, w - 64, 56, 2)
@@ -203,14 +229,14 @@ export function workPosterTexture(wk: WorkItem, lang: Lang) {
       // Neutral card for projects without a public site: name and stack only.
       ctx.fillStyle = '#E9ECF5'
       ctx.fillRect(0, 0, w, 320)
-      ctx.strokeStyle = 'rgba(43,63,214,0.12)'
+      ctx.strokeStyle = 'rgba(255,147,30,0.18)'
       ctx.lineWidth = 2
       for (let x = 0; x < w; x += 32) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, 320); ctx.stroke() }
       for (let y = 0; y < 320; y += 32) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke() }
       ctx.fillStyle = INK
       ctx.font = font(700, 44)
       const y = wrap(ctx, wk.name, 36, 120, w - 72, 50, 3)
-      ctx.fillStyle = BLUE
+      ctx.fillStyle = BRAND_TEXT
       ctx.font = font(600, 26)
       wrap(ctx, wk.stack, 36, y + 10, w - 72, 32, 2)
     }
@@ -230,7 +256,7 @@ export function processTexture(i: number, lang: Lang) {
     ctx.fillStyle = '#ffffff'
     rr(ctx, 0, 0, w, h, 20)
     ctx.fill()
-    ctx.fillStyle = BLUE
+    ctx.fillStyle = BRAND
     ctx.font = font(700, 120)
     ctx.fillText(lang === 'bn' ? '০১০২০৩০৪'.slice(i * 2, i * 2 + 2) : `0${i + 1}`, 30, 140)
     ctx.fillStyle = MUTED
@@ -242,7 +268,7 @@ export function processTexture(i: number, lang: Lang) {
     ctx.fillStyle = MUTED
     ctx.font = font(500, 27)
     wrap(ctx, tr(s.desc, lang), 30, y + 10, w - 60, 36, 5)
-    ctx.fillStyle = BLUE
+    ctx.fillStyle = BRAND
     ctx.fillRect(0, h - 10, w * ((i + 1) / PROCESS.length), 10)
   })
 }
@@ -258,23 +284,26 @@ export function kioskTexture(lang: Lang) {
     ctx.fillStyle = '#A9B0C6'
     ctx.font = font(500, 22)
     wrap(ctx, lang === 'bn' ? 'ফোন নম্বর দিয়ে ৫টি কুরিয়ারে ডেলিভারি হিস্ট্রি দেখুন — ফ্রি' : 'Delivery history across 5 couriers by phone number — free', 30, 104, w - 60, 30, 2)
-    let x = 30
-    let y = 180
-    ctx.font = font(600, 22)
-    for (const c of COURIER.couriers) {
-      const tw = ctx.measureText(c).width + 32
-      if (x + tw > w - 30) { x = 30; y += 50 }
-      ctx.fillStyle = 'rgba(255,255,255,0.1)'
-      rr(ctx, x, y - 30, tw, 40, 20)
-      ctx.fill()
+    // courier logos on white chips: 3 on top, 2 below
+    const cw = (w - 60 - 2 * 10) / 3
+    COURIER.couriers.forEach((c, i) => {
+      const x = 30 + (i % 3) * (cw + 10) + (i >= 3 ? (cw + 10) / 2 : 0)
+      const y = 148 + Math.floor(i / 3) * 62
       ctx.fillStyle = '#ffffff'
-      ctx.fillText(c, x + 16, y - 3)
-      x += tw + 10
-    }
-    ctx.fillStyle = BLUE
+      rr(ctx, x, y, cw, 52, 12)
+      ctx.fill()
+      if (!drawImg(ctx, COURIER.logos[c], x + 12, y + 8, cw - 24, 36)) {
+        ctx.fillStyle = INK
+        ctx.font = font(600, 22)
+        ctx.textAlign = 'center'
+        ctx.fillText(c, x + cw / 2, y + 34)
+        ctx.textAlign = 'left'
+      }
+    })
+    ctx.fillStyle = BRAND
     rr(ctx, 30, h - 92, w - 60, 62, 14)
     ctx.fill()
-    ctx.fillStyle = '#ffffff'
+    ctx.fillStyle = INK
     ctx.font = font(700, 28)
     ctx.textAlign = 'center'
     ctx.fillText(`${tr(COURIER.cta, lang)} →`, w / 2, h - 51)
@@ -285,10 +314,15 @@ export function kioskTexture(lang: Lang) {
 // ── contact sign ─────────────────────────────────────────────
 export function contactTexture(lang: Lang) {
   return make(`contact|${lang}`, 800, 490, (ctx, w, h) => {
-    ctx.fillStyle = BLUE
+    ctx.fillStyle = INK
     rr(ctx, 0, 0, w, h, 20)
     ctx.fill()
-    drawLogo(ctx, 40, 40, 72, '#ffffff', BLUE)
+    ctx.fillStyle = BRAND
+    ctx.fillRect(0, h - 12, w, 12)
+    ctx.fillStyle = '#ffffff'
+    rr(ctx, 40, 40, 76, 76, 16)
+    ctx.fill()
+    drawLogo(ctx, 46, 46, 64)
     ctx.fillStyle = '#ffffff'
     ctx.font = font(700, 52)
     ctx.fillText(tr(UI.contactTitle, lang), 134, 96)
@@ -299,7 +333,7 @@ export function contactTexture(lang: Lang) {
       [lang === 'bn' ? 'ঠিকানা' : 'Address', tr(CONTACT.address, lang)],
     ]
     rows.forEach(([k, val], i) => {
-      ctx.fillStyle = 'rgba(255,255,255,0.7)'
+      ctx.fillStyle = '#FFB25C'
       ctx.font = font(500, 26)
       ctx.fillText(k, 44, 196 + i * 84)
       ctx.fillStyle = '#ffffff'
@@ -313,7 +347,7 @@ export function deskTexture(lang: Lang) {
   return make(`desk|${lang}`, 512, 200, (ctx, w, h) => {
     ctx.fillStyle = '#ffffff'
     ctx.fillRect(0, 0, w, h)
-    ctx.fillStyle = BLUE
+    ctx.fillStyle = BRAND
     ctx.fillRect(0, 0, w, 10)
     ctx.fillStyle = INK
     ctx.font = font(700, 40)
@@ -341,12 +375,13 @@ export function techBoardTexture(lang: Lang) {
       const x = 40 + (i % cols) * (tw + 18)
       const y = 110 + Math.floor(i / cols) * 132
       ctx.fillStyle = '#ffffff'
-      rr(ctx, x, y, tw, 108, 14)
+      rr(ctx, x, y, tw, 116, 14)
       ctx.fill()
-      ctx.fillStyle = i % 3 === 0 ? BLUE : INK
-      ctx.font = font(700, 30)
+      const drew = drawImg(ctx, TECH_LOGOS[t], x + 20, y + 12, tw - 40, 58)
+      ctx.fillStyle = INK
+      ctx.font = font(700, drew ? 22 : 30)
       ctx.textAlign = 'center'
-      ctx.fillText(t, x + tw / 2, y + 66)
+      ctx.fillText(t, x + tw / 2, drew ? y + 100 : y + 66)
       ctx.textAlign = 'left'
     })
   })
@@ -357,13 +392,26 @@ export function signTexture(stop: StopId, lang: Lang) {
   return make(`sign|${stop}|${lang}`, 512, 128, (ctx, w, h) => {
     ctx.fillStyle = INK
     ctx.fillRect(0, 0, w, h)
-    ctx.fillStyle = BLUE
+    ctx.fillStyle = BRAND
     ctx.fillRect(0, h - 10, w, 10)
     ctx.fillStyle = '#ffffff'
     ctx.font = font(700, 58)
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
     ctx.fillText(label, w / 2, h / 2)
+  })
+}
+
+/** Above the entrance, seen when you turn around: the wordmark and a thank-you line. */
+export function frontWallTexture(lang: Lang) {
+  return make(`front|${lang}`, 1400, 360, (ctx, w, h) => {
+    ctx.clearRect(0, 0, w, h)
+    drawImg(ctx, WORDMARK, 0, 10, w, 250)
+    ctx.fillStyle = MUTED
+    ctx.font = font(600, 40)
+    ctx.textAlign = 'center'
+    ctx.fillText(lang === 'bn' ? 'আসার জন্য ধন্যবাদ · coderzonebd.com' : 'Thanks for visiting · coderzonebd.com', w / 2, h - 30)
+    ctx.textAlign = 'left'
   })
 }
 
@@ -403,10 +451,10 @@ export async function prepareTextures(lang: Lang, base: string, onProgress: (p: 
     ])
   } catch { /* fall back to system font */ }
   onProgress(0.2)
-  await loadWorkThumbs(base)
+  await Promise.all([loadWorkThumbs(base), loadLogos(base)])
   onProgress(0.45)
   const jobs: (() => unknown)[] = [
-    floorTexture, () => homeWallTexture(lang), () => kioskTexture(lang), () => contactTexture(lang), () => deskTexture(lang), () => techBoardTexture(lang),
+    floorTexture, () => homeWallTexture(lang), () => frontWallTexture(lang), () => kioskTexture(lang), () => contactTexture(lang), () => deskTexture(lang), () => techBoardTexture(lang),
     ...STOPS.map((s) => () => signTexture(s.id, lang)),
     ...SERVICES.map((s) => () => serviceCardTexture(s, lang)),
     ...PRODUCTS.map((p) => () => productFrontTexture(p, lang)),
