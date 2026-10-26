@@ -5,16 +5,16 @@ import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { useStore } from '../store'
 import { Hot } from './Hot'
-import { KIOSK_NORMAL, KIOSK_POS, ROOM } from './layout'
+import { COFFEE_X, KIOSK_NORMAL, KIOSK_POS, LOUNGE_X, ROOM } from './layout'
 
 const { halfW, halfD } = ROOM
 const coarse = typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches
 
 /** Hiding places, next to the furniture in Office.tsx / Models.tsx. */
 export const COINS: { id: string; pos: [number, number, number] }[] = [
-  { id: 'shelf', pos: [-halfW + 2.4, 2.26, halfD - 0.45] },
-  { id: 'lounge', pos: [-8.6, 0.16, 7.7] },
-  { id: 'coffee', pos: [halfW - 1.6, 1.1, halfD - 0.5] },
+  { id: 'shelf', pos: [halfW - 0.4, 2.26, 9] },
+  { id: 'lounge', pos: [LOUNGE_X, 0.16, halfD - 2.2] },
+  { id: 'coffee', pos: [COFFEE_X + 0.05, 1.1, halfD - 0.45] },
   { id: 'kiosk', pos: [KIOSK_POS.x - KIOSK_NORMAL.x * 0.6, 0.2, KIOSK_POS.z - KIOSK_NORMAL.z * 0.6] },
   { id: 'plant', pos: [-halfW + 1.6, 0.18, 3.0] },
 ]
