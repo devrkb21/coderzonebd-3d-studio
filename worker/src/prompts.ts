@@ -81,7 +81,13 @@ Hard rules:
 - Draw every product and category picture with CSS only: gradients, shapes, simple flat illustrations made from divs and pseudo-elements that suggest the product (a bottle, a shirt, a cake...). Emoji are fine as small accents.
 - Keep the CSS under about 250 lines and the whole document compact, so it streams quickly.
 
-The page, at a 1280px-wide desktop layout that also works on phones:
+Layout. The page is shown in a 1280×780 frame on a screen in our 3D studio and full size on phones down to 360px wide; it must look right at both:
+- Use normal document flow with flexbox or grid. Never place art over or under text: no position: absolute or fixed, negative margins or transforms that move art onto copy.
+- Hero: the copy and the art are two separate columns side by side on wide screens. In one @media (max-width: 700px) rule they stack, copy first and art below it (keep the art visible, a little shorter; don't hide it). Give the art box a fixed height (about 220–320px) and overflow: hidden; any absolutely positioned shapes that draw the illustration stay inside that box.
+- Headings use clamp() font sizes so they fit at 360px, and nothing overflows horizontally.
+- The product grid uses repeat(auto-fill, minmax(…)), so it drops to two columns on phones.
+
+The page:
 1. Top bar with the shop name as a logo, a search box (styled div), cart icon with a count.
 2. Hero: a confident headline and subline for this specific business, a call-to-action button, a CSS-drawn hero visual. Pick a colour palette that suits the business type.
 3. Category row: 4 to 6 categories with CSS-drawn icons.
