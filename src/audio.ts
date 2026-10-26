@@ -139,6 +139,7 @@ export function startSound() {
     if (s.lightsOn !== prev.lightsOn && ctx) fan.gain.setTargetAtTime(s.lightsOn ? 0.22 : 0.02, ctx.currentTime, 0.8)
     if ((s.stop !== prev.stop || s.focusId !== prev.focusId || s.overview !== prev.overview) && !s.intro) tone(s.focusId ? 1180 : 880, 0.08, 0.04)
     if (s.quote.length > prev.quote.length) { tone(1320, 0.12, 0.05); tone(1760, 0.18, 0.04, 'sine', 0.09) }
+    if (s.coins.length > prev.coins.length) { tone(1975, 0.1, 0.05, 'triangle'); tone(2637, 0.3, 0.05, 'triangle', 0.08) } // coin
     if (s.doorOpen && !prev.doorOpen) { tone(1568, 0.6, 0.03); tone(1175, 0.9, 0.03, 'sine', 0.35) } // door chime
   })
 }

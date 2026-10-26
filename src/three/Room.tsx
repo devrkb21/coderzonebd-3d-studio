@@ -10,6 +10,7 @@ import {
 import { Hot } from './Hot'
 import { BRAND, deskTexture, floorTexture, frontWallTexture, signboardTexture, signTexture } from './textures'
 import { usePhase } from './time'
+import { WelcomeBanner } from './Welcome'
 
 const { halfW, halfD, height } = ROOM
 
@@ -358,6 +359,7 @@ function Exterior({ hw }: { hw: number }) {
       <mesh position={[0, 5.45, -0.2]} rotation-y={Math.PI} material={m.sign}><planeGeometry args={[8, 1.6]} /></mesh>
       <mesh position={[0, 5.45, -0.17]} material={m.ink}><boxGeometry args={[8.2, 1.8, 0.04]} /></mesh>
       <mesh position={[0, DOOR.h + 0.32, -0.62]} rotation-x={-0.18} material={m.canopy}><boxGeometry args={[DOOR.w + 1.4, 0.06, 1.0]} /></mesh>
+      <WelcomeBanner position={[0, 4.0, -0.2]} />
     </group>
   )
 }

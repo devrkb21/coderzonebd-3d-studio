@@ -52,6 +52,16 @@ interface State {
   setSoundOn: (on: boolean) => void
   openChat: (who: Persona) => void
   closeChat: () => void
+  /** Coin hunt: ids of the hidden CZ coins found so far (remembered). */
+  coins: string[]
+  collectCoin: (id: string) => void
+  rewardOpen: boolean
+  setRewardOpen: (open: boolean) => void
+  postcardOpen: boolean
+  setPostcardOpen: (open: boolean) => void
+  /** The personalised store mock-up card (`?for=` visits). */
+  welcomeOpen: boolean
+  setWelcomeOpen: (open: boolean) => void
 }
 
 export type Persona = 'receptionist' | 'ceo' | 'cmo'
@@ -182,4 +192,27 @@ export const useStore = create<State>((set, get) => ({
     write('cz3d-sound', soundOn ? 'on' : 'off')
     set({ soundOn })
   },
+  coins: typeof window === 'undefined' ? [] : initialCoins(),
+  collectCoin: (id) => {
+    const c = get().coins
+    if (c.includes(id)) return
+    const coins = [...c, id]
+    write('cz3d-coins', JSON.stringify(coins))
+    set({ coins, rewardOpen: coins.length >= COIN_COUNT, touring: false })
+  },
+  rewardOpen: false,
+  setRewardOpen: (rewardOpen) => set({ rewardOpen }),
+  postcardOpen: false,
+  setPostcardOpen: (postcardOpen) => set({ postcardOpen, touring: false }),
+  welcomeOpen: false,
+  setWelcomeOpen: (welcomeOpen) => set({ welcomeOpen, touring: false }),
 }))
+
+export const COIN_COUNT = 5
+
+function initialCoins(): string[] {
+  try {
+    const ids = JSON.parse(read('cz3d-coins') ?? '[]')
+    return Array.isArray(ids) ? ids.filter((x): x is string => typeof x === 'string').slice(0, COIN_COUNT) : []
+  } catch { return [] }
+}

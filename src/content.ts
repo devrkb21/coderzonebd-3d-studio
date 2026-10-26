@@ -401,3 +401,14 @@ export const UI = {
     { bn: '৳৫ লাখের বেশি', en: 'Over ৳5 lakh' },
   ],
 } satisfies Record<string, L | L[]>
+
+/** Coin hunt: what a visitor gets for finding all five hidden CZ coins (confirmed by the team). */
+export const COIN_REWARD: L = {
+  bn: 'প্রথম প্রজেক্টের সাথে ১ মাস ফ্রি মেইনটেন্যান্স',
+  en: '1 month of free maintenance with your first project',
+}
+/** Prefilled WhatsApp message for claiming the coin-hunt reward. */
+export const COIN_CLAIM: L = {
+  bn: 'আসসালামু আলাইকুম! আমি 3D স্টুডিওতে ৫টা কয়েনই খুঁজে পেয়েছি — প্রথম প্রজেক্টের সাথে আমার ১ মাস ফ্রি মেইনটেন্যান্স চাই।',
+  en: "Hi! I found all 5 coins in the 3D studio — I'd like my 1 month of free maintenance with my first project.",
+}

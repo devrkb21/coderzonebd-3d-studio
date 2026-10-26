@@ -292,3 +292,45 @@ kbd { display: inline-block; min-width: 30px; padding: 3px 9px; border-radius: 7
 .intro-line { position: absolute; left: 50%; bottom: calc(max(24px, env(safe-area-inset-bottom)) + 64px); transform: translateX(-50%); margin: 0; width: max-content; max-width: calc(100vw - 32px); text-align: center; color: #fff; font-size: clamp(20px, 3.2vw, 34px); font-weight: 700; letter-spacing: 0.01em; text-shadow: 0 2px 18px rgba(0, 0, 0, 0.5); animation: rise 0.9s var(--ease); }
 .intro-skip { position: absolute; right: max(16px, env(safe-area-inset-right)); bottom: max(20px, env(safe-area-inset-bottom)); pointer-events: auto; padding: 10px 16px; border-radius: 999px; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); font-weight: 700; font-size: 14px; color: var(--ink); box-shadow: var(--float); }
 .intro-skip:hover { background: #fff; }
+
+/* ── coin hunt, selfie postcard, personalised visit ── */
+.coin-hud { position: fixed; z-index: 19; left: max(16px, env(safe-area-inset-left)); top: calc(max(12px, env(safe-area-inset-top)) + 58px); display: flex; align-items: center; gap: 7px; height: 34px; padding: 0 12px 0 5px; border-radius: 999px; background: rgba(255, 255, 255, 0.9); border: 1px solid var(--line); box-shadow: var(--float); font-size: 13px; font-weight: 700; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+.coin-hud.done { background: #ffe9a8; }
+.coin-dot { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: radial-gradient(circle at 40% 35%, #fff0b0, #f2c14e 55%, #c98f14); color: #8a5a00; font-size: 10px; font-weight: 800; box-shadow: inset 0 0 0 2px #a8740c; }
+.coin-burst { display: flex; justify-content: center; gap: 8px; margin: 14px 0 6px; }
+.coin-burst .coin-dot { width: 40px; height: 40px; font-size: 14px; animation: coin-pop 0.6s var(--ease) both; }
+@keyframes coin-pop { from { opacity: 0; transform: translateY(16px) scale(0.4) rotateY(180deg); } }
+.coin-prize-label { margin: 14px 0 2px; font-size: 13px; font-weight: 700; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.06em; text-align: center; }
+.coin-prize { margin: 0; font-size: 22px; font-weight: 700; color: var(--brand-text); text-align: center; line-height: 1.3; }
+.coin-note { margin: 10px 0 0; color: var(--ink-2); font-size: 15px; text-align: center; }
+.coin-reward .actions, .welcome-card .actions, .postcard .actions { flex-wrap: wrap; }
+.coin-reward .actions .btn, .welcome-card .actions .btn, .postcard .actions .btn { flex: 1; }
+.postcard-btn { color: var(--ink-2); }
+.postcard-preview { display: block; width: auto; max-width: 100%; height: min(46dvh, 420px); margin: 14px auto 0; border-radius: 10px; box-shadow: var(--float); }
+.postcard-name { display: grid; gap: 5px; margin-top: 14px; font-size: 14px; font-weight: 600; }
+.postcard-name input { font: inherit; font-size: 16px; font-weight: 400; padding: 11px 12px; border-radius: var(--r1); border: 1px solid rgba(18, 20, 28, 0.18); background: var(--page); color: var(--ink); }
+.welcome-sub { margin: 8px 0 0; color: var(--ink-2); }
+.welcome-mock { display: block; width: auto; max-width: 100%; height: min(56dvh, 560px); margin: 12px auto 0; border-radius: 12px; }
+@media (max-width: 759px) {
+  .coin-hud { top: calc(max(12px, env(safe-area-inset-top)) + 50px); }
+}
+/* the postcard button makes one more in the top bar: tighten it on narrow phones */
+@media (max-width: 420px) {
+  .topbar { gap: 6px; padding-left: max(10px, env(safe-area-inset-left)); padding-right: max(10px, env(safe-area-inset-right)); }
+  .brand { padding: 3px; }
+  .top-actions { gap: 4px; }
+  .mode-3d .top-actions .icon-btn:not(.sm) { width: 34px; height: 40px; }
+  .pill-btn { padding: 0 7px; font-size: 12px; }
+  .seg button { padding: 6px 6px; }
+  .coin-hud { left: max(10px, env(safe-area-inset-left)); }
+}
+.link-maker { max-width: 560px; margin: 0 auto; padding: 32px 16px 48px; }
+.link-maker h1 { margin: 18px 0 4px; font-size: 26px; }
+.lm-note { margin: 0 0 8px; color: var(--ink-2); }
+.lm-lang { display: flex; gap: 18px; margin: 0; padding: 0; border: 0; font-size: 14px; font-weight: 600; }
+.lm-lang legend { padding: 0; margin-bottom: 5px; }
+.lm-lang label { display: flex; align-items: center; gap: 6px; font-weight: 400; font-size: 16px; }
+.lm-out { display: grid; gap: 12px; margin-top: 24px; padding: 16px; border-radius: var(--r2); background: var(--paper); border: 1px solid var(--line); }
+.lm-out label { display: grid; gap: 5px; font-size: 14px; font-weight: 600; }
+.lm-out input, .lm-out textarea { font: inherit; font-size: 15px; font-weight: 400; padding: 10px 12px; border-radius: var(--r1); border: 1px solid rgba(18, 20, 28, 0.18); background: var(--page); color: var(--ink); resize: vertical; }
+.lm-out .actions { display: flex; gap: 10px; }

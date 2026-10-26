@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { COMPANY, STOPS, tr, UI } from '../content'
 import { useStore } from '../store'
 import { CloseIcon, ListIcon } from './icons'
+import { PostcardButton } from './Postcard'
 
 const BASE = import.meta.env.BASE_URL
 
@@ -57,6 +58,7 @@ export function TopBar() {
             </svg>
           </button>
         )}
+        {mode === '3d' && <PostcardButton />}
         {mode === '3d' && (
           <button className="icon-btn help-btn" onClick={() => setHelpOpen(true)} aria-label={tr(UI.help, lang)} title={tr(UI.help, lang)}>?</button>
         )}

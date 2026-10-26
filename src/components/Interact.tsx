@@ -1,6 +1,7 @@
 // Keyboard shortcuts, the auto tour, the hover label and the "how to explore" overlay.
 import { useEffect, useRef, useState } from 'react'
 import { STOPS, tr, UI } from '../content'
+import { PERSONAL, welcomeLine } from '../personal'
 import { useStore } from '../store'
 import { CloseIcon } from './icons'
 
@@ -176,9 +177,11 @@ export function IntroOverlay() {
   }, [intro])
   if (!intro) return null
   const bn = lang === 'bn'
-  const lines = bn
-    ? ['কোডার জোন বিডি-তে স্বাগতম', 'খুলনার একটি সফটওয়্যার স্টুডিও · ভেতরে আসুন']
-    : ['Welcome to Coder Zone BD', 'A software studio in Khulna · Come on in']
+  const lines = PERSONAL
+    ? [welcomeLine(PERSONAL.name, lang), bn ? 'এটা কোডার জোন বিডি, খুলনার সফটওয়্যার স্টুডিও · ভেতরে আসুন' : 'This is Coder Zone BD, a software studio in Khulna · Come on in']
+    : bn
+      ? ['কোডার জোন বিডি-তে স্বাগতম', 'খুলনার একটি সফটওয়্যার স্টুডিও · ভেতরে আসুন']
+      : ['Welcome to Coder Zone BD', 'A software studio in Khulna · Come on in']
   return (
     <div className="intro">
       <p key={line} className="intro-line">{lines[line]}</p>

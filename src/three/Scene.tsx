@@ -12,6 +12,9 @@ import { Outside, SKY } from './Outside'
 import { Room } from './Room'
 import { prepareTextures } from './textures'
 import { usePhase } from './time'
+import { Coins } from './Coins'
+import { SnapshotBridge } from './Snapshot'
+import { WelcomeStand } from './Welcome'
 
 /**
  * Soft shadows under and around everything that stands on the floor (furniture, plinths, the
@@ -115,6 +118,9 @@ export default function Scene({ onProgress }: { onProgress: (p: number) => void 
         <Robot />
         <FloorShadows />
       </Suspense>
+      <Coins />
+      <WelcomeStand />
+      <SnapshotBridge />
       <CameraRig />
     </Canvas>
   )
