@@ -5,6 +5,7 @@ import * as THREE from 'three'
 import { PROCESS, PRODUCTS, SERVICES, STOPS, tr, UI, WORK, type Lang, type StopId } from '../content'
 import { useStore } from '../store'
 import { PLACEMENTS, STOP_FRAMES, yawOf, type Placement } from './layout'
+import { useHomeVideo } from './homeVideo'
 import {
   contactTexture, homeWallTexture, kioskTexture, processTexture, productFrontTexture, serviceCardTexture, techBoardTexture, workPosterTexture,
 } from './textures'
@@ -15,6 +16,7 @@ export const DRAG_PX = 6
 function textureFor(pl: Placement, lang: Lang) {
   const { kind, ref } = pl.item
   switch (kind) {
+    // Static fallback; the looping film (useHomeVideo) replaces it once it plays.
     case 'home': return homeWallTexture(lang)
     case 'service': return serviceCardTexture(SERVICES.find((s) => s.id === ref)!, lang)
     case 'product': return productFrontTexture(PRODUCTS.find((p) => p.id === ref)!, lang)
@@ -99,10 +101,11 @@ function ItemMesh({ pl }: { pl: Placement }) {
   }, [pl])
   const boxMats = useMemo(() => [side, side, side, side, front, side], [side, front])
 
+  const homeVideo = useHomeVideo(lang, pl.item.kind === 'home')
   useEffect(() => {
-    front.map = textureFor(pl, lang)
+    front.map = homeVideo ?? textureFor(pl, lang)
     front.needsUpdate = true
-  }, [front, pl, lang])
+  }, [front, pl, lang, homeVideo])
 
   const tmp = useMemo(() => new THREE.Vector3(), [])
   const swing = useRef<THREE.Group>(null)

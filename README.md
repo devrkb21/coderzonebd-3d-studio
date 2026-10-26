@@ -15,7 +15,7 @@ A walk-through 3D office and showroom for [Coder Zone BD](https://coderzonebd.co
 
 | # | Section | Where | What it shows |
 | --- | --- | --- | --- |
-| 1 | Home | back wall, centre | Logo wall with the headline and stats. Its panel covers the company and why to choose us |
+| 1 | Home | back wall, centre | A looping 23-second brand film: the logo builds in, the headline, the stats count up, the four service lines and the four products, then Khulna · since 2024 and the WhatsApp call to action. Its panel covers the company and why to choose us |
 | 2 | Services | left wall, hanging rail | 8 cards. Each panel has what you get, an approximate price, duration, proof projects, **Add to quote** and WhatsApp buttons |
 | 3 | Products | back-left plinth | CZ Commerce, CheckoutGuard, Laravel Ecom and CZ Social (coming soon), with real logos, pricing and links |
 | 4 | Work | back-right wall | 13 projects. The live sites use real screenshots; projects without a public site get a neutral name + stack card |
@@ -129,7 +129,7 @@ npx wrangler tail                           # live logs
 - With reduced motion turned on, the camera jumps between sections instead of flying.
 - `?2d` / `?3d` / `?lang=bn` / `?time=night` / `?weather=rain` / `?fest=eid` in the URL force a mode, language, time of day, weather or festival. `?for=<name>&type=<kind>` makes a personalised visit, `?nointro` skips the intro, and `?make-link` opens the team's link maker.
 
-**Weight:** in 2D mode, three.js is never downloaded. 3D adds about 300 KB gzipped of JS plus the screenshots and logos. Everything else in the room is drawn on `<canvas>` at runtime.
+**Weight:** in 2D mode, three.js is never downloaded. 3D adds about 300 KB gzipped of JS plus the screenshots and logos, and the Home film for the current language (about 0.8 MB on desktop, 0.7 MB on phones, streamed after the room appears). Everything else in the room is drawn on `<canvas>` at runtime.
 
 ## Stack
 
@@ -162,6 +162,29 @@ Vite, React 18, TypeScript, React Three Fiber + drei (`CameraControls` for the c
 | `src/components/Postcard.tsx` | Selfie postcard button and dialog (capture via `src/three/Snapshot.tsx`) |
 | `src/components/WelcomeCard.tsx` | The large store preview with Get this store / WhatsApp |
 | `src/components/LinkMaker.tsx` | Internal link maker at `?make-link` |
+| `src/three/homeVideo.ts` | The Home wall film as a video texture, with the static fallback |
+| `video/home/` | The Home film's source (HyperFrames) and its render script |
+
+## Home wall video
+
+The Home wall plays a silent, seamlessly looping motion-graphics film, one per language: `public/video/home-en.mp4` and `home-bn.mp4` (1600×900, H.264, 30 fps, faststart), `home-<lang>-720.mp4` (1280×720, used on touch devices and small screens) and a poster `home-<lang>.jpg`. The last frame is the first frame, so the loop has no seam.
+
+- `src/three/homeVideo.ts` plays it on a muted, looping, inline `<video>` as a `THREE.VideoTexture` (sRGB) and switches the file when the language changes. The static canvas wall (`homeWallTexture`) shows until the film's first frame is playing, and stays for good when Save-Data or reduced motion is on or the browser refuses to autoplay. The film pauses while the tab is hidden. Clicking the wall still opens the Home panel.
+- The film is a [HyperFrames](https://hyperframes.heygen.com) composition in `video/home/index.html` (HTML + GSAP, Anek Bangla, brand colours, real logos). Its copy is the `COPY` object at the bottom of that file; keep it in step with `src/content.ts`.
+- To change and re-render it (Node 22+, FFmpeg):
+
+```bash
+cd video/home
+npx hyperframes preview          # edit in the browser Studio
+npx hyperframes check            # lint + layout checks
+node render.mjs                  # renders en + bn, writes public/video/*
+```
+
+`render.mjs` renders a master per language with `--variables '{"lang":"bn"}'`, then encodes the 1600×900 and 720p MP4s and the posters with FFmpeg. (A VP9 WebM came out larger than the H.264 at the same quality, so there isn't one.)
+
+### Promo trailer (not shipped)
+
+`marketing/trailer/` holds a 30-second silent promo of the studio for ads and reels, in 16:9 (`wide/`) and 9:16 (`tall/`, built from `wide/` by `scripts/make-tall.py`). The footage is the live site, recorded frame by frame under a virtual clock so it is a smooth 30 fps on any machine: `node scripts/record.cjs all` and `node scripts/record.cjs intro,tour,street,night,team,robot vertical` (set `PUPPETEER` to a `puppeteer-core` install). Link `wide/assets/footage` to `footage/` and `tall/assets/footage` to `footage-9x16/` (a symlink or junction), then run `npx hyperframes render --quality delivery` in `wide/` and `tall/`. Footage and renders are git-ignored.
 
 ## 3D models and credits
 
