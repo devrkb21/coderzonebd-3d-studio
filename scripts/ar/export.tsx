@@ -18,6 +18,7 @@ import { Items } from '../../src/three/Items'
 import { OfficeModels } from '../../src/three/Models'
 import { Reception } from '../../src/three/Reception'
 import { Cabins } from '../../src/three/Cabins'
+import { CzBooth } from '../../src/three/CzBooth'
 import { ROOM } from '../../src/three/layout'
 import { homeWallTexture, prepareTextures } from '../../src/three/textures'
 
@@ -325,6 +326,7 @@ prepareTextures('en', import.meta.env.BASE_URL, () => {}).then(() => {
       <Room />
       <Office />
       <Items />
+      <CzBooth />
       <Suspense fallback={null}>
         <OfficeModels />
         <Reception />

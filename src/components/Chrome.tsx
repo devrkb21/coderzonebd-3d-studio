@@ -89,7 +89,7 @@ export function NavPills() {
       </button>
       <span className="pill-sep" aria-hidden />
       {STOPS.map((s, i) => (
-        <button key={s.id} className={`pill ${stop === s.id && !focused && !overview ? 'active' : ''}`} aria-current={stop === s.id ? 'true' : undefined} onClick={() => goTo(s.id)} title={`${tr(s.label, lang)} (${i + 1})`}>
+        <button key={s.id} className={`pill ${stop === s.id && !focused && !overview ? 'active' : ''}`} aria-current={stop === s.id ? 'true' : undefined} onClick={() => goTo(s.id)} title={`${tr(s.label, lang)} (${(i + 1) % 10})`}>
           {tr(s.label, lang)}
         </button>
       ))}

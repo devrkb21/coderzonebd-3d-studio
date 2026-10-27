@@ -16,14 +16,15 @@ A walk-through 3D office and showroom for [Coder Zone BD](https://coderzonebd.co
 | # | Section | Where | What it shows |
 | --- | --- | --- | --- |
 | 1 | Home | back wall, centre | A looping 23-second brand film: the logo builds in, the headline, the stats count up, the four service lines and the four products, then Khulna · since 2024 and the WhatsApp call to action. Its panel covers the company and why to choose us |
-| 2 | Services | left wall, hanging rail | 8 cards. Each panel has what you get, an approximate price, duration, proof projects, **Add to quote** and WhatsApp buttons |
-| 3 | Products | back-left plinth | CZ Commerce, CheckoutGuard, Laravel Ecom and CZ Social (coming soon), with real logos, pricing and links |
-| 4 | Work | back-right wall | 13 projects. The live sites use real screenshots; projects without a public site get a neutral name + stack card |
-| 5 | Tech Stack | left wall, front | A board of the real logos of the tools we use (Laravel, React, Flutter, WordPress, …) |
-| 6 | Courier Check | centre kiosk | The free courier-history tool, with the real courier logos. **Check now** opens coderzonebd.com/courier-check |
-| 7 | Process | right wall | Discover → Design & Build → Launch → Support |
-| 8 | Contact | front-right desk | Contact details, team and FAQ. The quote list opens from here |
-| 9 | Leadership | front-left glass cabins | The two founders, Rakib Uddin (CEO · CTO) and Barek Mian (CMO · CFO), each at a desk with an AI assistant on a screen and a **Book a call** tablet. The panel introduces them and opens either assistant's chat or the booking dialog |
+| 2 | CZ Commerce | centre of the room, facing the entrance | The flagship product's launchpad: a booth with a slideshow screen (the hook, features, pricing, coupon CZ50), the floating CZ Commerce logo and a phone showing a store. Its panel has the pitch, **Start free** (czcommerce.app) and WhatsApp setup help. The AI receptionist recommends it to Facebook sellers |
+| 3 | Services | left wall, hanging rail | 8 cards. Each panel has what you get, an approximate price, duration, proof projects, **Add to quote** and WhatsApp buttons |
+| 4 | Products | back-left plinth | CZ Commerce, CheckoutGuard, Laravel Ecom (lifetime, self-hosted), CZ Social and TinyBot (both coming soon), with real logos, pricing and links |
+| 5 | Work | back-right wall | 13 projects. The live sites use real screenshots; projects without a public site get a neutral name + stack card |
+| 6 | Tech Stack | left wall, front | A board of the real logos of the tools we use (Laravel, React, Flutter, WordPress, …) |
+| 7 | Courier Check | centre kiosk | The free courier-history tool, with the real courier logos. **Check now** opens coderzonebd.com/courier-check |
+| 8 | Process | right wall | Discover → Design & Build → Launch → Support |
+| 9 | Contact | front-right desk | Contact details, team and FAQ. The quote list opens from here |
+| 10 | Leadership | front-left glass cabins | The two founders, Rakib Uddin (CEO · CTO) and Barek Mian (CMO · CFO), each at a desk with an AI assistant on a screen and a **Book a call** tablet. The panel introduces them and opens either assistant's chat or the booking dialog |
 
 Brand: the real Coder Zone BD logo and wordmark, orange `#FF931E` on ink `#12141C`.
 
@@ -128,7 +129,7 @@ It serves `scripts/ar/export.html` with Vite and opens it in headless Chrome. Th
 | Click | Tap | Open an item, or click a section's empty space to fly there |
 | Esc | | Step back one level: close the help, the quote list or the panel, then show the whole studio |
 | ← → | | Previous / next section (inside a panel: previous / next item) |
-| 1 – 9 | | Jump straight to a section |
+| 1 – 9, 0 | | Jump straight to a section |
 | T | ▶ Tour button | Auto tour through every section; any click, drag, scroll or key stops it |
 | L | Light switch by the door | Office lights on / off (daylight through the windows stays) |
 | ? or H | ? button | The "How to explore" help |

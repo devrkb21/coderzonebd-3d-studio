@@ -8,7 +8,7 @@ import { useStore } from '../store'
 import { PLACEMENTS, STOP_FRAMES, yawOf, type Placement } from './layout'
 import { useHomeVideo } from './homeVideo'
 import {
-  contactTexture, homeWallTexture, kioskTexture, processTexture, productFrontTexture, serviceCardTexture, signTexture, techBoardTexture, workPosterTexture,
+  contactTexture, czScreenTexture, homeWallTexture, kioskTexture, processTexture, productFrontTexture, serviceCardTexture, signTexture, techBoardTexture, workPosterTexture,
 } from './textures'
 
 /** Pointer movement (px) above which a press counts as a drag, not a click. */
@@ -19,6 +19,7 @@ function textureFor(pl: Placement, lang: Lang) {
   switch (kind) {
     // Static fallback; the looping film (useHomeVideo) replaces it once it plays.
     case 'home': return homeWallTexture(lang)
+    case 'cz': return czScreenTexture(lang)
     case 'service': return serviceCardTexture(SERVICES.find((s) => s.id === ref)!, lang)
     case 'product': return productFrontTexture(PRODUCTS.find((p) => p.id === ref)!, lang)
     case 'work': return workPosterTexture(WORK.find((w) => w.id === ref)!, lang)

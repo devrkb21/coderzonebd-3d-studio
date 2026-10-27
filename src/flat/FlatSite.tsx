@@ -4,7 +4,7 @@
 import {
   COMPANY, COURIER, PROCESS, PRODUCTS, SERVICES, SHOW_TESTIMONIALS, STOPS, TESTIMONIALS, tr, UI, WORK, type Lang,
 } from '../content'
-import { ContactDetails, CourierDetails, HomeDetails, LeadershipDetails, ProductDetails, ServiceDetails, TechDetails, WorkDetails } from '../components/details'
+import { ContactDetails, CourierDetails, CzCommerceDetails, HomeDetails, LeadershipDetails, ProductDetails, ServiceDetails, TechDetails, WorkDetails } from '../components/details'
 import { useStore } from '../store'
 
 export function FlatSite({ lang, visible, onQuote }: { lang: Lang; visible: boolean; onQuote?: () => void }) {
@@ -19,6 +19,11 @@ export function FlatSite({ lang, visible, onQuote }: { lang: Lang; visible: bool
           <p className="eyebrow">{COMPANY.name} · {lang === 'bn' ? 'খুলনা' : 'Khulna'}</p>
           <h1>{tr(COMPANY.headline, lang)}</h1>
           <HomeDetails lang={lang} />
+        </section>
+
+        <section id="czcommerce" className="flat-cz">
+          <h2>CZ Commerce</h2>
+          <CzCommerceDetails lang={lang} />
         </section>
 
         <section id="services">

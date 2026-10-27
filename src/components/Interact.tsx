@@ -30,7 +30,7 @@ export function Shortcuts() {
       if (s.focusId || s.quoteOpen || s.helpOpen) return
       if (e.key === 'ArrowRight') { s.setTouring(false); s.nextStop(1) }
       else if (e.key === 'ArrowLeft') { s.setTouring(false); s.nextStop(-1) }
-      else if (/^[1-9]$/.test(e.key) && STOPS[Number(e.key) - 1]) { s.setTouring(false); s.goTo(STOPS[Number(e.key) - 1].id) }
+      else if (/^[0-9]$/.test(e.key) && STOPS[(Number(e.key) + 9) % 10]) { s.setTouring(false); s.goTo(STOPS[(Number(e.key) + 9) % 10].id) }
       else if (e.key === 't' || e.key === 'T') s.setTouring(!s.touring)
       else if (e.key === 'l' || e.key === 'L') s.toggleLights()
       else if (e.key === '?' || e.key === '/' || e.key === 'h' || e.key === 'H') s.setHelpOpen(true)
@@ -110,7 +110,7 @@ export function HelpOverlay() {
         [bn ? 'ক্লিক' : 'Click', bn ? 'জিনিস খুলুন, বা সেকশনে চলে যান' : 'Open an item, or fly to a section'],
         ['Esc', bn ? 'এক ধাপ পেছনে: প্যানেল বন্ধ, তারপর পুরো স্টুডিও' : 'Step back: close the panel, then see the whole studio'],
         ['← →', bn ? 'আগের / পরের সেকশন' : 'Previous / next section'],
-        ['1 – 9', bn ? 'সরাসরি কোনো সেকশনে' : 'Jump to a section'],
+        ['1 – 9, 0', bn ? 'সরাসরি কোনো সেকশনে' : 'Jump to a section'],
         ['T', bn ? 'অটো ট্যুর চালু / বন্ধ' : 'Start or stop the auto tour'],
         ['L', bn ? 'অফিসের লাইট অন / অফ' : 'Office lights on / off'],
       ]

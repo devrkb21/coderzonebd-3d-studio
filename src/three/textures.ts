@@ -2,7 +2,7 @@
 // language. Only the six project screenshots are image files.
 import * as THREE from 'three'
 import {
-  COMPANY, CONTACT, COURIER, PROCESS, PRODUCTS, SERVICES, STOPS, TECH, TECH_LOGOS, WORK, tr, UI,
+  COMPANY, CONTACT, COURIER, CZ_PROMO, PROCESS, PRODUCTS, SERVICES, STOPS, TECH, TECH_LOGOS, WORK, tr, UI,
   type Lang, type ProductInfo, type Service, type StopId, type WorkItem,
 } from '../content'
 
@@ -88,6 +88,18 @@ export function drawImg(ctx: Ctx, path: string, x: number, y: number, w: number,
   const dh = ih * k
   ctx.drawImage(img, align === 'center' ? x + (w - dw) / 2 : x, y + (h - dh) / 2, dw, dh)
   return dw
+}
+
+/** The CZ Commerce lockup (as on czcommerce.app): the CZ tile, then "Commerce" in bold beside it. */
+export function drawCzLogo(ctx: Ctx, x: number, y: number, size: number, color = '#ffffff') {
+  drawImg(ctx, 'logos/czcommerce.svg', x, y, size, size)
+  ctx.save()
+  ctx.fillStyle = color
+  ctx.font = font(700, Math.round(size * 0.62))
+  ctx.textAlign = 'left'
+  ctx.textBaseline = 'middle'
+  ctx.fillText('Commerce', x + size * 1.22, y + size * 0.54)
+  ctx.restore()
 }
 
 /** The Coder Zone BD mark. */
@@ -181,13 +193,17 @@ export function productFrontTexture(p: ProductInfo, lang: Lang) {
     ctx.strokeStyle = 'rgba(255,255,255,0.12)'
     ctx.lineWidth = 2
     for (let i = -h; i < w; i += 34) { ctx.beginPath(); ctx.moveTo(i, h); ctx.lineTo(i + h, 0); ctx.stroke() }
-    ctx.fillStyle = '#ffffff'
-    rr(ctx, 32, 32, 96, 96, 20)
-    ctx.fill()
-    drawImg(ctx, p.logo, 44, 44, 72, 72)
-    ctx.fillStyle = '#ffffff'
-    ctx.font = font(700, 50)
-    wrap(ctx, p.name, 32, 220, w - 64, 56, 2)
+    if (p.id === 'czcommerce') {
+      drawCzLogo(ctx, 32, 120, 76)
+    } else {
+      ctx.fillStyle = '#ffffff'
+      rr(ctx, 32, 32, 96, 96, 20)
+      ctx.fill()
+      drawImg(ctx, p.logo, 44, 44, 72, 72)
+      ctx.fillStyle = '#ffffff'
+      ctx.font = font(700, 50)
+      wrap(ctx, p.name, 32, 220, w - 64, 56, 2)
+    }
     ctx.font = font(500, 26)
     ctx.fillStyle = 'rgba(255,255,255,0.85)'
     wrap(ctx, tr(p.tagline, lang), 32, 300, w - 64, 34, 3)
@@ -481,6 +497,93 @@ export function panelTexture() {
   })
   t.wrapS = t.wrapT = THREE.RepeatWrapping
   return t
+}
+
+const czScreens = new Map<Lang, THREE.CanvasTexture>()
+/**
+ * The CZ Commerce launchpad screen: a slideshow (hook, features, pricing, coupon) that cross-fades
+ * every few seconds. One live canvas per language, redrawn only while a transition runs.
+ */
+export function czScreenTexture(lang: Lang) {
+  const hit = czScreens.get(lang)
+  if (hit) return hit
+  const W = 1280
+  const H = 720
+  const c = document.createElement('canvas')
+  c.width = W
+  c.height = H
+  const ctx = c.getContext('2d')!
+  const tex = new THREE.CanvasTexture(c)
+  tex.colorSpace = THREE.SRGBColorSpace
+  tex.anisotropy = 4
+  const slides = CZ_PROMO.slides
+  const slide = (i: number, alpha: number, dx: number) => {
+    const s = slides[i % slides.length]
+    ctx.globalAlpha = alpha
+    ctx.fillStyle = '#ffffff'
+    ctx.textAlign = 'left'
+    ctx.font = font(700, lang === 'bn' ? 84 : 88)
+    wrap(ctx, tr(s.title, lang), 90 + dx, 330, W - 180, 100, 2)
+    ctx.fillStyle = 'rgba(255,255,255,0.86)'
+    ctx.font = font(500, 46)
+    wrap(ctx, tr(s.body, lang), 90 + dx, 470, W - 180, 62, 3)
+    ctx.globalAlpha = 1
+  }
+  const frame = (k: number, i: number) => {
+    const g = ctx.createLinearGradient(0, 0, W, H)
+    g.addColorStop(0, '#3348E8')
+    g.addColorStop(1, '#16208C')
+    ctx.fillStyle = g
+    ctx.fillRect(0, 0, W, H)
+    // soft glow and the brand bar
+    const r = ctx.createRadialGradient(W * 0.85, H * 0.1, 0, W * 0.85, H * 0.1, 520)
+    r.addColorStop(0, 'rgba(255,255,255,0.22)')
+    r.addColorStop(1, 'rgba(255,255,255,0)')
+    ctx.fillStyle = r
+    ctx.fillRect(0, 0, W, H)
+    drawCzLogo(ctx, 90, 72, 86)
+    ctx.fillStyle = BRAND
+    rr(ctx, W - 330, 86, 240, 58, 29)
+    ctx.fill()
+    ctx.fillStyle = INK
+    ctx.font = font(700, 30)
+    ctx.textAlign = 'center'
+    ctx.fillText(lang === 'bn' ? 'ফ্রি প্ল্যান আছে' : 'Free plan', W - 210, 125)
+    // the current slide slides out, the next one in
+    if (k <= 0) slide(i, 1, 0)
+    else {
+      slide(i, 1 - k, -60 * k)
+      slide(i + 1, k, 60 * (1 - k))
+    }
+    // progress dots
+    slides.forEach((_, j) => {
+      ctx.fillStyle = j === (k > 0.5 ? (i + 1) % slides.length : i % slides.length) ? '#ffffff' : 'rgba(255,255,255,0.35)'
+      ctx.beginPath()
+      ctx.arc(90 + j * 34, H - 70, 9, 0, Math.PI * 2)
+      ctx.fill()
+    })
+    ctx.fillStyle = 'rgba(255,255,255,0.9)'
+    ctx.font = font(700, 34)
+    ctx.textAlign = 'right'
+    ctx.fillText('czcommerce.app →', W - 90, H - 58)
+    tex.needsUpdate = true
+  }
+  let i = 0
+  frame(0, 0)
+  const HOLD = 4200
+  const FADE = 700
+  let start = performance.now()
+  const tick = () => {
+    const t = performance.now() - start
+    if (t > HOLD) {
+      const k = Math.min(1, (t - HOLD) / FADE)
+      frame(k, i)
+      if (k >= 1) { i = (i + 1) % slides.length; start = performance.now(); frame(0, i) }
+    }
+  }
+  setInterval(tick, 70)
+  czScreens.set(lang, tex)
+  return tex
 }
 
 /** Backlit storefront sign: the wordmark on a white light box. */

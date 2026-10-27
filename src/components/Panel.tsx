@@ -4,7 +4,7 @@ import { itemById, itemsAt } from '../items'
 import { useStore } from '../store'
 import { inertUnless } from './inert'
 import {
-  ContactDetails, CourierDetails, HomeDetails, LeadershipDetails, ProcessDetails, ProductDetails, ServiceDetails, TechDetails, WorkDetails,
+  ContactDetails, CourierDetails, HomeDetails, LeadershipDetails, ProcessDetails, ProductDetails, ServiceDetails, TechDetails, WorkDetails, CzCommerceDetails,
 } from './details'
 import { ChevronLeft, ChevronRight, CloseIcon } from './icons'
 
@@ -44,6 +44,10 @@ export function Panel() {
     case 'home':
       title = tr(UI.about, lang)
       body = <HomeDetails lang={lang} />
+      break
+    case 'cz':
+      title = 'CZ Commerce'
+      body = <CzCommerceDetails lang={lang} />
       break
     case 'service': {
       const s = SERVICES.find((x) => x.id === item.ref)!

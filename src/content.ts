@@ -5,10 +5,11 @@ export type Lang = 'bn' | 'en'
 export type L = { bn: string; en: string }
 export const tr = (l: L, lang: Lang) => l[lang]
 
-export type StopId = 'home' | 'services' | 'products' | 'work' | 'tech' | 'courier' | 'process' | 'contact' | 'leadership'
+export type StopId = 'home' | 'czcommerce' | 'services' | 'products' | 'work' | 'tech' | 'courier' | 'process' | 'contact' | 'leadership'
 
 export const STOPS: { id: StopId; label: L }[] = [
   { id: 'home', label: { bn: 'হোম', en: 'Home' } },
+  { id: 'czcommerce', label: { bn: 'CZ Commerce', en: 'CZ Commerce' } },
   { id: 'services', label: { bn: 'সার্ভিস', en: 'Services' } },
   { id: 'products', label: { bn: 'প্রোডাক্ট', en: 'Products' } },
   { id: 'work', label: { bn: 'কাজ', en: 'Work' } },
@@ -36,8 +37,8 @@ export const waLink = (text: string) => `https://wa.me/${CONTACT.whatsappNumber}
 export const COMPANY = {
   name: 'Coder Zone BD',
   headline: {
-    bn: 'আমরা এমন সফটওয়্যার বানাই যা ব্যবসার আসল সমস্যার সমাধান করে',
-    en: 'We build software that solves real business problems',
+    bn: 'বিক্রি বাড়ুক, ঝামেলা কমুক — সেই সফটওয়্যার আমরা বানাই।',
+    en: 'Sell more. Stress less. We build the software that does both.',
   } as L,
   intro: {
     bn: 'খুলনা থেকে ২০২৪ সাল থেকে কাজ করছি। ওয়েবসাইট, ই-কমার্স, কাস্টম সফটওয়্যার আর নিজেদের প্রোডাক্ট — সবকিছু নিজেদের টিমে বানাই।',
@@ -104,7 +105,7 @@ export const SERVICES: Service[] = [
       { bn: 'বেসিক SEO সেটআপ', en: 'Basic SEO setup' },
       { bn: 'কন্টাক্ট ফর্ম', en: 'Contact form' },
     ],
-    price: { bn: '৳৩০,০০০', en: '৳30,000' },
+    price: { bn: '৳১০,০০০', en: '৳10,000' },
     duration: { bn: '১০–১৪ দিন', en: '10–14 days' },
     proof: ['cosmooit'],
   },
@@ -119,7 +120,7 @@ export const SERVICES: Service[] = [
       { bn: 'কুরিয়ার ইন্টিগ্রেশন', en: 'Courier integration' },
       { bn: 'CheckoutGuard ১ বছর ফ্রি', en: 'CheckoutGuard free for 1 year' },
     ],
-    price: { bn: '৳৭৫,০০০', en: '৳75,000' },
+    price: { bn: '৳২০,০০০', en: '৳20,000' },
     duration: { bn: '৩–৪ সপ্তাহ', en: '3–4 weeks' },
     proof: ['zayapin', 'innercollection', 'zalonbd', 'backend-ecom'],
   },
@@ -134,7 +135,7 @@ export const SERVICES: Service[] = [
       { bn: 'অ্যাডমিন প্যানেল', en: 'Admin panel' },
       { bn: 'API ও ইন্টিগ্রেশন', en: 'API and integrations' },
     ],
-    price: { bn: '৳১.৫ লাখ', en: '৳1.5 lakh' },
+    price: { bn: '৳৩০,০০০', en: '৳30,000' },
     duration: { bn: '৬–১০ সপ্তাহ', en: '6–10 weeks' },
     proof: ['czcommerce', 'licensing', 'mess'],
   },
@@ -148,7 +149,7 @@ export const SERVICES: Service[] = [
       { bn: 'কুরিয়ার API (৫টি কুরিয়ার)', en: 'Courier APIs (5 couriers)' },
       { bn: 'পেমেন্ট গেটওয়ে (বিকাশ, Stripe)', en: 'Payment gateways (bKash, Stripe)' },
     ],
-    price: null,
+    price: { bn: '৳৫,০০০', en: '৳5,000' },
     duration: null,
     proof: ['checkoutguard'],
   },
@@ -162,7 +163,7 @@ export const SERVICES: Service[] = [
       { bn: 'API সংযোগ', en: 'API connection' },
       { bn: 'স্টোরে পাবলিশে সহায়তা', en: 'Help publishing to the stores' },
     ],
-    price: { bn: '৳১.২৫ লাখ', en: '৳1.25 lakh' },
+    price: { bn: '৳২০,০০০', en: '৳20,000' },
     duration: { bn: '৬–১০ সপ্তাহ', en: '6–10 weeks' },
     proof: ['ownpay'],
   },
@@ -175,7 +176,7 @@ export const SERVICES: Service[] = [
       { bn: 'শিডিউলড পোস্টিং', en: 'Scheduled posting' },
       { bn: 'অটোমেটেড ওয়ার্কফ্লো', en: 'Automated workflows' },
     ],
-    price: null,
+    price: { bn: '৳৫,০০০', en: '৳5,000' },
     duration: null,
     proof: ['czsocial'],
   },
@@ -188,7 +189,7 @@ export const SERVICES: Service[] = [
       { bn: 'ESP32 ফার্মওয়্যার', en: 'ESP32 firmware' },
       { bn: 'ডিভাইস–সার্ভার সংযোগ', en: 'Device-to-server connection' },
     ],
-    price: null,
+    price: { bn: '৳৫,০০০', en: '৳5,000' },
     duration: null,
     proof: ['companionos'],
   },
@@ -203,7 +204,7 @@ export const SERVICES: Service[] = [
       { bn: 'ছোটখাটো পরিবর্তন', en: 'Small changes' },
       { bn: 'আপটাইম মনিটরিং', en: 'Uptime monitoring' },
     ],
-    price: { bn: '৳৫,০০০/মাস', en: '৳5,000/month' },
+    price: { bn: '৳২,০০০/মাস', en: '৳2,000/month' },
     duration: null,
     proof: [],
   },
@@ -279,9 +280,9 @@ export const PRODUCTS: ProductInfo[] = [
       { bn: 'অ্যাডমিন প্যানেল', en: 'Admin panel' },
     ],
     tiers: [
-      { name: 'Monthly', price: { bn: '৳৫০০/মাস', en: '৳500/mo' } },
-      { name: 'Lifetime', price: { bn: '৳২০,০০০ লাইফটাইম', en: '৳20,000 lifetime' } },
+      { name: 'Lifetime', price: { bn: '৳২০,০০০ লাইফটাইম (সেলফ-হোস্টেড)', en: '৳20,000 lifetime (self-hosted)' } },
     ],
+    note: { bn: 'কোনো মাসিক ফি নেই — একবার কিনুন, নিজের সার্ভারে চালান।', en: 'No monthly fee — buy once, run it on your own server.' },
     links: [{ label: { bn: 'প্রোডাক্ট পেজ', en: 'Product page' }, url: 'https://coderzonebd.com/products/laravel-ecom' }],
   },
   {
@@ -293,7 +294,32 @@ export const PRODUCTS: ProductInfo[] = [
     links: [],
     comingSoon: true,
   },
+  {
+    id: 'tinybot', name: 'TinyBot', color: '#6C3CE0', logo: 'logos/coderzone-mark.png',
+    tagline: { bn: 'আমাদের প্রথম ফিজিক্যাল প্রোডাক্ট — শীঘ্রই আসছে', en: 'Our first physical product — coming soon' },
+    desc: { bn: 'Coder Zone BD-এর প্রথম হার্ডওয়্যার প্রোডাক্ট, এখন ডেভেলপমেন্টে আছে। লঞ্চের খবর সবার আগে পেতে হোয়াটসঅ্যাপে মেসেজ দিন।', en: "Coder Zone BD's first hardware product, in development now. Message us on WhatsApp to hear first when it launches." },
+    features: [],
+    tiers: [],
+    links: [],
+    comingSoon: true,
+  },
 ]
+
+/** The CZ Commerce launchpad in the middle of the studio: slides on its screen and the panel's pitch. */
+export const CZ_PROMO = {
+  url: 'https://czcommerce.app/',
+  hook: { bn: 'ফেসবুকে বিক্রি করেন? নিজের অনলাইন স্টোর খুলুন — ফ্রি-তে।', en: 'Selling on Facebook? Open your own online store — free.' } as L,
+  sub: { bn: 'অর্ডার, কুরিয়ার, ফেক অর্ডার চেক আর মেসেঞ্জার — সব এক প্যানেলে, বাংলায়।', en: 'Orders, couriers, fake-order checks and Messenger — one panel, in Bangla.' } as L,
+  start: { bn: 'ফ্রি-তে শুরু করুন', en: 'Start free' } as L,
+  whatsapp: { bn: 'হোয়াটসঅ্যাপে সেটআপে সাহায্য নিন', en: 'Get setup help on WhatsApp' } as L,
+  waText: { bn: 'আসসালামু আলাইকুম! 3D স্টুডিও থেকে CZ Commerce সম্পর্কে জানতে চাই।', en: 'Hi! I saw CZ Commerce in the 3D studio and would like to know more.' } as L,
+  slides: [
+    { title: { bn: 'ফেসবুকে বিক্রি করেন?', en: 'Selling on Facebook?' }, body: { bn: 'নিজের অনলাইন স্টোর খুলুন — ফ্রি-তে, ৫ মিনিটে।', en: 'Open your own online store — free, in 5 minutes.' } },
+    { title: { bn: 'সব এক প্যানেলে', en: 'Everything in one panel' }, body: { bn: 'স্টোর ও ল্যান্ডিং পেজ · ৪ কুরিয়ারে বাল্ক বুকিং · ফেক অর্ডার চেক · মেসেঞ্জার ইনবক্স', en: 'Store and landing pages · bulk booking on 4 couriers · fake-order check · Messenger inbox' } },
+    { title: { bn: 'হোস্টিং খরচ নেই', en: 'No hosting bills' }, body: { bn: 'ফ্রি প্ল্যান · Starter ৳৬৯০ · Growth ৳১,৪৯০ · Pro ৳২,৯৯০ / মাস', en: 'Free plan · Starter ৳690 · Growth ৳1,490 · Pro ৳2,990 / month' } },
+    { title: { bn: 'কুপন CZ50', en: 'Coupon CZ50' }, body: { bn: '৬ মাস ৫০% ছাড় — আজই শুরু করুন: czcommerce.app', en: '50% off for 6 months — start today at czcommerce.app' } },
+  ] as { title: L; body: L }[],
+}
 
 export interface WorkItem {
   id: string
@@ -413,10 +439,10 @@ export const UI = {
   step: { bn: 'ধাপ', en: 'Step' },
   budgets: [
     { bn: 'ঠিক করিনি', en: 'Not sure yet' },
-    { bn: '৳৫০,০০০-এর কম', en: 'Under ৳50,000' },
-    { bn: '৳৫০,০০০ – ৳১.৫ লাখ', en: '৳50,000 – ৳1.5 lakh' },
-    { bn: '৳১.৫ লাখ – ৳৫ লাখ', en: '৳1.5 lakh – ৳5 lakh' },
-    { bn: '৳৫ লাখের বেশি', en: 'Over ৳5 lakh' },
+    { bn: '৳১০,০০০-এর কম', en: 'Under ৳10,000' },
+    { bn: '৳১০,০০০ – ৳৩০,০০০', en: '৳10,000 – ৳30,000' },
+    { bn: '৳৩০,০০০ – ৳১ লাখ', en: '৳30,000 – ৳1 lakh' },
+    { bn: '৳১ লাখের বেশি', en: 'Over ৳1 lakh' },
   ],
 } satisfies Record<string, L | L[]>
 

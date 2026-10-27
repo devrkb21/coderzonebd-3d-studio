@@ -1,7 +1,7 @@
 // The clickable things in the room, in the order prev/next walks through them.
 import { PROCESS, PRODUCTS, SERVICES, WORK, type StopId } from './content'
 
-export type ItemKind = 'home' | 'service' | 'product' | 'work' | 'tech' | 'courier' | 'process' | 'contact' | 'leadership'
+export type ItemKind = 'home' | 'cz' | 'service' | 'product' | 'work' | 'tech' | 'courier' | 'process' | 'contact' | 'leadership'
 
 export interface Item {
   id: string
@@ -13,6 +13,7 @@ export interface Item {
 
 export const ITEMS: Item[] = [
   { id: 'home', stop: 'home', kind: 'home', ref: 'home' },
+  { id: 'czcommerce', stop: 'czcommerce', kind: 'cz', ref: 'czcommerce' },
   ...SERVICES.map((s) => ({ id: `service:${s.id}`, stop: 'services' as const, kind: 'service' as const, ref: s.id })),
   ...PRODUCTS.map((p) => ({ id: `product:${p.id}`, stop: 'products' as const, kind: 'product' as const, ref: p.id })),
   ...WORK.map((w) => ({ id: `work:${w.id}`, stop: 'work' as const, kind: 'work' as const, ref: w.id })),

@@ -1,7 +1,6 @@
 // Detail views shared by the 3D side panel and the 2D / SEO page.
 import {
-  COMPANY, CONTACT, COURIER, FAQ, LEADERSHIP, PROCESS, priceText, TECH, TECH_LOGOS, tr, UI, waLink, workById,
-  type Lang, type ProductInfo, type Service, type WorkItem,
+  COMPANY, CONTACT, COURIER, CZ_PROMO, FAQ, LEADERSHIP, PROCESS, PRODUCTS, priceText, TECH, TECH_LOGOS, tr, UI, waLink, workById, type Lang, type ProductInfo, type Service, type WorkItem,
 } from '../content'
 import { useStore } from '../store'
 
@@ -94,10 +93,40 @@ export function ServiceDetails({ service: s, lang, actions = true }: { service: 
   )
 }
 
+/** The CZ Commerce launchpad: the hook, everything it does, pricing, the coupon and the way in. */
+export function CzCommerceDetails({ lang }: { lang: Lang }) {
+  const p = PRODUCTS.find((x) => x.id === 'czcommerce')!
+  return (
+    <>
+      <span className="cz-logo" role="img" aria-label="CZ Commerce">
+        <img src={`${BASE}${p.logo}`} alt="" width={44} height={44} loading="lazy" />
+        <span>Commerce</span>
+      </span>
+      <p className="cz-hook">{tr(CZ_PROMO.hook, lang)}</p>
+      <p className="lead">{tr(CZ_PROMO.sub, lang)}</p>
+      <div className="actions">
+        <a className="btn primary" href={CZ_PROMO.url} target="_blank" rel="noopener noreferrer">{tr(CZ_PROMO.start, lang)} ↗</a>
+        <a className="btn" href={waLink(tr(CZ_PROMO.waText, lang))} target="_blank" rel="noopener noreferrer">{tr(CZ_PROMO.whatsapp, lang)}</a>
+      </div>
+      <ul className="checks">{p.features.map((f) => <li key={f.en}>{tr(f, lang)}</li>)}</ul>
+      <h3>{tr(UI.pricing, lang)}</h3>
+      <ul className="tiers">
+        {p.tiers.map((t) => <li key={t.name}><span>{t.name}</span><strong>{tr(t.price, lang)}</strong></li>)}
+      </ul>
+      {p.note && <p className="note">{tr(p.note, lang)}</p>}
+    </>
+  )
+}
+
 export function ProductDetails({ product: p, lang }: { product: ProductInfo; lang: Lang }) {
   return (
     <>
-      <img className="product-logo" src={`${BASE}${p.logo}`} alt={p.name} height={48} loading="lazy" />
+      {p.id === 'czcommerce' ? (
+        <span className="cz-logo" role="img" aria-label="CZ Commerce">
+          <img src={`${BASE}${p.logo}`} alt="" width={44} height={44} loading="lazy" />
+          <span>Commerce</span>
+        </span>
+      ) : <img className="product-logo" src={`${BASE}${p.logo}`} alt={p.name} height={48} loading="lazy" />}
       {p.comingSoon && <span className="badge-soon">{tr(UI.comingSoon, lang)}</span>}
       <p className="lead">{tr(p.desc, lang)}</p>
       {p.features.length > 0 && <ul className="checks">{p.features.map((f) => <li key={f.en}>{tr(f, lang)}</li>)}</ul>}

@@ -15,6 +15,8 @@ const RIGHT = new THREE.Vector3(-1, 0, 0)
 const FRONT = new THREE.Vector3(0, 0, -1)
 export const KIOSK_NORMAL = new THREE.Vector3(0.35, 0, 1).normalize()
 export const KIOSK_POS = new THREE.Vector3(-3.4, 0, 3)
+/** The CZ Commerce launchpad: centre of the room between the courier kiosk and the site builder, facing the entrance. */
+export const CZ_BOOTH = { z: 1.6, screen: { w: 2.6, h: 2.6 * 9 / 16, y: 2.15 } }
 /** Tech-stack board on the left wall, near the entrance. */
 export const TECH_Z = 6.6
 export const TECH_BOARD = { w: 5, h: 2.64, y: 2.7 }
@@ -47,7 +49,8 @@ export const STOP_FRAMES: Record<StopId, Frame> = {
   // tall enough to take in the digital clock above the home wall
   home: { center: v(0, 3.8, -halfD), normal: BACK, width: 9, height: 5.7 },
   services: { center: v(-halfW, 2.9, -3), normal: LEFT, width: 11.6, height: 3.6 },
-  products: { center: v(-10, 2.1, -halfD), normal: BACK, width: 8, height: 3.6 },
+  czcommerce: { center: v(0, 1.9, CZ_BOOTH.z), normal: BACK, width: 3.4, height: 3.4 },
+  products: { center: v(-10, 2.1, -halfD), normal: BACK, width: 9.6, height: 3.6 },
   work: { center: v(10, 3.3, -halfD), normal: BACK, width: 9.8, height: 4.7 },
   tech: { center: v(-halfW, 2.75, TECH_Z), normal: LEFT, width: 5.6, height: 3.2 },
   courier: { center: v(KIOSK_POS.x, 1.45, KIOSK_POS.z), normal: KIOSK_NORMAL, width: 2.4, height: 2.6 },
@@ -88,6 +91,8 @@ function along(center: THREE.Vector3, normal: THREE.Vector3, i: number, count: n
 export const SERVICE_RAIL_Y = 3.95
 export const SERVICE_CARD = { w: 1.15, h: 1.55, gap: 1.38 }
 export const PRODUCT_BOX = { w: 1.2, h: 1.5, d: 0.5, gap: 1.8, plinthTop: 1.0 }
+/** The plinth grows with the product line-up. */
+export const PRODUCT_SHELF = PRODUCTS.length * PRODUCT_BOX.gap + 0.4
 export const WORK_POSTER = { w: 1.6, h: 1.25, gapX: 1.85, cols: 5, rowY: [4.7, 3.3, 1.9] }
 export const PROCESS_BOARD = { w: 1.9, h: 2.4, gap: 2.35 }
 
@@ -95,6 +100,8 @@ function placeItem(item: Item): Placement {
   switch (item.kind) {
     case 'home':
       return { item, position: v(0, 3.5, -halfD + 0.1), normal: BACK, width: 8, height: 4.5 }
+    case 'cz':
+      return { item, position: v(0, CZ_BOOTH.screen.y, CZ_BOOTH.z + 0.06), normal: BACK, width: CZ_BOOTH.screen.w, height: CZ_BOOTH.screen.h }
     case 'service': {
       const i = SERVICES.findIndex((s) => s.id === item.ref)
       const F = STOP_FRAMES.services

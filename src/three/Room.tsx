@@ -5,7 +5,7 @@ import * as THREE from 'three'
 import { SERVICES, type StopId } from '../content'
 import { useStore } from '../store'
 import {
-  KIOSK_NORMAL, KIOSK_POS, PRODUCT_BOX, PROCESS_BOARD, ROOM, SERVICE_CARD, SERVICE_RAIL_Y, STOP_FRAMES, yawOf,
+  KIOSK_NORMAL, KIOSK_POS, PRODUCT_BOX, PRODUCT_SHELF, PROCESS_BOARD, ROOM, SERVICE_CARD, SERVICE_RAIL_Y, STOP_FRAMES, yawOf,
 } from './layout'
 import { Hot } from './Hot'
 import { BRAND, deskTexture, floorTexture, frontWallTexture, microcementTexture, panelTexture, plasterTexture, signboardTexture, signTexture } from './textures'
@@ -166,13 +166,13 @@ function ProductPlinth({ m }: { m: Mats }) {
   return (
     <group position={[-10, 0, -halfD]}>
       <mesh position={[0, PRODUCT_BOX.plinthTop / 2, 0.75]} material={m.white}>
-        <boxGeometry args={[7.6, PRODUCT_BOX.plinthTop, 1.3]} />
+        <boxGeometry args={[PRODUCT_SHELF, PRODUCT_BOX.plinthTop, 1.3]} />
       </mesh>
       <mesh position={[0, PRODUCT_BOX.plinthTop - 0.02, 1.405]} material={m.blue}>
-        <boxGeometry args={[7.6, 0.04, 0.01]} />
+        <boxGeometry args={[PRODUCT_SHELF, 0.04, 0.01]} />
       </mesh>
       <mesh position={[0, 3.3, 0.02]} material={m.white}>
-        <boxGeometry args={[7.8, 0.06, 0.04]} />
+        <boxGeometry args={[PRODUCT_SHELF + 0.2, 0.06, 0.04]} />
       </mesh>
     </group>
   )

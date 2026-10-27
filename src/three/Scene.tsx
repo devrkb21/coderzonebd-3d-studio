@@ -10,6 +10,7 @@ import { CameraRig } from './CameraRig'
 import { DemoScreen } from './DemoScreen'
 import { Ghosts } from './Ghosts'
 import { Items, DRAG_PX } from './Items'
+import { CzBooth } from './CzBooth'
 import { Office } from './Office'
 import { OfficeModels, Robot } from './Models'
 import { Cabins } from './Cabins'
@@ -123,6 +124,7 @@ export default function Scene({ onProgress }: { onProgress: (p: number) => void 
       <Room />
       <Office />
       <Items />
+      <CzBooth />
       <Outside />
       <Weather />
       <Festivals />
