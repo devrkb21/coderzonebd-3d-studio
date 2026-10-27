@@ -8,6 +8,7 @@ import { useStore } from '../store'
 import { AI_ENABLED } from '../ai/client'
 import { LOUNGE_X, ROOM } from './layout'
 import { noHit } from './Life'
+import { framePrintTexture } from './textures'
 
 const { halfW, halfD, height } = ROOM
 const url = (name: string) => `${import.meta.env.BASE_URL}models/${name}.glb`
@@ -18,20 +19,24 @@ export const MODEL_NAMES = [
 ]
 
 /** One placed copy of a model; never catches clicks. */
-export function Model({ name, ...props }: JSX.IntrinsicElements['group'] & { name: string }) {
+export function Model({ name, art, ...props }: JSX.IntrinsicElements['group'] & { name: string; art?: THREE.Texture }) {
   const { scene } = useGLTF(url(name))
   const copy = useMemo(() => {
     const c = scene.clone(true)
     c.traverse((o) => {
       const mesh = o as THREE.Mesh
       if (!mesh.isMesh) return
+      // a picture frame: our own print in it, and clear glass over it (each part is its own mesh)
+      const part = (mesh.material as THREE.Material).name ?? ''
+      if (art && part.endsWith('_artwork')) mesh.material = new THREE.MeshBasicMaterial({ map: art, toneMapped: false })
+      else if (art && part.endsWith('_glass')) mesh.material = new THREE.MeshBasicMaterial({ color: '#ffffff', transparent: true, opacity: 0.06, depthWrite: false })
       const mat = mesh.material as THREE.MeshStandardMaterial
       // the room has no environment map: keep materials from going dark and mirror-like
       if (mat && 'metalness' in mat) mat.envMapIntensity = 0
     })
     noHit(c)
     return c
-  }, [scene])
+  }, [scene, art])
   return <group {...props}><primitive object={copy} /></group>
 }
 
@@ -56,6 +61,7 @@ function FanModel({ x, z }: { x: number; z: number }) {
 }
 
 export function OfficeModels() {
+  const lang = useStore((s) => s.lang)
   return (
     <group>
       {/* lounge in the front-right corner: sofa against the front wall, armchair, coffee table, side table */}
@@ -78,7 +84,7 @@ export function OfficeModels() {
       <FanModel x={LOUNGE_X} z={halfD - 2.2} />
       <FanModel x={7} z={5.3} />
       {/* framed art either side of the windows, above the CEO's cabin and the lounge */}
-      <Model name="hanging_picture_frame_02" position={[14.2, 3.2, halfD - 0.04]} rotation-y={Math.PI} scale={1.6} />
+      <Model name="hanging_picture_frame_02" position={[14.2, 3.2, halfD - 0.04]} rotation-y={Math.PI} scale={1.6} art={framePrintTexture(lang)} />
       {/* CCTV in the corner, watching the room */}
       <Model name="security_camera_01" position={[halfW - 0.15, height - 0.35, halfD - 0.15]} rotation={[0, -Math.PI * 0.75, 0]} scale={1.1} />
     </group>

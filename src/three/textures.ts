@@ -586,6 +586,42 @@ export function czScreenTexture(lang: Lang) {
   return tex
 }
 
+const prints = new Map<Lang, THREE.CanvasTexture>()
+/**
+ * The framed print by the coffee corner: the mark, the tagline's first half and the studio line.
+ * Mapped onto a glTF model's UVs, so it isn't flipped like the other canvas textures.
+ */
+export function framePrintTexture(lang: Lang) {
+  const hit = prints.get(lang)
+  if (hit) return hit
+  const c = document.createElement('canvas')
+  const W = (c.width = 1200)
+  const H = (c.height = 800)
+  const ctx = c.getContext('2d')!
+  ctx.fillStyle = '#F6F1E8'
+  ctx.fillRect(0, 0, W, H)
+  // the frame's artwork UVs show only the middle of the image (about y 230-600), so keep it there
+  drawImg(ctx, MARK, W / 2 - 46, 236, 92, 92)
+  ctx.textAlign = 'center'
+  const line = lang === 'bn' ? ['বেশি বিক্রি,', 'কম টেনশন'] : ['Sell more.', 'Stress less.']
+  ctx.font = font(700, lang === 'bn' ? 70 : 76)
+  ctx.fillStyle = INK
+  ctx.fillText(line[0], W / 2, 420)
+  ctx.fillStyle = BRAND_TEXT
+  ctx.fillText(line[1], W / 2, 500)
+  ctx.fillStyle = BRAND
+  ctx.fillRect(W / 2 - 40, 528, 80, 5)
+  ctx.fillStyle = INK
+  ctx.font = font(600, 26)
+  ctx.fillText(lang === 'bn' ? 'Coder Zone BD · খুলনা · ২০২৪ থেকে' : 'Coder Zone BD · Khulna · since 2024', W / 2, 575)
+  const t = new THREE.CanvasTexture(c)
+  t.colorSpace = THREE.SRGBColorSpace
+  t.flipY = false
+  t.anisotropy = 4
+  prints.set(lang, t)
+  return t
+}
+
 /** Backlit storefront sign: the wordmark on a white light box. */
 export function signboardTexture() {
   return make('signboard', 1600, 320, (ctx, w, h) => {
