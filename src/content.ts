@@ -37,7 +37,7 @@ export const waLink = (text: string) => `https://wa.me/${CONTACT.whatsappNumber}
 export const COMPANY = {
   name: 'Coder Zone BD',
   headline: {
-    bn: 'বিক্রি বাড়ুক, ঝামেলা কমুক — সেই সফটওয়্যার আমরা বানাই।',
+    bn: 'বেশি বিক্রি, কম টেনশন — বাকিটা সামলাবে আমাদের সফটওয়্যার।',
     en: 'Sell more. Stress less. We build the software that does both.',
   } as L,
   intro: {
@@ -296,10 +296,19 @@ export const PRODUCTS: ProductInfo[] = [
   },
   {
     id: 'tinybot', name: 'TinyBot', color: '#6C3CE0', logo: 'logos/coderzone-mark.png',
-    tagline: { bn: 'আমাদের প্রথম ফিজিক্যাল প্রোডাক্ট — শীঘ্রই আসছে', en: 'Our first physical product — coming soon' },
-    desc: { bn: 'Coder Zone BD-এর প্রথম হার্ডওয়্যার প্রোডাক্ট, এখন ডেভেলপমেন্টে আছে। লঞ্চের খবর সবার আগে পেতে হোয়াটসঅ্যাপে মেসেজ দিন।', en: "Coder Zone BD's first hardware product, in development now. Message us on WhatsApp to hear first when it launches." },
-    features: [],
+    tagline: { bn: 'হাতের তালুর মাপের AI সঙ্গী রোবট — শীঘ্রই আসছে', en: 'A palm-sized AI companion robot — coming soon' },
+    desc: { bn: 'আমাদের প্রথম ফিজিক্যাল প্রোডাক্ট। টেবিলে বসে থাকা ছোট্ট এক রোবট, যার আছে জীবন্ত মুখ আর মেজাজ। বাংলায় কথা বলে, মনে করিয়ে দেয়, খেলে, আর পরিবারের সবাইকে খেয়াল রাখে। ফোন অ্যাপ দিয়ে সাজানো যায়।', en: 'Our first physical product: a little robot for your desk with a living face and its own moods. It chats in Bangla and English, reminds, plays and looks out for the family, all set up from a phone app.' },
+    features: [
+      { bn: 'বাংলা আর ইংরেজিতে AI-এর সাথে কথা বলা', en: 'AI voice chat in Bangla and English' },
+      { bn: 'জীবন্ত চোখ-মুখ আর ৯ রকম মেজাজ; মাথায় হাত বুলালে, নাড়ালে, তুললে সাড়া দেয়', en: 'A living animated face with nine moods; reacts to pats, shakes and being picked up' },
+      { bn: 'পানি, ওষুধ, নামাজের সময়, অ্যালার্ম আর ফোকাস টাইমার — ইন্টারনেট ছাড়াও', en: 'Water, medicine and prayer reminders, alarms and a focus timer, even offline' },
+      { bn: 'পরিবারের খেয়াল: অ্যাপে নোটিফিকেশন, কেয়ার অ্যালার্ট, দিনের সারাংশ, পড়ে গেলে সতর্কতা', en: 'Family care: app notifications, care alerts, a daily summary and fall alerts' },
+      { bn: 'ছোট্ট খেলা, শ্বাসের ব্যায়াম, গল্প, আর ঘুমপাড়ানি গানসহ নাইট লাইট', en: 'Mini games, a breathing exercise, stories and a night light with a lullaby' },
+      { bn: 'কণ্ঠে স্মার্ট হোম কন্ট্রোল, আবহাওয়া আর বিশেষ দিনের কথা', en: 'Voice smart-home control, weather and special days' },
+      { bn: 'ফোন অ্যাপে QR দিয়ে সেটআপ, চেহারা আর দৈনিক রুটিন সাজানো, তারবিহীন আপডেট', en: 'Phone app: set up by QR, customise its look and daily routine, wireless updates' },
+    ],
     tiers: [],
+    note: { bn: 'লঞ্চ শীঘ্রই। সবার আগে খবর পেতে হোয়াটসঅ্যাপে মেসেজ দিন।', en: 'Launching soon. Message us on WhatsApp to be first in line.' },
     links: [],
     comingSoon: true,
   },
